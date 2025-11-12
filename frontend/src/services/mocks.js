@@ -44,3 +44,37 @@ export const mockSatListData = [
     alerts: 'Ninguna',
   },
 ];
+
+/**
+ * Esta es la respuesta simulada para GET /api/student/:id
+ * Representa el perfil detallado de un estudiante.
+ * Basado en los hallazgos de la tesis.
+ */
+export const mockStudentProfileData = {
+  id: 'std-001',
+  name: 'Estudiante, Crítico A',
+  course: '10mo A',
+  risk_score: 85,
+  risk_level: 'Crítico',
+  // Los 4 factores del Score de Riesgo Compuesto (Recomendación 7.2.1)
+  risk_factors: [
+    { name: 'Faltas Injustificadas', value: '5', weight: '40%' },
+    { name: 'Quintil (Vulnerabilidad)', value: 'Q1', weight: '25%' },
+    { name: 'Sin Laptop', value: 'Sí', weight: '20%' },
+    { name: 'Apoyo Familiar', value: 'Bajo', weight: '15%' },
+  ],
+  // Las barreras clave identificadas en el modelo (Tabla 5.2 / Sección 5.2.2)
+  key_barriers: [
+    { name: 'Nivel Educativo del Representante', value: 'Bachillerato', impact: 'Alto' },
+    { name: 'Índice de Apoyo Familiar', value: 'Bajo', impact: 'Alto' },
+    { name: 'Tiene Laptop', value: 'No', impact: 'Medio' },
+    { name: 'Índice de Cobertura de Salud', value: 'Bajo', impact: 'Medio' },
+    { name: 'Lectura de Libros (Hogar)', value: 'No', impact: 'Bajo' },
+  ],
+  // Notas en materias clave (Tabla 5.4)
+  key_grades: [
+    { subject: 'Matemáticas', grade: 7.5, avg: 8.8 },
+    { subject: 'Animación a la Lectura', grade: 8.0, avg: 9.0 },
+    { subject: 'Estudios Sociales', grade: 8.2, avg: 8.9 },
+  ],
+};
