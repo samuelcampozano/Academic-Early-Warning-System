@@ -13,8 +13,12 @@ function App() {
         {/* Navegación simple por ahora */}
         <nav>
           <ul>
-            <li><Link to="/">Dashboard SAT</Link></li>
-            <li><Link to="/institucional">Visión Institucional</Link></li>
+            <li>
+              <Link to="/">Dashboard SAT</Link>
+            </li>
+            <li>
+              <Link to="/institucional">Visión Institucional</Link>
+            </li>
           </ul>
         </nav>
 
