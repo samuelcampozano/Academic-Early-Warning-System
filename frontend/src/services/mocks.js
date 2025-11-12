@@ -78,3 +78,28 @@ export const mockStudentProfileData = {
     { subject: 'Estudios Sociales', grade: 8.2, avg: 8.9 },
   ],
 };
+
+/**
+ * Esta es la respuesta simulada para GET /api/institutional-stats
+ * Representa los hallazgos macro de la tesis.
+ */
+export const mockInstitutionalStats = {
+  // De la Tabla 5.2 de la tesis
+  topBarriers: {
+    labels: [
+      'Edad Rep.', 'Cobertura Salud', 'Laptop (Sí)', 'Edad Est.', 'TV (Solo 1)',
+      'Lectura Libros (Sí)', 'Acceso Tec.', 'Nivel Inst. Rep.', 'Lectura Libros (No)', 'Num. Hermanos'
+    ],
+    data: [5.84, 4.58, 4.26, 3.53, 3.36, 3.23, 3.12, 3.02, 2.94, 2.68]
+  },
+  // De la Sección 5.2.2 de la tesis
+  laptopImpact: {
+    labels: ['Con Laptop', 'Sin Laptop'],
+    data: [8.97, 8.85]
+  },
+  // De la Sección 5.2.2 de la tesis
+  parentEducationImpact: {
+    labels: ['Superior/Univ.', 'Bachillerato', 'Básica'],
+    data: [9.02, 8.83, 8.75] // Se asume 8.75 para Básica
+  }
+};
