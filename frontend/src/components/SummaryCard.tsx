@@ -1,30 +1,35 @@
 import React from 'react';
+import { Card, CardContent } from './ui/Card';
+import { cn } from '../lib/utils';
 
 interface SummaryCardProps {
-  icon: React.ElementType;
-  value: string;
+  icon: React.ReactNode;
   label: string;
+  value: string | number;
   trend?: string;
+  trendColor?: string;
 }
 
-const SummaryCard: React.FC<SummaryCardProps> = ({ icon: Icon, value, label, trend }) => {
+const SummaryCard = ({ icon, label, value, trend, trendColor }: SummaryCardProps) => {
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <div className="flex items-center">
-        <div className="bg-blue-100 p-3 rounded-full">
-          <Icon className="h-6 w-6 text-blue-500" />
-        </div>
-        <div className="ml-4">
-          <p className="text-3xl font-bold text-gray-800">{value}</p>
-          <p className="text-sm font-medium text-gray-500">{label}</p>
-        </div>
-        {trend && (
-          <div className="ml-auto text-sm font-medium text-green-500">
-            {trend}
+    <Card>
+      <CardContent className="p-4">
+        <div className="flex items-center">
+          <div className="mr-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+            {icon}
           </div>
-        )}
-      </div>
-    </div>
+          <div>
+            <div className="text-3xl font-bold text-text-primary">{value}</div>
+            <div className="text-sm text-text-secondary">{label}</div>
+          </div>
+          {trend && (
+            <div className={cn('ml-auto text-sm font-semibold', trendColor)}>
+              {trend}
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
