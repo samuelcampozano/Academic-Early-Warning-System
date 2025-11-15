@@ -1,6 +1,22 @@
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, LabelList } from 'recharts';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/Card';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  LabelList,
+  Cell,
+} from 'recharts';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from '../ui/Card';
 
 const data = [
   { name: 'Superior/Univ.', value: 8.7, fill: '#8B5CF6' },
@@ -13,7 +29,9 @@ const EducationLevelChart = () => {
     <Card>
       <CardHeader>
         <CardTitle>Impacto del Nivel Educativo del Representante</CardTitle>
-        <CardDescription>Promedio general según el nivel educativo del representante legal.</CardDescription>
+        <CardDescription>
+          Promedio general según el nivel educativo del representante legal.
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
@@ -23,10 +41,14 @@ const EducationLevelChart = () => {
             <Tooltip />
             <Legend />
             <Bar dataKey="value" barSize={80}>
-                <LabelList dataKey="value" position="top" style={{ fontWeight: 'bold' }} />
-                {data.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.fill} />
-                ))}
+              <LabelList
+                dataKey="value"
+                position="top"
+                style={{ fontWeight: 'bold' }}
+              />
+              {data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.fill} />
+              ))}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
