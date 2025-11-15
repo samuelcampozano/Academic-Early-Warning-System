@@ -9,6 +9,7 @@ import {
   Cell,
   LabelList,
 } from 'recharts';
+import { useTheme } from '../context/ThemeContext';
 
 const topBarriersData = [
   { name: 'Cobertura Salud', value: 6.2 },
@@ -30,6 +31,11 @@ const educationImpactData = [
 ];
 
 const InstitutionalView = () => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  const textColor = isDark ? '#e2e8f0' : '#475569';
+  const cursorFill = isDark ? '#334155' : '#f1f5f9';
+
   return (
     <div>
       <div className="mb-8 md:mb-12">
@@ -64,16 +70,17 @@ const InstitutionalView = () => {
                 dataKey="name"
                 type="category"
                 width={120}
-                tick={{ fontSize: 13, fill: '#475569' }}
+                tick={{ fontSize: 13, fill: textColor }}
                 tickLine={false}
                 axisLine={false}
               />
               <Tooltip
-                cursor={{ fill: '#f1f5f9' }}
+                cursor={{ fill: cursorFill }}
                 contentStyle={{
-                  backgroundColor: 'white',
-                  border: '1px solid #e2e8f0',
+                  backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                  border: `1px solid ${isDark ? '#334155' : '#e2e8f0'}`,
                   borderRadius: '0.75rem',
+                  color: textColor,
                 }}
               />
               <Bar dataKey="value" barSize={24} radius={[0, 8, 8, 0]}>
@@ -88,7 +95,7 @@ const InstitutionalView = () => {
                   dataKey="value"
                   position="right"
                   formatter={(value) => `${value}%`}
-                  style={{ fontSize: 14, fontWeight: 'bold', fill: '#0F172A' }}
+                  style={{ fontSize: 14, fontWeight: 'bold', fill: textColor }}
                 />
               </Bar>
             </BarChart>
@@ -113,24 +120,25 @@ const InstitutionalView = () => {
             >
               <XAxis
                 dataKey="name"
-                tick={{ fontSize: 13, fill: '#475569' }}
+                tick={{ fontSize: 13, fill: textColor }}
                 tickLine={false}
                 axisLine={false}
               />
               <YAxis domain={[0, 10]} hide />
               <Tooltip
-                cursor={{ fill: '#f1f5f9' }}
+                cursor={{ fill: cursorFill }}
                 contentStyle={{
-                  backgroundColor: 'white',
-                  border: '1px solid #e2e8f0',
+                  backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                  border: `1px solid ${isDark ? '#334155' : '#e2e8f0'}`,
                   borderRadius: '0.75rem',
+                  color: textColor,
                 }}
               />
               <Bar dataKey="value" barSize={60} radius={[8, 8, 0, 0]}>
                 <LabelList
                   dataKey="value"
                   position="top"
-                  style={{ fontSize: 16, fontWeight: 'bold', fill: '#0F172A' }}
+                  style={{ fontSize: 16, fontWeight: 'bold', fill: textColor }}
                 />
                 {laptopImpactData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.fill} />
@@ -155,24 +163,25 @@ const InstitutionalView = () => {
             >
               <XAxis
                 dataKey="name"
-                tick={{ fontSize: 13, fill: '#475569' }}
+                tick={{ fontSize: 13, fill: textColor }}
                 tickLine={false}
                 axisLine={false}
               />
               <YAxis domain={[0, 10]} hide />
               <Tooltip
-                cursor={{ fill: '#f1f5f9' }}
+                cursor={{ fill: cursorFill }}
                 contentStyle={{
-                  backgroundColor: 'white',
-                  border: '1px solid #e2e8f0',
+                  backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                  border: `1px solid ${isDark ? '#334155' : '#e2e8f0'}`,
                   borderRadius: '0.75rem',
+                  color: textColor,
                 }}
               />
               <Bar dataKey="value" barSize={60} radius={[8, 8, 0, 0]}>
                 <LabelList
                   dataKey="value"
                   position="top"
-                  style={{ fontSize: 16, fontWeight: 'bold', fill: '#0F172A' }}
+                  style={{ fontSize: 16, fontWeight: 'bold', fill: textColor }}
                 />
                 {educationImpactData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.fill} />
