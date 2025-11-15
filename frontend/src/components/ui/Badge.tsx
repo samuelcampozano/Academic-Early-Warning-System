@@ -12,11 +12,12 @@ const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
 
     const variantClasses = {
       critical:
-        'bg-risk-critical-bg text-risk-critical-text border border-risk-critical-border',
+        'bg-risk-critical-bg text-risk-critical-text border border-risk-critical-border dark:bg-red-900/30 dark:text-red-400 dark:border-red-800',
       medium:
-        'bg-risk-medium-bg text-risk-medium-text border border-risk-medium-border',
-      low: 'bg-risk-low-bg text-risk-low-text border border-risk-low-border',
-      default: 'bg-gray-100 text-gray-800',
+        'bg-risk-medium-bg text-risk-medium-text border border-risk-medium-border dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800',
+      low: 'bg-risk-low-bg text-risk-low-text border border-risk-low-border dark:bg-green-900/30 dark:text-green-400 dark:border-green-800',
+      default:
+        'bg-gray-100 text-gray-800 dark:bg-slate-700 dark:text-slate-300',
     };
 
     return (
