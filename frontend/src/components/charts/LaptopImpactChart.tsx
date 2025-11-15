@@ -1,6 +1,22 @@
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, LabelList } from 'recharts';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/Card';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  LabelList,
+  Cell,
+} from 'recharts';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from '../ui/Card';
 
 const data = [
   { name: 'Con Laptop', value: 8.7, fill: '#2563EB' },
@@ -12,7 +28,10 @@ const LaptopImpactChart = () => {
     <Card>
       <CardHeader>
         <CardTitle>Impacto de Laptop en Promedio</CardTitle>
-        <CardDescription>Diferencia en el promedio general entre estudiantes con y sin laptop. (-8.5 puntos de impacto)</CardDescription>
+        <CardDescription>
+          Diferencia en el promedio general entre estudiantes con y sin laptop.
+          (-8.5 puntos de impacto)
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
@@ -22,7 +41,11 @@ const LaptopImpactChart = () => {
             <Tooltip />
             <Legend />
             <Bar dataKey="value" barSize={80}>
-              <LabelList dataKey="value" position="top" style={{ fill: 'white', fontWeight: 'bold' }} />
+              <LabelList
+                dataKey="value"
+                position="top"
+                style={{ fill: 'white', fontWeight: 'bold' }}
+              />
               {data.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.fill} />
               ))}

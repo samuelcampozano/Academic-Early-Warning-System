@@ -18,33 +18,59 @@ const StudentOverviewCard = ({ student }: StudentOverviewCardProps) => {
           <div>
             <h4 className="font-semibold mb-2">Información Demográfica</h4>
             <div className="space-y-2">
-              <p><strong>Edad:</strong> {student.age} años</p>
-              <p><strong>Estrato Socioeconómico:</strong> {student.stratum} (Vulnerable)</p>
-              <p><strong>Nivel Representante:</strong> Bachillerato</p>
+              <p>
+                <strong>Edad:</strong> {student.age} años
+              </p>
+              <p>
+                <strong>Estrato Socioeconómico:</strong> {student.stratum}{' '}
+                (Vulnerable)
+              </p>
+              <p>
+                <strong>Nivel Representante:</strong> Bachillerato
+              </p>
               <p className="flex items-center">
                 <AlertTriangle className="w-4 h-4 mr-1 text-risk-critical-text" />
-                <strong>Índice Vulnerabilidad:</strong> {student.alerts.quintile} - Más Vulnerable
+                <strong>Índice Vulnerabilidad:</strong>{' '}
+                {student.alerts.quintile} - Más Vulnerable
               </p>
             </div>
           </div>
           <div>
             <h4 className="font-semibold mb-2">Situación Académica</h4>
             <div className="space-y-2">
-              <p><strong>Promedio General:</strong> {Object.values(student.performance).reduce((acc, p) => acc + p.studentGrade, 0) / Object.values(student.performance).length}/10</p>
+              <p>
+                <strong>Promedio General:</strong>{' '}
+                {Object.values(student.performance).reduce(
+                  (acc, p) => acc + p.studentGrade,
+                  0,
+                ) / Object.values(student.performance).length}
+                /10
+              </p>
               <p className="flex items-center">
                 <AlertTriangle className="w-4 h-4 mr-1 text-risk-critical-text" />
-                <strong>Asistencia:</strong> 87% ({student.alerts.absences} faltas injustificadas)
+                <strong>Asistencia:</strong> 87% ({student.alerts.absences}{' '}
+                faltas injustificadas)
               </p>
-              <p><strong>Ranking en Curso:</strong> Puesto 8/12</p>
-              <p><strong>Materias en Riesgo:</strong> 2 (Matemáticas, Estudios Sociales)</p>
+              <p>
+                <strong>Ranking en Curso:</strong> Puesto 8/12
+              </p>
+              <p>
+                <strong>Materias en Riesgo:</strong> 2 (Matemáticas, Estudios
+                Sociales)
+              </p>
             </div>
           </div>
           <div>
             <h4 className="font-semibold mb-2">Recursos Disponibles</h4>
             <div className="space-y-2">
               <p className="flex items-center">
-                {student.alerts.hasLaptop ? <CheckCircle className="w-4 h-4 mr-1 text-green-500" /> : <XCircle className="w-4 h-4 mr-1 text-red-500" />}
-                <strong>Laptop:</strong> {student.alerts.hasLaptop ? 'Sí' : 'No'}
+                {student.alerts.hasLaptop ? (
+                  <CheckCircle className="w-4 h-4 mr-1 text-green-500" />
+                ) : (
+                  <XCircle className="w-4 h-4 mr-1 text-red-500" />
+                )}
+                <strong>Laptop:</strong>{' '}
+                {student.alerts.hasLaptop ? 'Sí' : 'No'}
               </p>
               <p className="flex items-center">
                 <CheckCircle className="w-4 h-4 mr-1 text-green-500" />
