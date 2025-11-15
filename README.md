@@ -89,7 +89,7 @@ GET /api/sat-list
 [
   {
     "id": "EST001",
-    "name": "Juan Pérez",
+    "name": "Nombre_del_estudiante",
     "course": "10mo EGB",
     "risk_level": "Alto",
     "risk_score": 85.3,
@@ -108,7 +108,7 @@ GET /api/student/{id}
 ```json
 {
   "id": "EST001",
-  "name": "Juan Pérez",
+  "name": "Nombre_del_estudiante",
   "course": "10mo EGB",
   "risk_level": "Alto",
   "risk_score": 85.3,
