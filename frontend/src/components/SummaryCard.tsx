@@ -10,7 +10,13 @@ interface SummaryCardProps {
   trendColor?: string;
 }
 
-const SummaryCard = ({ icon, label, value, trend, trendColor }: SummaryCardProps) => {
+const SummaryCard = ({
+  icon,
+  label,
+  value,
+  trend,
+  trendColor,
+}: SummaryCardProps) => {
   return (
     <Card>
       <CardContent className="p-4">

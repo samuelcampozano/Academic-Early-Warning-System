@@ -36,30 +36,35 @@ export default function useInstitutionalData() {
         let responseData: any;
 
         if (USE_MOCK_DATA) {
-          await new Promise(resolve => setTimeout(resolve, 200));
+          await new Promise((resolve) => setTimeout(resolve, 200));
           responseData = mockInstitutionalStats;
         } else {
           throw new Error('API real aún no implementada');
         }
 
         const formattedData: InstitutionalStats = {
-          topBarriers: responseData.topBarriers.labels.map((label: string, index: number) => ({
-            name: label,
-            value: responseData.topBarriers.data[index],
-          })),
-          laptopImpact: responseData.laptopImpact.labels.map((label: string, index: number) => ({
-            name: label,
-            value: responseData.laptopImpact.data[index],
-          })),
-          parentEducationImpact: responseData.parentEducationImpact.labels.map((label: string, index: number) => ({
-            name: label,
-            value: responseData.parentEducationImpact.data[index],
-          })),
+          topBarriers: responseData.topBarriers.labels.map(
+            (label: string, index: number) => ({
+              name: label,
+              value: responseData.topBarriers.data[index],
+            }),
+          ),
+          laptopImpact: responseData.laptopImpact.labels.map(
+            (label: string, index: number) => ({
+              name: label,
+              value: responseData.laptopImpact.data[index],
+            }),
+          ),
+          parentEducationImpact: responseData.parentEducationImpact.labels.map(
+            (label: string, index: number) => ({
+              name: label,
+              value: responseData.parentEducationImpact.data[index],
+            }),
+          ),
         };
 
         setStats(formattedData);
         setError(null);
-
       } catch (err: any) {
         setError(err.message);
         setStats(null);

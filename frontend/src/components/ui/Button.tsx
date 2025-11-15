@@ -12,8 +12,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variantClasses = {
       primary: 'bg-primary text-white hover:bg-primary-hover',
-      secondary:
-        'bg-white text-primary border border-primary hover:bg-blue-50',
+      secondary: 'bg-white text-primary border border-primary hover:bg-blue-50',
       tertiary: 'bg-transparent text-primary hover:bg-hover-bg',
     };
 
@@ -24,7 +23,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       />
     );
-  }
+  },
 );
 
 Button.displayName = 'Button';

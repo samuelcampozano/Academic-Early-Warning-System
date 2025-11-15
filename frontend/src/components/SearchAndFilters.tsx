@@ -1,7 +1,13 @@
 import React from 'react';
 import { Search } from 'lucide-react';
 import { Input } from './ui/Input'; // Assuming you have an Input component
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/Select'; // Assuming a Select component
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './ui/Select'; // Assuming a Select component
 
 const SearchAndFilters = () => {
   return (
@@ -9,10 +15,7 @@ const SearchAndFilters = () => {
       <div className="flex items-center justify-between">
         <div className="relative w-96">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary" />
-          <Input
-            placeholder="Buscar estudiante..."
-            className="pl-10"
-          />
+          <Input placeholder="Buscar estudiante..." className="pl-10" />
         </div>
         <div className="flex items-center space-x-4">
           <Select>

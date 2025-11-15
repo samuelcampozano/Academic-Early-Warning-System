@@ -1,6 +1,20 @@
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/Card';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+} from 'recharts';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from '../ui/Card';
 
 const data = [
   { name: 'Cobertura Salud', value: 6.2 },
@@ -17,17 +31,28 @@ const BarrierChart = () => {
     <Card>
       <CardHeader>
         <CardTitle>Top 10 Barreras Predictivas</CardTitle>
-        <CardDescription>Importancia de cada factor en el modelo predictivo.</CardDescription>
+        <CardDescription>
+          Importancia de cada factor en el modelo predictivo.
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={data} layout="vertical" margin={{ left: 20 }}>
             <XAxis type="number" hide />
-            <YAxis type="category" dataKey="name" tickLine={false} axisLine={false} tick={{ fontSize: 13 }} />
+            <YAxis
+              type="category"
+              dataKey="name"
+              tickLine={false}
+              axisLine={false}
+              tick={{ fontSize: 13 }}
+            />
             <Tooltip />
             <Bar dataKey="value" barSize={32} radius={[0, 8, 8, 0]}>
               {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                <Cell
+                  key={`cell-${index}`}
+                  fill={colors[index % colors.length]}
+                />
               ))}
             </Bar>
           </BarChart>
