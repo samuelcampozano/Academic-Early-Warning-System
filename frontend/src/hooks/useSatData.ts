@@ -16,7 +16,7 @@ export default function useSatData() {
         let responseData: Student[];
 
         if (USE_MOCK_DATA) {
-          await new Promise(resolve => setTimeout(resolve, 500));
+          await new Promise((resolve) => setTimeout(resolve, 500));
           responseData = mockSatListData;
         } else {
           throw new Error('API real aún no implementada');
@@ -24,7 +24,6 @@ export default function useSatData() {
 
         setData(responseData);
         setError(null);
-
       } catch (err: any) {
         setError(err.message);
         setData([]);

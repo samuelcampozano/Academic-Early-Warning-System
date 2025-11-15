@@ -48,7 +48,7 @@ export default function useStudentProfile() {
         let responseData: any;
 
         if (USE_MOCK_DATA) {
-          await new Promise(resolve => setTimeout(resolve, 300));
+          await new Promise((resolve) => setTimeout(resolve, 300));
           responseData = { ...mockStudentProfileData, id: id };
         } else {
           throw new Error('API real aún no implementada');
@@ -56,7 +56,6 @@ export default function useStudentProfile() {
 
         setProfile(responseData);
         setError(null);
-
       } catch (err: any) {
         setError(err.message);
         setProfile(null);

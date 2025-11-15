@@ -1,11 +1,12 @@
 export interface Student {
   id: string;
-  name: string;
-  grade: string;
-  riskLevel: 'Crítico' | 'Medio' | 'Bajo';
-  riskScore: number;
+  nombre: string;
+  curso: string;
+  nivel_riesgo: 'Crítico' | 'Medio' | 'Bajo';
+  score_riesgo: number;
   age: number;
   stratum: number;
+  alertas_principales: string[];
   alerts: {
     absences?: number;
     hasLaptop: boolean;
@@ -25,5 +26,9 @@ export interface Student {
     laptop: { value: boolean; contribution: number; weight: number };
     familySupport: { value: string; contribution: number; weight: number };
   };
+  // Backward compatibility aliases
+  name: string;
+  grade: string;
+  riskLevel: 'Crítico' | 'Medio' | 'Bajo';
+  riskScore: number;
 }
-
