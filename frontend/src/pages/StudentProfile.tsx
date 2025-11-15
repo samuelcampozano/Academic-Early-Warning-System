@@ -1,12 +1,17 @@
 import React from 'react';
-import { Student } from '../types';
+import { useParams, Link } from 'react-router-dom';
+import { useStudentData } from '../context/StudentDataContext';
+import KeyBarriers from '../components/KeyBarriers';
+import SubjectPerformance from '../components/SubjectPerformance';
+import RecommendedActions from '../components/RecommendedActions';
+import AlertHistory from '../components/AlertHistory';
+import Notes from '../components/Notes';
 
-interface StudentProfileProps {
-  student: Student | null;
-  onBack: () => void;
-}
+const StudentProfile = () => {
+  const { studentId } = useParams<{ studentId: string }>();
+  const { students } = useStudentData();
+  const student = students.find((s) => s.id === studentId);
 
-const StudentProfile = ({ student, onBack }: StudentProfileProps) => {
   if (!student) {
     return (
       <div className="text-center py-20">
@@ -16,12 +21,12 @@ const StudentProfile = ({ student, onBack }: StudentProfileProps) => {
         <p className="text-slate-500 mt-2">
           Por favor, regresa al dashboard y selecciona un estudiante.
         </p>
-        <button
-          onClick={onBack}
-          className="mt-6 px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors"
+        <Link
+          to="/"
+          className="mt-6 inline-block px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors"
         >
           Volver al Dashboard
-        </button>
+        </Link>
       </div>
     );
   }
@@ -30,12 +35,12 @@ const StudentProfile = ({ student, onBack }: StudentProfileProps) => {
     <div>
       {/* Breadcrumb */}
       <div className="mb-6 flex items-center gap-2 text-sm">
-        <button
-          onClick={onBack}
+        <Link
+          to="/"
           className="text-blue-600 hover:text-blue-700 font-medium hover:underline"
         >
           Dashboard
-        </button>
+        </Link>
         <span className="text-slate-400">›</span>
         <span className="text-slate-600 font-medium">
           Perfil del Estudiante
@@ -52,16 +57,16 @@ const StudentProfile = ({ student, onBack }: StudentProfileProps) => {
             <p className="text-lg text-slate-600 mb-4">{student.grade}</p>
             <span
               className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold uppercase ${
-                student.riskLevel === 'Crítico'
+                student.riskLevel === 'Critical'
                   ? 'bg-red-100 text-red-800 border-2 border-red-300'
-                  : student.riskLevel === 'Medio'
+                  : student.riskLevel === 'Medium'
                     ? 'bg-yellow-100 text-yellow-800 border-2 border-yellow-300'
                     : 'bg-green-100 text-green-800 border-2 border-green-300'
               }`}
             >
-              {student.riskLevel === 'Crítico'
+              {student.riskLevel === 'Critical'
                 ? '⚠️'
-                : student.riskLevel === 'Medio'
+                : student.riskLevel === 'Medium'
                   ? '🔶'
                   : '✅'}
               {student.riskLevel}
@@ -72,9 +77,9 @@ const StudentProfile = ({ student, onBack }: StudentProfileProps) => {
               className="relative w-32 h-32 rounded-full flex items-center justify-center"
               style={{
                 border: `8px solid ${
-                  student.riskLevel === 'Crítico'
+                  student.riskLevel === 'Critical'
                     ? '#DC2626'
-                    : student.riskLevel === 'Medio'
+                    : student.riskLevel === 'Medium'
                       ? '#F59E0B'
                       : '#10B981'
                 }`,
@@ -116,7 +121,7 @@ const StudentProfile = ({ student, onBack }: StudentProfileProps) => {
                 Estrato:
               </span>
               <span className="text-sm font-bold text-slate-900">
-                {student.stratum} (Vulnerable)
+                {student.socioeconomicStratum} (Vulnerable)
               </span>
             </div>
             <div className="flex justify-between items-center">
@@ -217,14 +222,7 @@ const StudentProfile = ({ student, onBack }: StudentProfileProps) => {
             </h2>
             <div className="space-y-6">
               {Object.entries(student.riskFactors).map(
-                ([key, factor]: [
-                  string,
-                  {
-                    value: number | string | boolean;
-                    contribution: number;
-                    weight: number;
-                  },
-                ]) => (
+                ([key, factor]) => (
                   <div
                     key={key}
                     className={`rounded-xl p-5 border ${
@@ -273,7 +271,7 @@ const StudentProfile = ({ student, onBack }: StudentProfileProps) => {
                     >
                       <span className="text-lg flex-shrink-0">⚠️</span>
                       <p className="leading-relaxed">
-                        {/* Explanation text here */}
+                        {factor.explanation}
                       </p>
                     </div>
                   </div>
@@ -281,47 +279,13 @@ const StudentProfile = ({ student, onBack }: StudentProfileProps) => {
               )}
             </div>
           </div>
-          {/* Key Barriers */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
-            <h2 className="text-xl font-bold text-slate-900 mb-6">
-              Barreras Clave (Hallazgos Tesis)
-            </h2>
-            <div className="space-y-4">{/* Barriers */}</div>
-          </div>
-          {/* Subject Performance */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
-            <h2 className="text-xl font-bold text-slate-900 mb-6">
-              Rendimiento en Materias Clave
-            </h2>
-            <div className="space-y-5">{/* Subjects */}</div>
-          </div>
+          <KeyBarriers student={student} />
+          <SubjectPerformance student={student} />
         </div>
         <div className="space-y-6">
-          {/* Recommended Actions */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
-            <h3 className="text-lg font-bold text-slate-900 mb-2">
-              Acciones Recomendadas
-            </h3>
-            <p className="text-xs text-slate-600 mb-6">
-              Basadas en factores de riesgo identificados
-            </p>
-            {/* Actions */}
-          </div>
-          {/* Alert History */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
-            <h3 className="text-lg font-bold text-slate-900 mb-6">
-              Historial de Alertas
-            </h3>
-            {/* History */}
-          </div>
-          {/* Notes */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
-            <h3 className="text-lg font-bold text-slate-900 mb-2">Notas</h3>
-            <p className="text-xs text-slate-600 mb-4">
-              Registro de observaciones y seguimiento
-            </p>
-            {/* Notes */}
-          </div>
+          <RecommendedActions student={student} />
+          <AlertHistory />
+          <Notes />
         </div>
       </div>
     </div>
