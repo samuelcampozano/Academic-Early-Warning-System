@@ -9,15 +9,17 @@ interface StudentOverviewCardProps {
 
 const StudentOverviewCard = ({ student }: StudentOverviewCardProps) => {
   return (
-    <Card className="mt-8 bg-blue-50 border-blue-200">
+    <Card className="mt-8 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
       <CardHeader>
         <CardTitle>📋 Perfil del Estudiante</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-slate-900 dark:text-slate-100">
           <div>
-            <h4 className="font-semibold mb-2">Información Demográfica</h4>
-            <div className="space-y-2">
+            <h4 className="font-semibold mb-2 text-slate-900 dark:text-slate-100">
+              Información Demográfica
+            </h4>
+            <div className="space-y-2 text-slate-700 dark:text-slate-300">
               <p>
                 <strong>Edad:</strong> {student.age} años
               </p>

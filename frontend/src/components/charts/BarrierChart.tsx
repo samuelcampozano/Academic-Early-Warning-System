@@ -15,6 +15,7 @@ import {
   CardDescription,
   CardContent,
 } from '../ui/Card';
+import { useTheme } from '../../context/ThemeContext';
 
 const data = [
   { name: 'Cobertura Salud', value: 6.2 },
@@ -27,6 +28,10 @@ const data = [
 const colors = ['#1E40AF', '#2563EB', '#3B82F6', '#60A5FA', '#93C5FD'];
 
 const BarrierChart = () => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  const textColor = isDark ? '#e2e8f0' : '#334155';
+
   return (
     <Card>
       <CardHeader>
@@ -44,9 +49,16 @@ const BarrierChart = () => {
               dataKey="name"
               tickLine={false}
               axisLine={false}
-              tick={{ fontSize: 13 }}
+              tick={{ fontSize: 13, fill: textColor }}
             />
-            <Tooltip />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                border: `1px solid ${isDark ? '#334155' : '#e2e8f0'}`,
+                borderRadius: '8px',
+                color: textColor,
+              }}
+            />
             <Bar dataKey="value" barSize={32} radius={[0, 8, 8, 0]}>
               {data.map((entry, index) => (
                 <Cell

@@ -11,10 +11,10 @@ import {
 
 const SearchAndFilters = () => {
   return (
-    <div className="my-6 rounded-lg bg-card p-4 shadow">
+    <div className="my-6 rounded-lg bg-white dark:bg-slate-800 p-4 shadow border border-slate-200 dark:border-slate-700">
       <div className="flex items-center justify-between">
         <div className="relative w-96">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400" />
           <Input placeholder="Buscar estudiante..." className="pl-10" />
         </div>
         <div className="flex items-center space-x-4">

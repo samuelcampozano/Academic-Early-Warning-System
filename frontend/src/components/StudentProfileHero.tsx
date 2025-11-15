@@ -21,7 +21,7 @@ const StudentProfileHero = () => {
         : 'border-risk-low-border';
 
   return (
-    <div className="bg-hover-bg p-8 rounded-lg">
+    <div className="bg-slate-100 dark:bg-slate-800 p-8 rounded-lg">
       <Breadcrumbs
         items={[
           { href: '/', label: 'Dashboard' },
@@ -30,10 +30,12 @@ const StudentProfileHero = () => {
       />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="md:col-span-2">
-          <h1 className="text-32 font-bold text-text-primary">
+          <h1 className="text-32 font-bold text-slate-900 dark:text-slate-100">
             {student.name}
           </h1>
-          <p className="text-16 text-text-secondary mt-1">{student.grade}</p>
+          <p className="text-16 text-slate-600 dark:text-slate-400 mt-1">
+            {student.grade}
+          </p>
           <Badge
             variant={
               student.riskLevel === 'Critical'
@@ -50,13 +52,15 @@ const StudentProfileHero = () => {
         </div>
         <div className="flex items-center justify-end">
           <div
-            className={`h-32 w-32 flex items-center justify-center rounded-full border-8 bg-card ${riskColor}`}
+            className={`h-32 w-32 flex items-center justify-center rounded-full border-8 bg-white dark:bg-slate-800 ${riskColor}`}
           >
             <div className="text-center">
-              <div className="text-4xl font-bold text-text-primary">
+              <div className="text-4xl font-bold text-slate-900 dark:text-slate-100">
                 {student.riskScore}
               </div>
-              <div className="text-sm text-text-secondary">/100</div>
+              <div className="text-sm text-slate-600 dark:text-slate-400">
+                /100
+              </div>
             </div>
           </div>
         </div>
