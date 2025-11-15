@@ -11,8 +11,10 @@ const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
       'inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider';
 
     const variantClasses = {
-      critical: 'bg-risk-critical-bg text-risk-critical-text border border-risk-critical-border',
-      medium: 'bg-risk-medium-bg text-risk-medium-text border border-risk-medium-border',
+      critical:
+        'bg-risk-critical-bg text-risk-critical-text border border-risk-critical-border',
+      medium:
+        'bg-risk-medium-bg text-risk-medium-text border border-risk-medium-border',
       low: 'bg-risk-low-bg text-risk-low-text border border-risk-low-border',
       default: 'bg-gray-100 text-gray-800',
     };
@@ -24,7 +26,7 @@ const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
         {...props}
       />
     );
-  }
+  },
 );
 
 Badge.displayName = 'Badge';
