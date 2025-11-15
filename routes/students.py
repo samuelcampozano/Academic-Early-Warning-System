@@ -29,12 +29,12 @@ def get_sat_list():
     """
     try:
         # Obtener parámetros
-        limit = request.args.get("limit", 100, type=int)
+        limit = request.args.get("limit", 1000, type=int)
         risk_level_filter = request.args.get("risk_level", None)
 
         # Obtener estudiantes de la base de datos
         students = supabase_client.get_students(limit=limit)
-
+        
         if not students:
             return jsonify([]), 200
 
@@ -77,7 +77,7 @@ def get_sat_list():
         return jsonify(students_with_risk), 200
 
     except Exception as e:
-        logger.error(f"Error in get_sat_list: {str(e)}")
+        logger.error(f"Error in get_sat_list: {str(e)}", exc_info=True)
         return jsonify({"error": "Error al obtener la lista SAT"}), 500
 
 

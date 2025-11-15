@@ -79,7 +79,7 @@ class RiskCalculator:
             return round(total_score, 2), risk_level, components
 
         except Exception as e:
-            logger.error(f"Error calculating risk score: {str(e)}")
+            logger.error(f"Error calculating risk score: {str(e)}", exc_info=True)
             return 0.0, "Bajo", {}
 
     @staticmethod
@@ -90,10 +90,10 @@ class RiskCalculator:
         Q3 (Medio) = 50
         Q4-Q5 (Alto) = 0
         """
-        quintil = student_data.get("quintil", 5)
-        quintil_group = student_data.get("quintil_agrupado", "").lower()
+        quintil = student_data.get("quintil") or 5
+        quintil_group = (student_data.get("quintil_agrupado") or "").lower()
 
-        if "bajo" in quintil_group or quintil <= 2:
+        if "bajo" in quintil_group or (quintil and quintil <= 2):
             return 100.0
         elif "medio" in quintil_group or quintil == 3:
             return 50.0
@@ -167,7 +167,7 @@ class RiskCalculator:
             barrier_points += RiskCalculator.BARRIER_IMPORTANCE["laptop"]
 
         # Nivel de instrucción representante (Top 8 barrera - 3.02%)
-        nivel = socio_data.get("nivel_instruccion_rep", "").lower()
+        nivel = (socio_data.get("nivel_instruccion_rep") or "").lower()
         if "primaria" in nivel or "básica" in nivel:
             barrier_points += RiskCalculator.BARRIER_IMPORTANCE["nivel_instruccion"]
 
@@ -179,19 +179,19 @@ class RiskCalculator:
         if not socio_data.get("internet", False):
             barrier_points += 2.0
 
-        # Índices compuestos
-        indice_salud = socio_data.get("indice_cobertura_salud", "").lower()
-        if "sin" in indice_salud:
+        # Índices compuestos (pueden ser None/NULL)
+        indice_salud = socio_data.get("indice_cobertura_salud") or ""
+        if indice_salud and "sin" in indice_salud.lower():
             barrier_points += RiskCalculator.BARRIER_IMPORTANCE["indice_cobertura_salud"]
 
-        indice_tech = socio_data.get("indice_acceso_tecnologico", "").lower()
-        if "bajo" in indice_tech or "sin" in indice_tech:
+        indice_tech = socio_data.get("indice_acceso_tecnologico") or ""
+        if indice_tech and ("bajo" in indice_tech.lower() or "sin" in indice_tech.lower()):
             barrier_points += RiskCalculator.BARRIER_IMPORTANCE[
                 "indice_acceso_tecnologico"
             ]
 
-        indice_apoyo = socio_data.get("indice_apoyo_familiar", "").lower()
-        if "bajo" in indice_apoyo:
+        indice_apoyo = socio_data.get("indice_apoyo_familiar") or ""
+        if indice_apoyo and "bajo" in indice_apoyo.lower():
             barrier_points += RiskCalculator.BARRIER_IMPORTANCE["indice_apoyo_familiar"]
 
         # Normalizar a escala 0-100 (máximo teórico ~30 puntos)
@@ -247,8 +247,8 @@ class RiskCalculator:
             )
 
         # Nivel instrucción
-        nivel = socio_data.get("nivel_instruccion_rep", "Desconocido")
-        if "primaria" in nivel.lower() or "básica" in nivel.lower():
+        nivel = socio_data.get("nivel_instruccion_rep") or "Desconocido"
+        if nivel and ("primaria" in nivel.lower() or "básica" in nivel.lower()):
             barriers.append(
                 {
                     "name": "Nivel Instrucción Representante",
@@ -274,8 +274,8 @@ class RiskCalculator:
             )
 
         # Cobertura salud
-        indice_salud = socio_data.get("indice_cobertura_salud", "")
-        if "sin" in indice_salud.lower():
+        indice_salud = socio_data.get("indice_cobertura_salud") or ""
+        if indice_salud and "sin" in indice_salud.lower():
             barriers.append(
                 {
                     "name": "Sin cobertura de salud",
@@ -285,8 +285,8 @@ class RiskCalculator:
             )
 
         # Apoyo familiar
-        indice_apoyo = socio_data.get("indice_apoyo_familiar", "")
-        if "bajo" in indice_apoyo.lower():
+        indice_apoyo = socio_data.get("indice_apoyo_familiar") or ""
+        if indice_apoyo and "bajo" in indice_apoyo.lower():
             barriers.append(
                 {
                     "name": "Apoyo familiar bajo",

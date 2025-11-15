@@ -24,16 +24,17 @@ class SupabaseClient:
         """Inicializa el cliente de Supabase"""
         config = get_config()
         url = config.SUPABASE_URL
-        key = config.SUPABASE_KEY
+        # Usar SERVICE_KEY para evitar restricciones RLS
+        key = config.SUPABASE_SERVICE_KEY or config.SUPABASE_KEY
 
         if not url or not key:
             logger.error("Supabase credentials not configured")
             raise ValueError(
-                "SUPABASE_URL y SUPABASE_KEY deben estar configurados en .env"
+                "SUPABASE_URL y SUPABASE_SERVICE_KEY deben estar configurados en .env"
             )
 
         self._client = create_client(url, key)
-        logger.info("Supabase client initialized successfully")
+        logger.info(f"Supabase client initialized successfully (using {'SERVICE_KEY' if config.SUPABASE_SERVICE_KEY else 'ANON_KEY'})")
 
     @property
     def client(self) -> Client:
@@ -50,30 +51,24 @@ class SupabaseClient:
         Returns:
             Lista de estudiantes
         """
-        # TEMPORAL: Usar datos mock mientras no hay Supabase configurado
-        from services.mocks import get_mock_students
-        return get_mock_students()
-        
-        # TODO: Descomentar cuando Supabase esté configurado
-        # try:
-        #     response = (
-        #         self._client.table("students")
-        #         .select(
-        #             """
-        #             *,
-        #             socioeconomic_data(*),
-        #             academic_performance(*),
-        #             attendance(*),
-        #             risk_predictions(*)
-        #         """
-        #         )
-        #         .limit(limit)
-        #         .execute()
-        #     )
-        #     return response.data
-        # except Exception as e:
-        #     logger.error(f"Error getting students: {str(e)}")
-        #     return []
+        try:
+            response = (
+                self._client.table("students")
+                .select(
+                    """
+                    *,
+                    socioeconomic_data(*),
+                    academic_performance(*),
+                    attendance(*)
+                """
+                )
+                .limit(limit)
+                .execute()
+            )
+            return response.data
+        except Exception as e:
+            logger.error(f"Error getting students: {str(e)}", exc_info=True)
+            return []
 
     def get_student_by_id(self, student_id):
         """
@@ -85,31 +80,25 @@ class SupabaseClient:
         Returns:
             Datos del estudiante o None si no existe
         """
-        # TEMPORAL: Usar datos mock mientras no hay Supabase configurado
-        from services.mocks import get_mock_student_by_id
-        return get_mock_student_by_id(student_id)
-        
-        # TODO: Descomentar cuando Supabase esté configurado
-        # try:
-        #     response = (
-        #         self._client.table("students")
-        #         .select(
-        #             """
-        #             *,
-        #             socioeconomic_data(*),
-        #             academic_performance(*),
-        #             attendance(*),
-        #             risk_predictions(*)
-        #         """
-        #         )
-        #         .eq("id", student_id)
-        #         .single()
-        #         .execute()
-        #     )
-        #     return response.data
-        # except Exception as e:
-        #     logger.error(f"Error getting student {student_id}: {str(e)}")
-        #     return None
+        try:
+            response = (
+                self._client.table("students")
+                .select(
+                    """
+                    *,
+                    socioeconomic_data(*),
+                    academic_performance(*),
+                    attendance(*)
+                """
+                )
+                .eq("id", student_id)
+                .maybe_single()
+                .execute()
+            )
+            return response.data
+        except Exception as e:
+            logger.error(f"Error getting student {student_id}: {str(e)}", exc_info=True)
+            return None
 
     def get_institutional_stats(self):
         """
@@ -139,7 +128,7 @@ class SupabaseClient:
         distribution = {"Q1-Q2": 0, "Q3": 0, "Q4-Q5": 0}
 
         for student in students:
-            quintil_group = student.get("quintil_agrupado", "").lower()
+            quintil_group = (student.get("quintil_agrupado") or "").lower()
             if "bajo" in quintil_group:
                 distribution["Q1-Q2"] += 1
             elif "medio" in quintil_group:
@@ -151,15 +140,16 @@ class SupabaseClient:
 
     def _calculate_risk_distribution(self, students):
         """Calcula la distribución por nivel de riesgo"""
+        from services.risk_calculator import risk_calculator
+        
         distribution = {"Alto": 0, "Medio": 0, "Bajo": 0}
 
         for student in students:
-            risk_predictions = student.get("risk_predictions", [])
-            if risk_predictions:
-                latest_prediction = risk_predictions[-1]
-                risk_level = latest_prediction.get("risk_level", "Bajo")
+            try:
+                _, risk_level, _ = risk_calculator.calculate_risk_score(student)
                 distribution[risk_level] = distribution.get(risk_level, 0) + 1
-            else:
+            except Exception as e:
+                logger.debug(f"Error calculating risk for student {student.get('id')}: {e}")
                 distribution["Bajo"] += 1
 
         return distribution
