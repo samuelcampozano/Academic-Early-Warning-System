@@ -1,15 +1,11 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 import { cn } from '../../lib/utils';
 
-interface NavigationProps {
-  currentPage: string;
-  setCurrentPage: (page: string) => void;
-}
-
-const Navigation = ({ currentPage, setCurrentPage }: NavigationProps) => {
+const Navigation = () => {
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard SAT', icon: '📊' },
-    { id: 'institutional', label: 'Visión Institucional', icon: '🏫' },
+    { to: '/', label: 'Dashboard SAT', icon: '📊' },
+    { to: '/institutional', label: 'Visión Institucional', icon: '🏫' },
   ];
 
   return (
@@ -26,20 +22,22 @@ const Navigation = ({ currentPage, setCurrentPage }: NavigationProps) => {
             <div className="hidden md:block">
               <div className="ml-10 flex items-baseline space-x-1 h-full">
                 {navItems.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => setCurrentPage(item.id)}
-                    className={cn(
-                      'flex items-center gap-2 px-4 py-2 text-base font-medium rounded-lg transition-colors duration-150 h-full border-b-4',
-                      currentPage === item.id
-                        ? 'bg-blue-50 border-blue-600 text-blue-700'
-                        : 'border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900',
-                    )}
-                    aria-current={currentPage === item.id ? 'page' : undefined}
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    end // Use 'end' for the root path to prevent it from matching all routes
+                    className={({ isActive }) =>
+                      cn(
+                        'flex items-center gap-2 px-4 py-2 text-base font-medium rounded-lg transition-colors duration-150 h-full border-b-4',
+                        isActive
+                          ? 'bg-blue-50 border-blue-600 text-blue-700'
+                          : 'border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900',
+                      )
+                    }
                   >
                     <span className="text-xl">{item.icon}</span>
                     {item.label}
-                  </button>
+                  </NavLink>
                 ))}
               </div>
             </div>

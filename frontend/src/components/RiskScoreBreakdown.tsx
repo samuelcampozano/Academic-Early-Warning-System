@@ -92,7 +92,7 @@ const RiskScoreBreakdown = ({ student }: { student: Student }) => {
         <RiskFactorCard
           icon={<Users />}
           title="Índice de Vulnerabilidad"
-          value={student.riskFactors.vulnerability.value}
+          value={student.riskFactors.vulnerability.value.toString()}
           contribution={student.riskFactors.vulnerability.contribution}
           weight={student.riskFactors.vulnerability.weight}
           score={student.riskScore}
@@ -112,7 +112,7 @@ const RiskScoreBreakdown = ({ student }: { student: Student }) => {
         <RiskFactorCard
           icon={<Users />}
           title="Apoyo Familiar"
-          value={student.riskFactors.familySupport.value}
+          value={student.riskFactors.familySupport.value.toString()}
           contribution={student.riskFactors.familySupport.contribution}
           weight={student.riskFactors.familySupport.weight}
           score={student.riskScore}

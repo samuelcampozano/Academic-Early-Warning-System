@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Student } from '../types';
+import { Student, RiskLevel } from '../types';
 import { Badge } from './ui/Badge';
 import { Card } from './ui/Card';
 import { AlertTriangle, Laptop, Users } from 'lucide-react';
@@ -16,13 +16,13 @@ const StudentTable = ({ students }: StudentTableProps) => {
     navigate(`/student/${studentId}`);
   };
 
-  const riskLevelVariant = (level: 'Crítico' | 'Medio' | 'Bajo') => {
+  const riskLevelVariant = (level: RiskLevel) => {
     switch (level) {
-      case 'Crítico':
+      case 'Critical':
         return 'critical';
-      case 'Medio':
+      case 'Medium':
         return 'medium';
-      case 'Bajo':
+      case 'Low':
         return 'low';
     }
   };
@@ -51,7 +51,7 @@ const StudentTable = ({ students }: StudentTableProps) => {
         </div>,
       );
     }
-    if (student.alerts.familySupport === 'Bajo') {
+    if (student.alerts.familySupport === 'Low') {
       alerts.push(
         <div
           key="support"
@@ -118,7 +118,7 @@ const StudentTable = ({ students }: StudentTableProps) => {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-center">
                   <Badge variant={riskLevelVariant(student.riskLevel)}>
-                    {student.riskLevel === 'Crítico' && (
+                    {student.riskLevel === 'Critical' && (
                       <AlertTriangle className="w-4 h-4 mr-1" />
                     )}
                     {student.riskLevel}

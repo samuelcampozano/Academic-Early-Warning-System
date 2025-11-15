@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Student } from '../types';
+import { Student, RiskLevel } from '../types';
 import {
   AlertTriangle,
   ShieldAlert,
@@ -15,19 +15,19 @@ interface StudentRowProps {
   isEven: boolean;
 }
 
-const RiskBadge = ({ level }: { level: Student['nivel_riesgo'] }) => {
+const RiskBadge = ({ level }: { level: RiskLevel }) => {
   const config = {
-    Crítico: {
+    Critical: {
       icon: AlertTriangle,
       color: 'text-red-800 bg-red-100',
       label: 'Crítico',
     },
-    Medio: {
+    Medium: {
       icon: ShieldAlert,
       color: 'text-yellow-800 bg-yellow-100',
       label: 'Medio',
     },
-    Bajo: {
+    Low: {
       icon: CheckCircle,
       color: 'text-green-800 bg-green-100',
       label: 'Bajo',
@@ -73,8 +73,7 @@ const StudentRow: React.FC<StudentRowProps> = ({ student, isEven }) => {
     navigate(`/student/${student.id}`);
   };
 
-  const { nombre, curso, nivel_riesgo, score_riesgo, alertas_principales } =
-    student;
+  const { name, grade, riskLevel, riskScore, mainAlerts } = student;
 
   return (
     <tr
@@ -83,26 +82,26 @@ const StudentRow: React.FC<StudentRowProps> = ({ student, isEven }) => {
       title="Clic para ver detalles"
     >
       <td className="px-6 py-4 whitespace-nowrap">
-        <div className="text-sm font-medium text-gray-900">{nombre}</div>
+        <div className="text-sm font-medium text-gray-900">{name}</div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
-        <div className="text-sm text-gray-500">{curso}</div>
+        <div className="text-sm text-gray-500">{grade}</div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
-        <RiskBadge level={nivel_riesgo} />
+        <RiskBadge level={riskLevel} />
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="text-sm text-gray-900">
-          {score_riesgo} <span className="text-gray-500">/ 100</span>
+          {riskScore} <span className="text-gray-500">/ 100</span>
         </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-        {alertas_principales.slice(0, 3).map((alert, index) => (
+        {mainAlerts.slice(0, 3).map((alert: string, index: number) => (
           <AlertChip key={index} alertText={alert} />
         ))}
-        {alertas_principales.length > 3 && (
+        {mainAlerts.length > 3 && (
           <span className="text-xs font-medium text-gray-500">
-            +{alertas_principales.length - 3} más
+            +{mainAlerts.length - 3} más
           </span>
         )}
       </td>

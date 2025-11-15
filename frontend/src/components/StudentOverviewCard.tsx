@@ -22,7 +22,7 @@ const StudentOverviewCard = ({ student }: StudentOverviewCardProps) => {
                 <strong>Edad:</strong> {student.age} años
               </p>
               <p>
-                <strong>Estrato Socioeconómico:</strong> {student.stratum}{' '}
+                <strong>Estrato Socioeconómico:</strong> {student.socioeconomicStratum}{' '}
                 (Vulnerable)
               </p>
               <p>

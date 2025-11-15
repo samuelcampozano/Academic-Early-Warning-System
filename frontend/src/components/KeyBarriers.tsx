@@ -39,7 +39,7 @@ const BarrierCard = ({
   </div>
 );
 
-const KeyBarriers = () => {
+const KeyBarriers = ({ student }: KeyBarriersProps) => {
   return (
     <Card className="mt-8">
       <CardHeader>

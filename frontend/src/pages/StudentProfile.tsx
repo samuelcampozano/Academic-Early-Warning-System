@@ -48,7 +48,7 @@ const StudentProfile = () => {
       </div>
 
       {/* Hero Section */}
-      <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-8 mb-8 border border-slate-200">
+      <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-4 md:p-8 mb-6 md:mb-8 border border-slate-200">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <h1 className="text-4xl font-extrabold text-slate-900 mb-2">
@@ -213,8 +213,8 @@ const StudentProfile = () => {
       </div>
 
       {/* Main Content */}
-      <div className="grid grid-cols-3 gap-8">
-        <div className="col-span-2 space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+        <div className="lg:col-span-2 space-y-6 md:space-y-8">
           {/* Risk Score Breakdown */}
           <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
             <h2 className="text-xl font-bold text-slate-900 mb-6">
@@ -282,7 +282,7 @@ const StudentProfile = () => {
           <KeyBarriers student={student} />
           <SubjectPerformance student={student} />
         </div>
-        <div className="space-y-6">
+        <div className="space-y-6 lg:sticky lg:top-6 lg:self-start">
           <RecommendedActions student={student} />
           <AlertHistory />
           <Notes />

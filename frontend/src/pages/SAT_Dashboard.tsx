@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
 import { Student } from '../types';
+import { useNavigate } from 'react-router-dom';
+import { useStudentData } from '../context/StudentDataContext';
 
-interface SAT_DashboardProps {
-  students: Student[];
-  onStudentClick: (student: Student) => void;
-}
-
-const SAT_Dashboard = ({ students, onStudentClick }: SAT_DashboardProps) => {
+const SAT_Dashboard = () => {
+  const { students } = useStudentData();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCourse, setFilterCourse] = useState('all');
   const [filterRisk, setFilterRisk] = useState('all');
+  const navigate = useNavigate();
+
+  const handleStudentClick = (student: Student) => {
+    navigate(`/student/${student.id}`);
+  };
 
   const filteredStudents = students
     .filter((student) =>
@@ -24,14 +27,17 @@ const SAT_Dashboard = ({ students, onStudentClick }: SAT_DashboardProps) => {
 
   const totalStudents = students.length;
   const criticalRiskCount = students.filter(
-    (s) => s.riskLevel === 'Crítico',
+    (s) => s.riskLevel === 'Critical',
   ).length;
   const mediumRiskCount = students.filter(
-    (s) => s.riskLevel === 'Medio',
+    (s) => s.riskLevel === 'Medium',
   ).length;
-  const averageRiskScore = Math.round(
-    students.reduce((acc, s) => acc + s.riskScore, 0) / totalStudents,
-  );
+  const averageRiskScore =
+    totalStudents > 0
+      ? Math.round(
+          students.reduce((acc, s) => acc + s.riskScore, 0) / totalStudents,
+        )
+      : 0;
 
   return (
     <div>
@@ -48,7 +54,7 @@ const SAT_Dashboard = ({ students, onStudentClick }: SAT_DashboardProps) => {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
         <div className="bg-white rounded-xl p-6 shadow-card border border-slate-200 flex items-center gap-5">
           <div className="bg-blue-100 text-blue-600 rounded-full w-14 h-14 flex items-center justify-center text-3xl">
             👥
@@ -126,9 +132,9 @@ const SAT_Dashboard = ({ students, onStudentClick }: SAT_DashboardProps) => {
       </div>
 
       {/* Search and Filters */}
-      <div className="bg-white rounded-xl p-4 shadow-card border border-slate-200 mb-8">
-        <div className="flex items-center justify-between">
-          <div className="relative w-full max-w-md">
+      <div className="bg-white rounded-xl p-4 shadow-card border border-slate-200 mb-6 md:mb-8">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4">
+          <div className="relative w-full md:max-w-md">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <span className="text-slate-400">🔍</span>
             </div>
@@ -140,7 +146,7 @@ const SAT_Dashboard = ({ students, onStudentClick }: SAT_DashboardProps) => {
               className="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-lg bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full md:w-auto">
             <select
               value={filterCourse}
               onChange={(e) => setFilterCourse(e.target.value)}
@@ -158,9 +164,9 @@ const SAT_Dashboard = ({ students, onStudentClick }: SAT_DashboardProps) => {
               className="px-4 py-2.5 border border-slate-300 rounded-lg bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">Todos los Riesgos</option>
-              <option value="Crítico">Crítico</option>
-              <option value="Medio">Medio</option>
-              <option value="Bajo">Bajo</option>
+              <option value="Critical">Crítico</option>
+              <option value="Medium">Medio</option>
+              <option value="Low">Bajo</option>
             </select>
           </div>
         </div>
@@ -168,6 +174,7 @@ const SAT_Dashboard = ({ students, onStudentClick }: SAT_DashboardProps) => {
 
       {/* Students Table */}
       <div className="bg-white rounded-xl shadow-card border border-slate-200 overflow-hidden">
+        <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-slate-200">
           <thead className="bg-slate-50">
             <tr>
@@ -207,7 +214,7 @@ const SAT_Dashboard = ({ students, onStudentClick }: SAT_DashboardProps) => {
             {filteredStudents.map((student) => (
               <tr
                 key={student.id}
-                onClick={() => onStudentClick(student)}
+                onClick={() => handleStudentClick(student)}
                 className="hover:bg-slate-50 cursor-pointer transition-colors"
               >
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -221,16 +228,16 @@ const SAT_Dashboard = ({ students, onStudentClick }: SAT_DashboardProps) => {
                 <td className="px-6 py-4 whitespace-nowrap text-center">
                   <span
                     className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase ${
-                      student.riskLevel === 'Crítico'
+                      student.riskLevel === 'Critical'
                         ? 'bg-critical-background text-critical-text'
-                        : student.riskLevel === 'Medio'
+                        : student.riskLevel === 'Medium'
                           ? 'bg-medium-background text-medium-text'
                           : 'bg-low-background text-low-text'
                     }`}
                   >
-                    {student.riskLevel === 'Crítico' && '⚠️'}
-                    {student.riskLevel === 'Medio' && '🔶'}
-                    {student.riskLevel === 'Bajo' && '✅'}
+                    {student.riskLevel === 'Critical' && '⚠️'}
+                    {student.riskLevel === 'Medium' && '🔶'}
+                    {student.riskLevel === 'Low' && '✅'}
                     {student.riskLevel}
                   </span>
                 </td>
@@ -252,7 +259,7 @@ const SAT_Dashboard = ({ students, onStudentClick }: SAT_DashboardProps) => {
                         💻 Sin Laptop
                       </span>
                     )}
-                    {student.alerts.familySupport === 'Bajo' && (
+                    {student.alerts.familySupport === 'Low' && (
                       <span className="inline-flex items-center gap-1 bg-orange-100 text-orange-800 text-xs font-medium px-2 py-1 rounded-md">
                         👥 Apoyo Bajo
                       </span>
@@ -263,6 +270,7 @@ const SAT_Dashboard = ({ students, onStudentClick }: SAT_DashboardProps) => {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

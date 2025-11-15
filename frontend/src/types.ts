@@ -1,16 +1,18 @@
+export type RiskLevel = 'Critical' | 'Medium' | 'Low';
+
 export interface Student {
   id: string;
-  nombre: string;
-  curso: string;
-  nivel_riesgo: 'Crítico' | 'Medio' | 'Bajo';
-  score_riesgo: number;
+  name: string;
+  grade: string;
+  riskLevel: RiskLevel;
+  riskScore: number;
   age: number;
-  stratum: number;
-  alertas_principales: string[];
+  socioeconomicStratum: number;
+  mainAlerts: string[];
   alerts: {
     absences?: number;
     hasLaptop: boolean;
-    familySupport: 'Alto' | 'Medio' | 'Bajo';
+    familySupport: 'High' | 'Medium' | 'Low';
     quintile: 'Q1' | 'Q2' | 'Q3' | 'Q4' | 'Q5';
   };
   performance: {
@@ -21,14 +23,11 @@ export interface Student {
     };
   };
   riskFactors: {
-    absences: { value: number; contribution: number; weight: number };
-    vulnerability: { value: string; contribution: number; weight: number };
-    laptop: { value: boolean; contribution: number; weight: number };
-    familySupport: { value: string; contribution: number; weight: number };
+    [key: string]: {
+      value: number | string | boolean;
+      contribution: number;
+      weight: number;
+      explanation?: string;
+    };
   };
-  // Backward compatibility aliases
-  name: string;
-  grade: string;
-  riskLevel: 'Crítico' | 'Medio' | 'Bajo';
-  riskScore: number;
 }

@@ -14,9 +14,9 @@ const StudentProfileHero = () => {
   }
 
   const riskColor =
-    student.riskLevel === 'Crítico'
+    student.riskLevel === 'Critical'
       ? 'border-risk-critical-border'
-      : student.riskLevel === 'Medio'
+      : student.riskLevel === 'Medium'
         ? 'border-risk-medium-border'
         : 'border-risk-low-border';
 
@@ -36,9 +36,9 @@ const StudentProfileHero = () => {
           <p className="text-16 text-text-secondary mt-1">{student.grade}</p>
           <Badge
             variant={
-              student.riskLevel === 'Crítico'
+              student.riskLevel === 'Critical'
                 ? 'critical'
-                : student.riskLevel === 'Medio'
+                : student.riskLevel === 'Medium'
                   ? 'medium'
                   : 'low'
             }
