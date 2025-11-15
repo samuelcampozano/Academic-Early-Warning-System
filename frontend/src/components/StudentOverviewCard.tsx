@@ -22,8 +22,8 @@ const StudentOverviewCard = ({ student }: StudentOverviewCardProps) => {
                 <strong>Edad:</strong> {student.age} años
               </p>
               <p>
-                <strong>Estrato Socioeconómico:</strong> {student.socioeconomicStratum}{' '}
-                (Vulnerable)
+                <strong>Estrato Socioeconómico:</strong>{' '}
+                {student.socioeconomicStratum} (Vulnerable)
               </p>
               <p>
                 <strong>Nivel Representante:</strong> Bachillerato

@@ -175,101 +175,104 @@ const SAT_Dashboard = () => {
       {/* Students Table */}
       <div className="bg-white rounded-xl shadow-card border border-slate-200 overflow-hidden">
         <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-slate-200">
-          <thead className="bg-slate-50">
-            <tr>
-              <th
-                scope="col"
-                className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider"
-              >
-                Nombre
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider"
-              >
-                Curso
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-4 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider"
-              >
-                Nivel de Riesgo
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-4 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider"
-              >
-                Score
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider"
-              >
-                Alertas Principales
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-slate-200">
-            {filteredStudents.map((student) => (
-              <tr
-                key={student.id}
-                onClick={() => handleStudentClick(student)}
-                className="hover:bg-slate-50 cursor-pointer transition-colors"
-              >
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-semibold text-slate-900">
-                    {student.name}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-slate-600">{student.grade}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-center">
-                  <span
-                    className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase ${
-                      student.riskLevel === 'Critical'
-                        ? 'bg-critical-background text-critical-text'
-                        : student.riskLevel === 'Medium'
-                          ? 'bg-medium-background text-medium-text'
-                          : 'bg-low-background text-low-text'
-                    }`}
-                  >
-                    {student.riskLevel === 'Critical' && '⚠️'}
-                    {student.riskLevel === 'Medium' && '🔶'}
-                    {student.riskLevel === 'Low' && '✅'}
-                    {student.riskLevel}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-center">
-                  <span className="text-xl font-bold text-slate-800">
-                    {student.riskScore}
-                  </span>
-                  <span className="text-sm text-slate-500"> / 100</span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center gap-2">
-                    {student.alerts.absences && student.alerts.absences > 3 && (
-                      <span className="inline-flex items-center gap-1 bg-red-100 text-red-800 text-xs font-medium px-2 py-1 rounded-md">
-                        📋 {student.alerts.absences} Faltas
-                      </span>
-                    )}
-                    {!student.alerts.hasLaptop && (
-                      <span className="inline-flex items-center gap-1 bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-1 rounded-md">
-                        💻 Sin Laptop
-                      </span>
-                    )}
-                    {student.alerts.familySupport === 'Low' && (
-                      <span className="inline-flex items-center gap-1 bg-orange-100 text-orange-800 text-xs font-medium px-2 py-1 rounded-md">
-                        👥 Apoyo Bajo
-                      </span>
-                    )}
-                  </div>
-                </td>
+          <table className="min-w-full divide-y divide-slate-200">
+            <thead className="bg-slate-50">
+              <tr>
+                <th
+                  scope="col"
+                  className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider"
+                >
+                  Nombre
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider"
+                >
+                  Curso
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-4 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider"
+                >
+                  Nivel de Riesgo
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-4 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider"
+                >
+                  Score
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider"
+                >
+                  Alertas Principales
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="bg-white divide-y divide-slate-200">
+              {filteredStudents.map((student) => (
+                <tr
+                  key={student.id}
+                  onClick={() => handleStudentClick(student)}
+                  className="hover:bg-slate-50 cursor-pointer transition-colors"
+                >
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-semibold text-slate-900">
+                      {student.name}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-slate-600">
+                      {student.grade}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <span
+                      className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase ${
+                        student.riskLevel === 'Critical'
+                          ? 'bg-critical-background text-critical-text'
+                          : student.riskLevel === 'Medium'
+                            ? 'bg-medium-background text-medium-text'
+                            : 'bg-low-background text-low-text'
+                      }`}
+                    >
+                      {student.riskLevel === 'Critical' && '⚠️'}
+                      {student.riskLevel === 'Medium' && '🔶'}
+                      {student.riskLevel === 'Low' && '✅'}
+                      {student.riskLevel}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <span className="text-xl font-bold text-slate-800">
+                      {student.riskScore}
+                    </span>
+                    <span className="text-sm text-slate-500"> / 100</span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      {student.alerts.absences &&
+                        student.alerts.absences > 3 && (
+                          <span className="inline-flex items-center gap-1 bg-red-100 text-red-800 text-xs font-medium px-2 py-1 rounded-md">
+                            📋 {student.alerts.absences} Faltas
+                          </span>
+                        )}
+                      {!student.alerts.hasLaptop && (
+                        <span className="inline-flex items-center gap-1 bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-1 rounded-md">
+                          💻 Sin Laptop
+                        </span>
+                      )}
+                      {student.alerts.familySupport === 'Low' && (
+                        <span className="inline-flex items-center gap-1 bg-orange-100 text-orange-800 text-xs font-medium px-2 py-1 rounded-md">
+                          👥 Apoyo Bajo
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

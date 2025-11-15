@@ -17,7 +17,7 @@ ChartJS.register(
   BarElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
 );
 
 export default function BarChart({ chartData, title }) {
@@ -44,8 +44,8 @@ export default function BarChart({ chartData, title }) {
         display: true,
         text: title,
         font: {
-          size: 16
-        }
+          size: 16,
+        },
       },
     },
   };

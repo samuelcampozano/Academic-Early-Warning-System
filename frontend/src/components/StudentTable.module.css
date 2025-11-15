@@ -34,10 +34,20 @@
   font-size: 0.8rem;
 }
 
-.risk-pill.risk-crítico { background-color: #d9534f; }
-.risk-pill.risk-medio { background-color: #f0ad4e; }
-.risk-pill.risk-bajo { background-color: #5cb85c; }
+.risk-pill.risk-crítico {
+  background-color: #d9534f;
+}
+.risk-pill.risk-medio {
+  background-color: #f0ad4e;
+}
+.risk-pill.risk-bajo {
+  background-color: #5cb85c;
+}
 
 /* Estilos para colorear la fila (sutil) */
-.student-row.risk-crítico { border-left: 5px solid #d9534f; }
-.student-row.risk-medio { border-left: 5px solid #f0ad4e; }
+.student-row.risk-crítico {
+  border-left: 5px solid #d9534f;
+}
+.student-row.risk-medio {
+  border-left: 5px solid #f0ad4e;
+}

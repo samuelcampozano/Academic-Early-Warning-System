@@ -221,62 +221,58 @@ const StudentProfile = () => {
               Desglose del Score de Riesgo
             </h2>
             <div className="space-y-6">
-              {Object.entries(student.riskFactors).map(
-                ([key, factor]) => (
-                  <div
-                    key={key}
-                    className={`rounded-xl p-5 border ${
-                      factor.contribution > 20
-                        ? 'bg-red-50 border-red-200'
-                        : 'bg-orange-50 border-orange-200'
-                    }`}
-                  >
-                    <h3 className="text-base font-semibold text-slate-900 mb-3">
-                      {key}
-                    </h3>
-                    <div className="space-y-2 mb-3">
-                      <div className="flex justify-between text-sm">
-                        <span className="font-medium text-slate-700">
-                          Valor Actual:
-                        </span>
-                        <span className="font-bold text-slate-900">
-                          {typeof factor.value === 'boolean'
-                            ? factor.value
-                              ? 'Sí'
-                              : 'No'
-                            : factor.value}
-                        </span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="font-medium text-slate-700">
-                          Contribución al Score:
-                        </span>
-                        <span className="font-bold text-blue-600">
-                          +{factor.contribution} puntos ({factor.weight}% peso)
-                        </span>
-                      </div>
+              {Object.entries(student.riskFactors).map(([key, factor]) => (
+                <div
+                  key={key}
+                  className={`rounded-xl p-5 border ${
+                    factor.contribution > 20
+                      ? 'bg-red-50 border-red-200'
+                      : 'bg-orange-50 border-orange-200'
+                  }`}
+                >
+                  <h3 className="text-base font-semibold text-slate-900 mb-3">
+                    {key}
+                  </h3>
+                  <div className="space-y-2 mb-3">
+                    <div className="flex justify-between text-sm">
+                      <span className="font-medium text-slate-700">
+                        Valor Actual:
+                      </span>
+                      <span className="font-bold text-slate-900">
+                        {typeof factor.value === 'boolean'
+                          ? factor.value
+                            ? 'Sí'
+                            : 'No'
+                          : factor.value}
+                      </span>
                     </div>
-                    <div className="w-full h-3 bg-slate-200 rounded-full overflow-hidden mb-3">
-                      <div
-                        className={`h-full ${factor.contribution > 20 ? 'bg-gradient-to-r from-red-500 to-red-600' : 'bg-gradient-to-r from-orange-500 to-orange-600'}`}
-                        style={{ width: `${factor.weight}%` }}
-                      ></div>
-                    </div>
-                    <div
-                      className={`flex items-start gap-2 text-sm text-slate-700 bg-white rounded-lg p-3 border ${
-                        factor.contribution > 20
-                          ? 'border-red-200'
-                          : 'border-orange-200'
-                      }`}
-                    >
-                      <span className="text-lg flex-shrink-0">⚠️</span>
-                      <p className="leading-relaxed">
-                        {factor.explanation}
-                      </p>
+                    <div className="flex justify-between text-sm">
+                      <span className="font-medium text-slate-700">
+                        Contribución al Score:
+                      </span>
+                      <span className="font-bold text-blue-600">
+                        +{factor.contribution} puntos ({factor.weight}% peso)
+                      </span>
                     </div>
                   </div>
-                ),
-              )}
+                  <div className="w-full h-3 bg-slate-200 rounded-full overflow-hidden mb-3">
+                    <div
+                      className={`h-full ${factor.contribution > 20 ? 'bg-gradient-to-r from-red-500 to-red-600' : 'bg-gradient-to-r from-orange-500 to-orange-600'}`}
+                      style={{ width: `${factor.weight}%` }}
+                    ></div>
+                  </div>
+                  <div
+                    className={`flex items-start gap-2 text-sm text-slate-700 bg-white rounded-lg p-3 border ${
+                      factor.contribution > 20
+                        ? 'border-red-200'
+                        : 'border-orange-200'
+                    }`}
+                  >
+                    <span className="text-lg flex-shrink-0">⚠️</span>
+                    <p className="leading-relaxed">{factor.explanation}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
           <KeyBarriers student={student} />

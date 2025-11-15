@@ -7,7 +7,7 @@ interface StudentDataContextType {
 }
 
 const StudentDataContext = createContext<StudentDataContextType | undefined>(
-  undefined
+  undefined,
 );
 
 export const StudentDataProvider = ({ children }: { children: ReactNode }) => {
