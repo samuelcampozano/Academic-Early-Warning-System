@@ -1,0 +1,51 @@
+# Python / Flask
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.env
+.venv
+venv/
+ENV/
+env/
+instance/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Base de datos local
+*.db
+*.sqlite
+*.sqlite3
+
+# Archivos de configuración con datos sensibles
+config/secrets.py
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Modelos ML entrenados (pueden ser muy grandes)
+models/trained/*.pkl
+models/trained/*.joblib
+models/trained/*.h5
+
+# Datos sensibles
+data/raw/*.csv
+data/raw/*.xlsx
+data/processed/*.csv
