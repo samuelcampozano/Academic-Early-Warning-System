@@ -85,7 +85,10 @@ export default function useStudentProfile() {
         if (USE_MOCK_DATA) {
           await new Promise((resolve) => setTimeout(resolve, 300));
           // Mock data structure assumed for fallback
-          responseData = { id: id, nombre: 'Estudiante Mock' /* ...other fields */ };
+          responseData = {
+            id: id,
+            nombre: 'Estudiante Mock' /* ...other fields */,
+          };
         } else {
           const apiUrl = process.env.REACT_APP_API_URL;
           if (!apiUrl) {
