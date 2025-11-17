@@ -32,8 +32,13 @@ const mapStudentData = (backendData: any[]): Student[] => {
     alerts: {
       absences: student.total_inasistencias,
       hasLaptop: !student.laptop,
-      quintile: `Quintil ${student.quintil}`,
+      // Assuming default values as they are not in the backend list response
+      familySupport: 'Medium',
+      quintile: `Q${student.quintil}` as 'Q1' | 'Q2' | 'Q3' | 'Q4' | 'Q5',
     },
+    // Adding missing properties with default empty objects
+    performance: {},
+    riskFactors: {},
   }));
 };
 
@@ -52,7 +57,6 @@ export default function useSatData() {
           // This part is now for fallback/testing only
           await new Promise((resolve) => setTimeout(resolve, 500));
           // Assuming mockSatListData exists and has a similar structure
-          // responseData = mockSatListData;
           responseData = []; // Or your mock data
         } else {
           const apiUrl = process.env.REACT_APP_API_URL;
