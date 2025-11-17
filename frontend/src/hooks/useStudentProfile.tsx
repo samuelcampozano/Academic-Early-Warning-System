@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { mockStudentProfileData } from '../services/mocks';
+import axios from 'axios';
 
-const USE_MOCK_DATA = true;
+const USE_MOCK_DATA = false;
 
+// Existing interfaces - preserved
 export interface RiskFactor {
   name: string;
   value: string;
@@ -33,6 +34,37 @@ export interface StudentProfile {
   key_grades: KeyGrade[];
 }
 
+// --- Data Mapping Functions ---
+const mapRiskLevel = (
+  level: 'Alto' | 'Medio' | 'Bajo',
+): 'Crítico' | 'Medio' | 'Bajo' => {
+  switch (level) {
+    case 'Alto':
+      return 'Crítico';
+    case 'Medio':
+      return 'Medio';
+    case 'Bajo':
+      return 'Bajo';
+    default:
+      return 'Bajo';
+  }
+};
+
+const mapProfileData = (backendData: any): StudentProfile => {
+  return {
+    id: backendData.id,
+    name: backendData.nombre,
+    course: backendData.grado,
+    risk_score: Math.round(backendData.risk_score),
+    risk_level: mapRiskLevel(backendData.risk_level),
+    // The following fields are based on the guide's expected frontend structure.
+    // If the backend provides different structures for these, the mapping will need adjustment.
+    risk_factors: backendData.risk_factors || [],
+    key_barriers: backendData.key_barriers || [],
+    key_grades: backendData.key_grades || [],
+  };
+};
+
 export default function useStudentProfile() {
   const { id } = useParams<{ id: string }>();
   const [profile, setProfile] = useState<StudentProfile | null>(null);
@@ -41,7 +73,10 @@ export default function useStudentProfile() {
 
   useEffect(() => {
     async function fetchProfile() {
-      if (!id) return;
+      if (!id) {
+        setLoading(false);
+        return;
+      }
 
       try {
         setLoading(true);
@@ -49,15 +84,28 @@ export default function useStudentProfile() {
 
         if (USE_MOCK_DATA) {
           await new Promise((resolve) => setTimeout(resolve, 300));
-          responseData = { ...mockStudentProfileData, id: id };
+          // Mock data structure assumed for fallback
+          responseData = { id: id, nombre: 'Estudiante Mock' /* ...other fields */ };
         } else {
-          throw new Error('API real aún no implementada');
+          const apiUrl = process.env.REACT_APP_API_URL;
+          if (!apiUrl) {
+            throw new Error(
+              'REACT_APP_API_URL is not defined in the environment.',
+            );
+          }
+          const response = await axios.get(`${apiUrl}/students/${id}`);
+          responseData = response.data;
         }
 
-        setProfile(responseData);
+        const formattedProfile = mapProfileData(responseData);
+        setProfile(formattedProfile);
         setError(null);
       } catch (err: any) {
-        setError(err.message);
+        setError(
+          err.response?.data?.message ||
+            err.message ||
+            'An unknown error occurred.',
+        );
         setProfile(null);
       } finally {
         setLoading(false);

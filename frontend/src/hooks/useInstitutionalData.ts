@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { mockInstitutionalStats } from '../services/mocks';
+import axios from 'axios';
 
-const USE_MOCK_DATA = true;
+const USE_MOCK_DATA = false;
 
 export interface TopBarrier {
   name: string;
@@ -24,6 +24,16 @@ export interface InstitutionalStats {
   parentEducationImpact: ParentEducationImpact[];
 }
 
+const mapChartData = (
+  labels: string[],
+  data: number[],
+): { name: string; value: number }[] => {
+  return labels.map((label, index) => ({
+    name: label,
+    value: data[index] || 0,
+  }));
+};
+
 export default function useInstitutionalData() {
   const [stats, setStats] = useState<InstitutionalStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -37,36 +47,46 @@ export default function useInstitutionalData() {
 
         if (USE_MOCK_DATA) {
           await new Promise((resolve) => setTimeout(resolve, 200));
-          responseData = mockInstitutionalStats;
+          // Fallback to mock data if needed for testing
+          responseData = {
+            topBarriers: { labels: [], data: [] },
+            laptopImpact: { labels: [], data: [] },
+            parentEducationImpact: { labels: [], data: [] },
+          };
         } else {
-          throw new Error('API real aún no implementada');
+          const apiUrl = process.env.REACT_APP_API_URL;
+          if (!apiUrl) {
+            throw new Error(
+              'REACT_APP_API_URL is not defined in the environment.',
+            );
+          }
+          const response = await axios.get(`${apiUrl}/institutional-stats`);
+          responseData = response.data;
         }
 
         const formattedData: InstitutionalStats = {
-          topBarriers: responseData.topBarriers.labels.map(
-            (label: string, index: number) => ({
-              name: label,
-              value: responseData.topBarriers.data[index],
-            }),
+          topBarriers: mapChartData(
+            responseData.topBarriers.labels,
+            responseData.topBarriers.data,
           ),
-          laptopImpact: responseData.laptopImpact.labels.map(
-            (label: string, index: number) => ({
-              name: label,
-              value: responseData.laptopImpact.data[index],
-            }),
+          laptopImpact: mapChartData(
+            responseData.laptopImpact.labels,
+            responseData.laptopImpact.data,
           ),
-          parentEducationImpact: responseData.parentEducationImpact.labels.map(
-            (label: string, index: number) => ({
-              name: label,
-              value: responseData.parentEducationImpact.data[index],
-            }),
+          parentEducationImpact: mapChartData(
+            responseData.parentEducationImpact.labels,
+            responseData.parentEducationImpact.data,
           ),
         };
 
         setStats(formattedData);
         setError(null);
       } catch (err: any) {
-        setError(err.message);
+        setError(
+          err.response?.data?.message ||
+            err.message ||
+            'An unknown error occurred.',
+        );
         setStats(null);
       } finally {
         setLoading(false);
