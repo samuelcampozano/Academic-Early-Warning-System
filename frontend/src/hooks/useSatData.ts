@@ -1,49 +1,53 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Student } from '../types';
+import { studentApi } from '../services/api';
 
-const USE_MOCK_DATA = false;
+// Backend returns Spanish field names, we map to English for frontend
+interface BackendStudent {
+  id: string;
+  name: string;
+  course: string;
+  risk_level: 'Alto' | 'Medio' | 'Bajo';
+  risk_score: number;
+  key_barriers: string[];
+  promedio_general: number;
+  materias_en_riesgo: number;
+}
 
-const mapRiskLevel = (
-  level: 'Alto' | 'Medio' | 'Bajo',
-): 'Critical' | 'Medium' | 'Low' => {
-  switch (level) {
-    case 'Alto':
-      return 'Critical';
-    case 'Medio':
-      return 'Medium';
-    case 'Bajo':
-      return 'Low';
-    default:
-      return 'Low';
-  }
+export interface SatStudent {
+  id: string;
+  name: string;
+  course: string;
+  riskLevel: 'Critical' | 'Medium' | 'Low';
+  riskScore: number;
+  keyBarriers: string[];
+  averageGrade: number;
+  subjectsAtRisk: number;
+}
+
+const mapRiskLevel = (level: 'Alto' | 'Medio' | 'Bajo'): 'Critical' | 'Medium' | 'Low' => {
+  const mapping = {
+    'Alto': 'Critical',
+    'Medio': 'Medium',
+    'Bajo': 'Low'
+  };
+  return mapping[level] || 'Low';
 };
 
-const mapStudentData = (backendData: any[]): Student[] => {
+const mapStudentData = (backendData: BackendStudent[]): SatStudent[] => {
   return backendData.map((student) => ({
     id: student.id,
-    name: student.nombre,
-    grade: student.grado,
+    name: student.name,
+    course: student.course,
     riskLevel: mapRiskLevel(student.risk_level),
-    riskScore: Math.round(student.risk_score),
-    age: student.edad,
-    socioeconomicStratum: student.quintil,
-    mainAlerts: student.key_barriers,
-    alerts: {
-      absences: student.total_inasistencias,
-      hasLaptop: !student.laptop,
-      // Assuming default values as they are not in the backend list response
-      familySupport: 'Medium',
-      quintile: `Q${student.quintil}` as 'Q1' | 'Q2' | 'Q3' | 'Q4' | 'Q5',
-    },
-    // Adding missing properties with default empty objects
-    performance: {},
-    riskFactors: {},
+    riskScore: Math.round(student.risk_score * 10) / 10, // Round to 1 decimal
+    keyBarriers: student.key_barriers || [],
+    averageGrade: student.promedio_general,
+    subjectsAtRisk: student.materias_en_riesgo,
   }));
 };
 
-export default function useSatData() {
-  const [data, setData] = useState<Student[]>([]);
+export default function useSatData(riskFilter?: 'Alto' | 'Medio' | 'Bajo') {
+  const [data, setData] = useState<SatStudent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -51,33 +55,15 @@ export default function useSatData() {
     async function fetchData() {
       try {
         setLoading(true);
-        let responseData: any[];
-
-        if (USE_MOCK_DATA) {
-          // This part is now for fallback/testing only
-          await new Promise((resolve) => setTimeout(resolve, 500));
-          // Assuming mockSatListData exists and has a similar structure
-          responseData = []; // Or your mock data
-        } else {
-          const apiUrl = process.env.REACT_APP_API_URL;
-          if (!apiUrl) {
-            throw new Error(
-              'REACT_APP_API_URL is not defined in the environment.',
-            );
-          }
-          const response = await axios.get(`${apiUrl}/students`);
-          responseData = response.data;
-        }
-
-        const formattedData = mapStudentData(responseData);
-        setData(formattedData);
         setError(null);
+
+        const response = await studentApi.getSatList(1000, riskFilter);
+        const formattedData = mapStudentData(response.data);
+        
+        setData(formattedData);
       } catch (err: any) {
-        setError(
-          err.response?.data?.message ||
-            err.message ||
-            'An unknown error occurred.',
-        );
+        console.error('Error fetching SAT list:', err);
+        setError(err.message || 'Failed to load student data');
         setData([]);
       } finally {
         setLoading(false);
@@ -85,7 +71,7 @@ export default function useSatData() {
     }
 
     fetchData();
-  }, []);
+  }, [riskFilter]);
 
   return { data, loading, error };
 }

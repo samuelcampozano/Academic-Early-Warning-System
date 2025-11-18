@@ -49,5 +49,12 @@ models/trained/*.h5
 data/raw/*.csv
 data/raw/*.xlsx
 data/processed/*.csv
+test_supabase_connection.py
+check_database_schema.py
+
+# AI/Development prompts (not for production repo)
+FRONTEND_INTEGRATION_PROMPT.md
+INTEGRATION_PACKAGE.md
+BACKEND_VERIFICATION.md
 
 .gemini/

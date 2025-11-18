@@ -1,6 +1,7 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useStudentData } from '../context/StudentDataContext';
+import useStudentProfile from '../hooks/useStudentProfile';
+import { LoadingSpinner, ErrorMessage, EmptyState } from '../components/ui/Feedback';
 import KeyBarriers from '../components/KeyBarriers';
 import SubjectPerformance from '../components/SubjectPerformance';
 import RecommendedActions from '../components/RecommendedActions';
@@ -8,28 +9,25 @@ import AlertHistory from '../components/AlertHistory';
 import Notes from '../components/Notes';
 
 const StudentProfile = () => {
-  const { studentId } = useParams<{ studentId: string }>();
-  const { students } = useStudentData();
-  const student = students.find((s) => s.id === studentId);
+  const { id } = useParams<{ id: string }>();
+  const { profile, loading, error } = useStudentProfile();
 
-  if (!student) {
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
+  if (error) {
+    return <ErrorMessage message={error} />;
+  }
+
+  if (!profile) {
     return (
-      <div className="text-center py-20">
-        <h2 className="text-2xl font-bold text-slate-700">
-          Estudiante no encontrado
-        </h2>
-        <p className="text-slate-500 mt-2">
-          Por favor, regresa al dashboard y selecciona un estudiante.
-        </p>
-        <Link
-          to="/"
-          className="mt-6 inline-block px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors"
-        >
-          Volver al Dashboard
-        </Link>
-      </div>
+      <EmptyState message="No se pudo cargar el perfil del estudiante. Asegúrate de que el ID es correcto." />
     );
   }
+
+  // Use 'profile' object instead of 'student'
+  const student = profile; 
 
   return (
     <div>
@@ -48,28 +46,28 @@ const StudentProfile = () => {
       </div>
 
       {/* Hero Section */}
-      <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-4 md:p-8 mb-6 md:mb-8 border border-slate-200">
+      <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700 rounded-2xl p-4 md:p-8 mb-6 md:mb-8 border border-slate-200 dark:border-slate-700">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <h1 className="text-4xl font-extrabold text-slate-900 mb-2">
+            <h1 className="text-4xl font-extrabold text-slate-900 dark:text-slate-100 mb-2">
               {student.name}
             </h1>
-            <p className="text-lg text-slate-600 mb-4">{student.grade}</p>
+            <p className="text-lg text-slate-600 dark:text-slate-400 mb-4">{student.course}</p>
             <span
               className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold uppercase ${
-                student.riskLevel === 'Critical'
-                  ? 'bg-red-100 text-red-800 border-2 border-red-300'
-                  : student.riskLevel === 'Medium'
-                    ? 'bg-yellow-100 text-yellow-800 border-2 border-yellow-300'
-                    : 'bg-green-100 text-green-800 border-2 border-green-300'
+                student.risk_level === 'Critical'
+                  ? 'bg-red-100 text-red-800 border-2 border-red-300 dark:bg-red-900/30 dark:text-red-400 dark:border-red-600'
+                  : student.risk_level === 'Medium'
+                    ? 'bg-yellow-100 text-yellow-800 border-2 border-yellow-300 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-600'
+                    : 'bg-green-100 text-green-800 border-2 border-green-300 dark:bg-green-900/30 dark:text-green-400 dark:border-green-600'
               }`}
             >
-              {student.riskLevel === 'Critical'
+              {student.risk_level === 'Critical'
                 ? '⚠️'
-                : student.riskLevel === 'Medium'
+                : student.risk_level === 'Medium'
                   ? '🔶'
                   : '✅'}
-              {student.riskLevel}
+              {student.risk_level}
             </span>
           </div>
           <div className="flex flex-col items-center">
@@ -77,9 +75,9 @@ const StudentProfile = () => {
               className="relative w-32 h-32 rounded-full flex items-center justify-center"
               style={{
                 border: `8px solid ${
-                  student.riskLevel === 'Critical'
+                  student.risk_level === 'Critical'
                     ? '#DC2626'
-                    : student.riskLevel === 'Medium'
+                    : student.risk_level === 'Medium'
                       ? '#F59E0B'
                       : '#10B981'
                 }`,
@@ -87,13 +85,13 @@ const StudentProfile = () => {
               }}
             >
               <div className="text-center">
-                <div className="text-5xl font-extrabold text-slate-900">
-                  {student.riskScore}
+                <div className="text-5xl font-extrabold text-slate-900 dark:text-slate-100">
+                  {student.risk_score}
                 </div>
-                <div className="text-sm text-slate-500 font-medium">/100</div>
+                <div className="text-sm text-slate-500 dark:text-slate-400 font-medium">/100</div>
               </div>
             </div>
-            <div className="mt-3 text-sm font-medium text-slate-600">
+            <div className="mt-3 text-sm font-medium text-slate-600 dark:text-slate-400">
               Score de Riesgo
             </div>
           </div>
@@ -101,111 +99,80 @@ const StudentProfile = () => {
       </div>
 
       {/* Student Overview Card */}
-      <div className="bg-blue-50 rounded-2xl p-6 mb-8 border-2 border-blue-200">
-        <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+      <div className="bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-6 mb-8 border-2 border-blue-200 dark:border-blue-700">
+        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-6 flex items-center gap-2">
           <span className="text-2xl">📋</span> Perfil del Estudiante
         </h2>
-        <div className="grid grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Risk Factors */}
           <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-4">
-              Información Demográfica
+            <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wide mb-4">
+              Factores de Riesgo
             </h3>
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-slate-600">Edad:</span>
-              <span className="text-sm font-bold text-slate-900">
-                {student.age} años
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-slate-600">
-                Estrato:
-              </span>
-              <span className="text-sm font-bold text-slate-900">
-                {student.socioeconomicStratum} (Vulnerable)
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-slate-600">
-                Nivel Representante:
-              </span>
-              <span className="text-sm font-bold text-slate-900">
-                Bachillerato
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-slate-600">
-                Vulnerabilidad:
-              </span>
-              <span className="inline-flex items-center gap-1 text-sm font-bold text-red-700">
-                <span>⚠️</span> {student.alerts.quintile} - Más Vulnerable
-              </span>
-            </div>
+            {student.risk_factors.map((factor, index) => (
+              <div key={index} className="flex justify-between items-center">
+                <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                  {factor.name}:
+                </span>
+                <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                  {factor.value} ({factor.weight})
+                </span>
+              </div>
+            ))}
           </div>
+
+          {/* Academic Situation */}
           <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-4">
+            <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wide mb-4">
               Situación Académica
             </h3>
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-slate-600">
-                Promedio General:
-              </span>
-              <span className="text-sm font-bold text-slate-900">7.8 / 10</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-slate-600">
-                Asistencia:
-              </span>
-              <span className="inline-flex items-center gap-1 text-sm font-bold text-red-700">
-                <span>⚠️</span> 87% ({student.alerts.absences} faltas)
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-slate-600">
-                Ranking en Curso:
-              </span>
-              <span className="text-sm font-bold text-slate-900">
-                Puesto 8/12
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-slate-600">
-                Materias en Riesgo:
-              </span>
-              <span className="text-sm font-bold text-orange-700">
-                2 materias
-              </span>
-            </div>
+            {student.key_grades.map((grade, index) => (
+              <div key={index} className="flex justify-between items-center">
+                <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                  {grade.subject}:
+                </span>
+                <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                  {grade.grade.toFixed(2)}
+                </span>
+              </div>
+            ))}
           </div>
+
+          {/* Attendance */}
           <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-4">
-              Recursos Disponibles
+            <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wide mb-4">
+              Asistencia
             </h3>
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-slate-600">
-                Laptop:
+              <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                Total Inasistencias:
               </span>
-              <span className="text-sm font-bold text-red-700">
-                {student.alerts.hasLaptop ? '✅ Sí' : '❌ No'}
+              <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                {student.asistencia.total_inasistencias}
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-slate-600">
-                Internet en Casa:
+              <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                Faltas Justificadas:
               </span>
-              <span className="text-sm font-bold text-green-700">✅ Sí</span>
+              <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                {student.asistencia.faltas_justificadas}
+              </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-slate-600">
-                Espacio de Estudio:
+              <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                Faltas Injustificadas:
               </span>
-              <span className="text-sm font-bold text-red-700">❌ No</span>
+              <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                {student.asistencia.faltas_injustificadas}
+              </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-slate-600">
-                Apoyo Familiar:
+              <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                Porcentaje Asistencia:
               </span>
-              <span className="inline-flex items-center gap-1 text-sm font-bold text-orange-700">
-                <span>⚠️</span> {student.alerts.familySupport}
+              <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                {student.asistencia.porcentaje_asistencia.toFixed(2)}%
               </span>
             </div>
           </div>
@@ -216,61 +183,49 @@ const StudentProfile = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
         <div className="lg:col-span-2 space-y-6 md:space-y-8">
           {/* Risk Score Breakdown */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
-            <h2 className="text-xl font-bold text-slate-900 mb-6">
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-card border border-slate-200 dark:border-slate-700">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-6">
               Desglose del Score de Riesgo
             </h2>
             <div className="space-y-6">
-              {Object.entries(student.riskFactors).map(([key, factor]) => (
+              {student.risk_factors.map((factor, index) => (
                 <div
-                  key={key}
+                  key={index} // Changed from factor.name as it's not unique in backend
                   className={`rounded-xl p-5 border ${
-                    factor.contribution > 20
-                      ? 'bg-red-50 border-red-200'
-                      : 'bg-orange-50 border-orange-200'
+                    parseFloat(factor.weight) > 0.20 // Assuming weight is '20%'
+                      ? 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800'
+                      : 'bg-orange-50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-800'
                   }`}
                 >
-                  <h3 className="text-base font-semibold text-slate-900 mb-3">
-                    {key}
+                  <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-3">
+                    {factor.name}
                   </h3>
                   <div className="space-y-2 mb-3">
                     <div className="flex justify-between text-sm">
-                      <span className="font-medium text-slate-700">
+                      <span className="font-medium text-slate-600 dark:text-slate-400">
                         Valor Actual:
                       </span>
-                      <span className="font-bold text-slate-900">
-                        {typeof factor.value === 'boolean'
-                          ? factor.value
-                            ? 'Sí'
-                            : 'No'
-                          : factor.value}
+                      <span className="font-bold text-slate-900 dark:text-slate-100">
+                        {factor.value}
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="font-medium text-slate-700">
-                        Contribución al Score:
+                      <span className="font-medium text-slate-600 dark:text-slate-400">
+                        Ponderación:
                       </span>
-                      <span className="font-bold text-blue-600">
-                        +{factor.contribution} puntos ({factor.weight}% peso)
+                      <span className="font-bold text-blue-600 dark:text-blue-400">
+                        {factor.weight}
                       </span>
                     </div>
                   </div>
-                  <div className="w-full h-3 bg-slate-200 rounded-full overflow-hidden mb-3">
+                  {/* Progress bar for weight contribution */}
+                  <div className="w-full h-3 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden mb-3">
                     <div
-                      className={`h-full ${factor.contribution > 20 ? 'bg-gradient-to-r from-red-500 to-red-600' : 'bg-gradient-to-r from-orange-500 to-orange-600'}`}
-                      style={{ width: `${factor.weight}%` }}
+                      className={`h-full ${parseFloat(factor.weight) > 0.20 ? 'bg-gradient-to-r from-red-500 to-red-600' : 'bg-gradient-to-r from-orange-500 to-orange-600'}`}
+                      style={{ width: factor.weight }}
                     ></div>
                   </div>
-                  <div
-                    className={`flex items-start gap-2 text-sm text-slate-700 bg-white rounded-lg p-3 border ${
-                      factor.contribution > 20
-                        ? 'border-red-200'
-                        : 'border-orange-200'
-                    }`}
-                  >
-                    <span className="text-lg flex-shrink-0">⚠️</span>
-                    <p className="leading-relaxed">{factor.explanation}</p>
-                  </div>
+                  {/* No explanation in current API response, so removing that part */}
                 </div>
               ))}
             </div>

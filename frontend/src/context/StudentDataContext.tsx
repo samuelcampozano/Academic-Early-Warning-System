@@ -1,21 +1,19 @@
 import React, { createContext, useContext, ReactNode } from 'react';
-import { Student } from '../types';
-import { students as mockStudents } from '../data/mockData';
+import useSatData, { SatStudent } from '../hooks/useSatData';
 
 interface StudentDataContextType {
-  students: Student[];
+  students: SatStudent[];
+  loading: boolean;
+  error: string | null;
 }
 
-const StudentDataContext = createContext<StudentDataContextType | undefined>(
-  undefined,
-);
+const StudentDataContext = createContext<StudentDataContextType | undefined>(undefined);
 
 export const StudentDataProvider = ({ children }: { children: ReactNode }) => {
-  // In the future, you could fetch data here instead of using mocks
-  const students = mockStudents;
+  const { data: students, loading, error } = useSatData();
 
   return (
-    <StudentDataContext.Provider value={{ students }}>
+    <StudentDataContext.Provider value={{ students, loading, error }}>
       {children}
     </StudentDataContext.Provider>
   );

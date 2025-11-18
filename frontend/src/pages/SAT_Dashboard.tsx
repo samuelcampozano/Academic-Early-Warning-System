@@ -1,43 +1,41 @@
 import React, { useState } from 'react';
-import { Student } from '../types';
 import { useNavigate } from 'react-router-dom';
-import { useStudentData } from '../context/StudentDataContext';
+import useSatData from '../hooks/useSatData';
+import { SatStudent } from '../hooks/useSatData';
+
 
 const SAT_Dashboard = () => {
-  const { students } = useStudentData();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterCourse, setFilterCourse] = useState('all');
-  const [filterRisk, setFilterRisk] = useState('all');
+  const { data: students, loading, error } = useSatData();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedRisk, setSelectedRisk] = useState<string>('all');
   const navigate = useNavigate();
 
-  const handleStudentClick = (student: Student) => {
+  const handleStudentClick = (student: SatStudent) => {
     navigate(`/student/${student.id}`);
   };
 
-  const filteredStudents = students
-    .filter((student) =>
-      student.name.toLowerCase().includes(searchQuery.toLowerCase()),
-    )
-    .filter(
-      (student) => filterCourse === 'all' || student.grade === filterCourse,
-    )
-    .filter(
-      (student) => filterRisk === 'all' || student.riskLevel === filterRisk,
-    );
+  if (loading) {
+    return <div>Cargando estudiantes...</div>;
+  }
 
+  if (error) {
+    return <div className="text-red-600">Error: {error}</div>;
+  }
+
+  // Filter students based on search and risk level
+  const filteredStudents = students.filter((student) => {
+    const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesRisk = selectedRisk === 'all' || student.riskLevel.toLowerCase() === selectedRisk.toLowerCase();
+    return matchesSearch && matchesRisk;
+  });
+
+  // Calculate summary statistics from real data
   const totalStudents = students.length;
-  const criticalRiskCount = students.filter(
-    (s) => s.riskLevel === 'Critical',
-  ).length;
-  const mediumRiskCount = students.filter(
-    (s) => s.riskLevel === 'Medium',
-  ).length;
-  const averageRiskScore =
-    totalStudents > 0
-      ? Math.round(
-          students.reduce((acc, s) => acc + s.riskScore, 0) / totalStudents,
-        )
-      : 0;
+  const criticalRisk = students.filter(s => s.riskLevel === 'Critical').length;
+  const mediumRisk = students.filter(s => s.riskLevel === 'Medium').length;
+  const averageGrade = students.reduce((sum, s) => sum + s.averageGrade, 0) / (totalStudents || 1); // Avoid division by zero
+  const averageRiskScore = students.reduce((sum, s) => sum + s.riskScore, 0) / (totalStudents || 1);
+
 
   return (
     <div>
@@ -74,7 +72,7 @@ const SAT_Dashboard = () => {
           </div>
           <div>
             <div className="text-3xl font-extrabold text-slate-900 dark:text-slate-100">
-              {criticalRiskCount}
+              {criticalRisk}
             </div>
             <div className="text-sm font-medium text-slate-600 dark:text-slate-400">
               Riesgo Crítico
@@ -87,7 +85,7 @@ const SAT_Dashboard = () => {
           </div>
           <div>
             <div className="text-3xl font-extrabold text-slate-900 dark:text-slate-100">
-              {mediumRiskCount}
+              {mediumRisk}
             </div>
             <div className="text-sm font-medium text-slate-600 dark:text-slate-400">
               Riesgo Medio
@@ -100,7 +98,7 @@ const SAT_Dashboard = () => {
           </div>
           <div>
             <div className="text-3xl font-extrabold text-slate-900 dark:text-slate-100">
-              {averageRiskScore}
+              {averageRiskScore.toFixed(1)}
             </div>
             <div className="text-sm font-medium text-slate-600 dark:text-slate-400">
               Score Promedio
@@ -124,7 +122,7 @@ const SAT_Dashboard = () => {
               3 estudiantes críticos sin laptop necesitan intervención urgente
             </li>
             <li>
-              Promedio general de riesgo alto: {averageRiskScore}/100 (↑5.2% vs
+              Promedio general de riesgo alto: {averageRiskScore.toFixed(1)}/100 (↑5.2% vs
               último trimestre)
             </li>
           </ul>
@@ -141,26 +139,15 @@ const SAT_Dashboard = () => {
             <input
               type="text"
               placeholder="Buscar estudiante por nombre..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="block w-full pl-10 pr-3 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full md:w-auto">
             <select
-              value={filterCourse}
-              onChange={(e) => setFilterCourse(e.target.value)}
-              className="px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">Todos los Cursos</option>
-              <option value="10mo A">10mo A</option>
-              <option value="9no B">9no B</option>
-              <option value="9no A">9no A</option>
-              <option value="8vo C">8vo C</option>
-            </select>
-            <select
-              value={filterRisk}
-              onChange={(e) => setFilterRisk(e.target.value)}
+              value={selectedRisk}
+              onChange={(e) => setSelectedRisk(e.target.value)}
               className="px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">Todos los Riesgos</option>
@@ -224,17 +211,17 @@ const SAT_Dashboard = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-slate-600 dark:text-slate-400">
-                      {student.grade}
+                      {student.course}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center">
                     <span
                       className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase ${
                         student.riskLevel === 'Critical'
-                          ? 'bg-critical-background text-critical-text'
+                          ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
                           : student.riskLevel === 'Medium'
-                            ? 'bg-medium-background text-medium-text'
-                            : 'bg-low-background text-low-text'
+                            ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                            : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
                       }`}
                     >
                       {student.riskLevel === 'Critical' && '⚠️'}
@@ -245,28 +232,23 @@ const SAT_Dashboard = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center">
                     <span className="text-xl font-bold text-slate-800">
-                      {student.riskScore}
+                      {student.riskScore.toFixed(1)}
                     </span>
                     <span className="text-sm text-slate-500"> / 100</span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      {student.alerts.absences &&
-                        student.alerts.absences > 3 && (
-                          <span className="inline-flex items-center gap-1 bg-red-100 text-red-800 text-xs font-medium px-2 py-1 rounded-md">
-                            📋 {student.alerts.absences} Faltas
-                          </span>
-                        )}
-                      {!student.alerts.hasLaptop && (
-                        <span className="inline-flex items-center gap-1 bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-1 rounded-md">
-                          💻 Sin Laptop
+                      {student.subjectsAtRisk > 0 && (
+                        <span className="inline-flex items-center gap-1 bg-red-100 text-red-800 text-xs font-medium px-2 py-1 rounded-md">
+                          📚 {student.subjectsAtRisk} Materias en riesgo
                         </span>
                       )}
-                      {student.alerts.familySupport === 'Low' && (
+                      {student.keyBarriers.length > 0 && (
                         <span className="inline-flex items-center gap-1 bg-orange-100 text-orange-800 text-xs font-medium px-2 py-1 rounded-md">
-                          👥 Apoyo Bajo
+                          🚧 {student.keyBarriers[0]}
                         </span>
                       )}
+                      {/* Add more alerts based on actual data if available */}
                     </div>
                   </td>
                 </tr>
@@ -280,3 +262,4 @@ const SAT_Dashboard = () => {
 };
 
 export default SAT_Dashboard;
+

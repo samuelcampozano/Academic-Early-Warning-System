@@ -1,10 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
+import { studentApi } from '../services/api';
 
-const USE_MOCK_DATA = false;
-
-// Existing interfaces - preserved
 export interface RiskFactor {
   name: string;
   value: string;
@@ -13,14 +10,21 @@ export interface RiskFactor {
 
 export interface KeyBarrier {
   name: string;
-  value: string;
-  impact: 'Alto' | 'Medio' | 'Bajo';
+  importance?: number;
+  description?: string;
 }
 
 export interface KeyGrade {
   subject: string;
   grade: number;
-  avg: number;
+  avg: number | null;
+}
+
+export interface Attendance {
+  total_inasistencias: number;
+  faltas_justificadas: number;
+  faltas_injustificadas: number;
+  porcentaje_asistencia: number;
 }
 
 export interface StudentProfile {
@@ -28,40 +32,38 @@ export interface StudentProfile {
   name: string;
   course: string;
   risk_score: number;
-  risk_level: 'Crítico' | 'Medio' | 'Bajo';
+  risk_level: 'Critical' | 'Medium' | 'Low';
   risk_factors: RiskFactor[];
   key_barriers: KeyBarrier[];
   key_grades: KeyGrade[];
+  asistencia: Attendance;
 }
 
-// --- Data Mapping Functions ---
-const mapRiskLevel = (
-  level: 'Alto' | 'Medio' | 'Bajo',
-): 'Crítico' | 'Medio' | 'Bajo' => {
-  switch (level) {
-    case 'Alto':
-      return 'Crítico';
-    case 'Medio':
-      return 'Medio';
-    case 'Bajo':
-      return 'Bajo';
-    default:
-      return 'Bajo';
-  }
+const mapRiskLevel = (level: 'Alto' | 'Medio' | 'Bajo'): 'Critical' | 'Medium' | 'Low' => {
+  const mapping = { 'Alto': 'Critical', 'Medio': 'Medium', 'Bajo': 'Low' };
+  return mapping[level] || 'Low';
 };
 
 const mapProfileData = (backendData: any): StudentProfile => {
   return {
     id: backendData.id,
-    name: backendData.nombre,
-    course: backendData.grado,
-    risk_score: Math.round(backendData.risk_score),
+    name: backendData.name,
+    course: backendData.course,
+    risk_score: Math.round(backendData.risk_score * 10) / 10,
     risk_level: mapRiskLevel(backendData.risk_level),
-    // The following fields are based on the guide's expected frontend structure.
-    // If the backend provides different structures for these, the mapping will need adjustment.
     risk_factors: backendData.risk_factors || [],
-    key_barriers: backendData.key_barriers || [],
+    key_barriers: Array.isArray(backendData.key_barriers) 
+      ? backendData.key_barriers.map((b: any) => 
+          typeof b === 'string' ? { name: b } : b
+        )
+      : [],
     key_grades: backendData.key_grades || [],
+    asistencia: backendData.asistencia || {
+      total_inasistencias: 0,
+      faltas_justificadas: 0,
+      faltas_injustificadas: 0,
+      porcentaje_asistencia: 100,
+    },
   };
 };
 
@@ -80,35 +82,15 @@ export default function useStudentProfile() {
 
       try {
         setLoading(true);
-        let responseData: any;
-
-        if (USE_MOCK_DATA) {
-          await new Promise((resolve) => setTimeout(resolve, 300));
-          // Mock data structure assumed for fallback
-          responseData = {
-            id: id,
-            nombre: 'Estudiante Mock' /* ...other fields */,
-          };
-        } else {
-          const apiUrl = process.env.REACT_APP_API_URL;
-          if (!apiUrl) {
-            throw new Error(
-              'REACT_APP_API_URL is not defined in the environment.',
-            );
-          }
-          const response = await axios.get(`${apiUrl}/students/${id}`);
-          responseData = response.data;
-        }
-
-        const formattedProfile = mapProfileData(responseData);
-        setProfile(formattedProfile);
         setError(null);
+
+        const response = await studentApi.getStudentProfile(id);
+        const formattedProfile = mapProfileData(response.data);
+        
+        setProfile(formattedProfile);
       } catch (err: any) {
-        setError(
-          err.response?.data?.message ||
-            err.message ||
-            'An unknown error occurred.',
-        );
+        console.error('Error fetching student profile:', err);
+        setError(err.message || 'Failed to load student profile');
         setProfile(null);
       } finally {
         setLoading(false);

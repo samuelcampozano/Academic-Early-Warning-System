@@ -10,31 +10,70 @@ import {
   LabelList,
 } from 'recharts';
 import { useTheme } from '../context/ThemeContext';
-
-const topBarriersData = [
-  { name: 'Cobertura Salud', value: 6.2 },
-  { name: 'Edad Est.', value: 4.5 },
-  { name: 'Lectura Libros (Sí)', value: 3.8 },
-  { name: 'Nivel Inst. Rep.', value: 3.2 },
-  { name: 'Num. Hermanos', value: 2.8 },
-];
-
-const laptopImpactData = [
-  { name: 'Con Laptop', value: 8.7, fill: '#3B82F6' },
-  { name: 'Sin Laptop', value: 7.2, fill: '#F59E0B' },
-];
-
-const educationImpactData = [
-  { name: 'Superior/Univ.', value: 8.7, fill: '#8B5CF6' },
-  { name: 'Bachillerato', value: 8.5, fill: '#EC4899' },
-  { name: 'Básica', value: 8.6, fill: '#10B981' },
-];
+import useInstitutionalData from '../hooks/useInstitutionalData';
 
 const InstitutionalView = () => {
+  const { stats, loading, error } = useInstitutionalData();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const textColor = isDark ? '#e2e8f0' : '#475569';
   const cursorFill = isDark ? '#334155' : '#f1f5f9';
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-lg text-slate-600 dark:text-slate-400">
+          Cargando estadísticas institucionales...
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-lg text-red-600 dark:text-red-400">
+          Error: {error}
+        </div>
+      </div>
+    );
+  }
+
+  if (!stats) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-lg text-slate-600 dark:text-slate-400">
+          No hay datos disponibles
+        </div>
+      </div>
+    );
+  }
+
+  // Transform Chart.js format to Recharts format
+  const topBarriersData = stats.topBarriers.labels.map((label, index) => ({
+    name: label,
+    value: stats.topBarriers.datasets[0].data[index],
+  }));
+
+  const laptopImpactData = stats.laptopImpact.labels.map((label, index) => ({
+    name: label,
+    value: stats.laptopImpact.datasets[0].data[index],
+    fill: Array.isArray(stats.laptopImpact.datasets[0].backgroundColor)
+      ? stats.laptopImpact.datasets[0].backgroundColor[index]
+      : stats.laptopImpact.datasets[0].backgroundColor,
+  }));
+
+  const educationImpactData = stats.parentEducationImpact.labels.map((label, index) => ({
+    name: label,
+    value: stats.parentEducationImpact.datasets[0].data[index],
+    fill: Array.isArray(stats.parentEducationImpact.datasets[0].backgroundColor)
+      ? stats.parentEducationImpact.datasets[0].backgroundColor[index]
+      : stats.parentEducationImpact.datasets[0].backgroundColor,
+  }));
+
+  // You can uncomment and adapt other charts if they are included in the stats.
+  // For now, I will only include the ones that were explicitly mentioned to be replaced.
+  // The structure of the component itself remains similar, just the data source changes.
 
   return (
     <div>
@@ -249,3 +288,4 @@ const InstitutionalView = () => {
 };
 
 export default InstitutionalView;
+
