@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+// Force rebuild
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -40,12 +41,13 @@ export const getSatList = (limit?: number, riskLevel?: 'Alto' | 'Medio' | 'Bajo'
   return api.get(`/sat-list?${params.toString()}`);
 };
 
-export const getStudentProfile = (studentId: string) => {
+export const getStudentById = (studentId: string) => {
   return api.get(`/student/${studentId}`);
 };
 
-// Alias for backwards compatibility
-export const getStudentById = getStudentProfile;
+export const getStudentProfile = (studentId: string) => {
+  return api.get(`/student/${studentId}`);
+};
 
 export const getInstitutionalStats = () => {
   return api.get('/institutional-stats');
