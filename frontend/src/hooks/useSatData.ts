@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { studentApi } from '../services/api';
+import { getSatList } from '../services/api';
 
 // Backend returns Spanish field names, we map to English for frontend
 interface BackendStudent {
@@ -25,12 +25,12 @@ export interface SatStudent {
 }
 
 const mapRiskLevel = (level: 'Alto' | 'Medio' | 'Bajo'): 'Critical' | 'Medium' | 'Low' => {
-  const mapping = {
+  const mapping: { [key in 'Alto' | 'Medio' | 'Bajo']: 'Critical' | 'Medium' | 'Low' } = {
     'Alto': 'Critical',
     'Medio': 'Medium',
     'Bajo': 'Low'
   };
-  return mapping[level] || 'Low';
+  return mapping[level] as 'Critical' | 'Medium' | 'Low';
 };
 
 const mapStudentData = (backendData: BackendStudent[]): SatStudent[] => {
@@ -57,7 +57,7 @@ export default function useSatData(riskFilter?: 'Alto' | 'Medio' | 'Bajo') {
         setLoading(true);
         setError(null);
 
-        const response = await studentApi.getSatList(1000, riskFilter);
+        const response = await getSatList(1000, riskFilter);
         const formattedData = mapStudentData(response.data);
         
         setData(formattedData);

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { studentApi } from '../services/api';
+import { getInstitutionalStats } from '../services/api';
 
 export interface ChartDataset {
   label: string;
@@ -42,7 +42,7 @@ export default function useInstitutionalData() {
         setLoading(true);
         setError(null);
 
-        const response = await studentApi.getInstitutionalStats();
+                const response = await getInstitutionalStats();
         
         // Backend already returns data in Chart.js format
         setStats(response.data);

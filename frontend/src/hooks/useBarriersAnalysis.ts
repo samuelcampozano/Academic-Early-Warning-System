@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { studentApi } from '../services/api';
+import { getBarriersAnalysis } from '../services/api';
 
 export interface BarrierDetail {
   name: string;
@@ -28,7 +28,7 @@ export default function useBarriersAnalysis() {
         setLoading(true);
         setError(null);
 
-        const response = await studentApi.getBarriersAnalysis();
+        const response = await getBarriersAnalysis();
         setAnalysis(response.data);
       } catch (err: any) {
         console.error('Error fetching barriers analysis:', err);

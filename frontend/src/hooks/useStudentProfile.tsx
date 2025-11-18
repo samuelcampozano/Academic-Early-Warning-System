@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { studentApi } from '../services/api';
+import { getStudentProfile } from '../services/api';
 
 export interface RiskFactor {
   name: string;
@@ -40,8 +40,12 @@ export interface StudentProfile {
 }
 
 const mapRiskLevel = (level: 'Alto' | 'Medio' | 'Bajo'): 'Critical' | 'Medium' | 'Low' => {
-  const mapping = { 'Alto': 'Critical', 'Medio': 'Medium', 'Bajo': 'Low' };
-  return mapping[level] || 'Low';
+  const mapping: { [key in 'Alto' | 'Medio' | 'Bajo']: 'Critical' | 'Medium' | 'Low' } = {
+    'Alto': 'Critical',
+    'Medio': 'Medium',
+    'Bajo': 'Low'
+  };
+  return mapping[level] as 'Critical' | 'Medium' | 'Low';
 };
 
 const mapProfileData = (backendData: any): StudentProfile => {
@@ -84,7 +88,7 @@ export default function useStudentProfile() {
         setLoading(true);
         setError(null);
 
-        const response = await studentApi.getStudentProfile(id);
+        const response = await getStudentProfile(id);
         const formattedProfile = mapProfileData(response.data);
         
         setProfile(formattedProfile);

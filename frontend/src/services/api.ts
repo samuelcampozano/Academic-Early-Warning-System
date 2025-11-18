@@ -33,32 +33,28 @@ api.interceptors.response.use(
 export default api;
 
 // API Methods
-export const studentApi = {
-  // Get all students for SAT list
-  getSatList: (limit?: number, riskLevel?: 'Alto' | 'Medio' | 'Bajo') => {
-    const params = new URLSearchParams();
-    if (limit) params.append('limit', limit.toString());
-    if (riskLevel) params.append('risk_level', riskLevel);
-    return api.get(`/sat-list?${params.toString()}`);
-  },
+export const getSatList = (limit?: number, riskLevel?: 'Alto' | 'Medio' | 'Bajo') => {
+  const params = new URLSearchParams();
+  if (limit) params.append('limit', limit.toString());
+  if (riskLevel) params.append('risk_level', riskLevel);
+  return api.get(`/sat-list?${params.toString()}`);
+};
 
-  // Get individual student profile
-  getStudentProfile: (studentId: string) => {
-    return api.get(`/student/${studentId}`);
-  },
+export const getStudentProfile = (studentId: string) => {
+  return api.get(`/student/${studentId}`);
+};
 
-  // Get institutional statistics
-  getInstitutionalStats: () => {
-    return api.get('/institutional-stats');
-  },
+// Alias for backwards compatibility
+export const getStudentById = getStudentProfile;
 
-  // Get barriers analysis
-  getBarriersAnalysis: () => {
-    return api.get('/barriers-analysis');
-  },
+export const getInstitutionalStats = () => {
+  return api.get('/institutional-stats');
+};
 
-  // Predict risk for a student
-  predictRisk: (studentId: string) => {
-    return api.post('/predict', { student_id: studentId });
-  },
+export const getBarriersAnalysis = () => {
+  return api.get('/barriers-analysis');
+};
+
+export const predictRisk = (studentId: string) => {
+  return api.post('/predict', { student_id: studentId });
 };

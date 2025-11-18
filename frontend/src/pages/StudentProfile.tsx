@@ -26,8 +26,22 @@ const StudentProfile = () => {
     );
   }
 
-  // Use 'profile' object instead of 'student'
-  const student = profile; 
+  // Convert StudentProfile to Student type for components
+  // For now, create a minimal adapter that components can use
+  const student: any = {
+    ...profile,
+    grade: profile.course,
+    riskLevel: profile.risk_level,
+    riskScore: profile.risk_score,
+    performance: {}, // Empty for now, would need to map key_grades
+    alerts: {
+      absences: profile.asistencia.total_inasistencias,
+      hasLaptop: false, // Not in current API
+      familySupport: 'Medium' as const,
+      quintile: 'Q3' as const
+    },
+    riskFactors: {}
+  }; 
 
   return (
     <div>
@@ -109,7 +123,7 @@ const StudentProfile = () => {
             <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wide mb-4">
               Factores de Riesgo
             </h3>
-            {student.risk_factors.map((factor, index) => (
+            {student.risk_factors.map((factor: any, index: number) => (
               <div key={index} className="flex justify-between items-center">
                 <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
                   {factor.name}:
@@ -126,7 +140,7 @@ const StudentProfile = () => {
             <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wide mb-4">
               Situación Académica
             </h3>
-            {student.key_grades.map((grade, index) => (
+            {student.key_grades.map((grade: any, index: number) => (
               <div key={index} className="flex justify-between items-center">
                 <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
                   {grade.subject}:
@@ -188,7 +202,7 @@ const StudentProfile = () => {
               Desglose del Score de Riesgo
             </h2>
             <div className="space-y-6">
-              {student.risk_factors.map((factor, index) => (
+              {student.risk_factors.map((factor: any, index: number) => (
                 <div
                   key={index} // Changed from factor.name as it's not unique in backend
                   className={`rounded-xl p-5 border ${
