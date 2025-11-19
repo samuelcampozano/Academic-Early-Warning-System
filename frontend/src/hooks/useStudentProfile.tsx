@@ -127,7 +127,7 @@ export default function useStudentProfile() {
     }
 
     fetchProfile();
-  }, [id]);
+  }, [studentId]);
 
   return { profile, loading, error };
 }
