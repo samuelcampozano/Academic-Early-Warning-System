@@ -7,6 +7,8 @@ const SAT_Dashboard = () => {
   const { data: students, loading, error } = useSatData();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRisk, setSelectedRisk] = useState<string>('all');
+  const [selectedCourse, setSelectedCourse] = useState<string>('all');
+  const [selectedScoreRange, setSelectedScoreRange] = useState<string>('all');
   const navigate = useNavigate();
 
   const handleStudentClick = (student: SatStudent) => {
@@ -21,6 +23,9 @@ const SAT_Dashboard = () => {
     return <div className="text-red-600">Error: {error}</div>;
   }
 
+  // Derive unique courses for filter
+  const courses = Array.from(new Set(students.map((s) => s.course))).sort();
+
   // Filter students based on search and risk level
   const filteredStudents = students.filter((student) => {
     const matchesSearch = student.name
@@ -29,7 +34,20 @@ const SAT_Dashboard = () => {
     const matchesRisk =
       selectedRisk === 'all' ||
       student.riskLevel.toLowerCase() === selectedRisk.toLowerCase();
-    return matchesSearch && matchesRisk;
+    const matchesCourse =
+      selectedCourse === 'all' || student.course === selectedCourse;
+
+    let matchesScore = true;
+    if (selectedScoreRange === '0-30')
+      matchesScore = student.riskScore >= 0 && student.riskScore <= 30;
+    if (selectedScoreRange === '31-60')
+      matchesScore = student.riskScore > 30 && student.riskScore <= 60;
+    if (selectedScoreRange === '61-80')
+      matchesScore = student.riskScore > 60 && student.riskScore <= 80;
+    if (selectedScoreRange === '81-100')
+      matchesScore = student.riskScore > 80 && student.riskScore <= 100;
+
+    return matchesSearch && matchesRisk && matchesCourse && matchesScore;
   });
 
   // Calculate summary statistics from real data
@@ -106,7 +124,7 @@ const SAT_Dashboard = () => {
               {averageRiskScore.toFixed(1)}
             </div>
             <div className="text-sm font-medium text-slate-600 dark:text-slate-400">
-              Score Promedio
+              Nivel de Riesgo Global
             </div>
           </div>
         </div>
@@ -149,7 +167,7 @@ const SAT_Dashboard = () => {
               className="block w-full pl-10 pr-3 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full md:w-auto">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full md:w-auto flex-wrap">
             <select
               value={selectedRisk}
               onChange={(e) => setSelectedRisk(e.target.value)}
@@ -159,6 +177,31 @@ const SAT_Dashboard = () => {
               <option value="Critical">Crítico</option>
               <option value="Medium">Medio</option>
               <option value="Low">Bajo</option>
+            </select>
+
+            <select
+              value={selectedCourse}
+              onChange={(e) => setSelectedCourse(e.target.value)}
+              className="px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">Todos los Cursos</option>
+              {courses.map((course) => (
+                <option key={course} value={course}>
+                  {course}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={selectedScoreRange}
+              onChange={(e) => setSelectedScoreRange(e.target.value)}
+              className="px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">Rango de Score</option>
+              <option value="0-30">0 - 30 (Bajo)</option>
+              <option value="31-60">31 - 60 (Medio)</option>
+              <option value="61-80">61 - 80 (Alto)</option>
+              <option value="81-100">81 - 100 (Crítico)</option>
             </select>
           </div>
         </div>
@@ -236,10 +279,10 @@ const SAT_Dashboard = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center">
-                    <span className="text-xl font-bold text-slate-800">
+                    <span className="text-xl font-bold text-slate-800 dark:text-slate-100">
                       {student.riskScore.toFixed(1)}
                     </span>
-                    <span className="text-sm text-slate-500"> / 100</span>
+                    <span className="text-sm text-slate-500 dark:text-slate-400"> / 100</span>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">

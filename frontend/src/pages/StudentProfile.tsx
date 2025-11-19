@@ -78,24 +78,45 @@ const StudentProfile = () => {
             </span>
           </div>
           <div className="flex flex-col items-center">
-            <div
-              className="relative w-32 h-32 rounded-full flex items-center justify-center"
-              style={{
-                border: `8px solid ${
-                  profile.risk_level === 'Critical'
-                    ? '#DC2626'
-                    : profile.risk_level === 'Medium'
-                      ? '#F59E0B'
-                      : '#10B981'
-                }`,
-                backgroundColor: '#FFFFFF',
-              }}
-            >
-              <div className="text-center">
-                <div className="text-5xl font-extrabold text-slate-900 dark:text-slate-100">
+            <div className="relative w-32 h-32 flex items-center justify-center">
+              {/* SVG Circle for Risk Score */}
+              <svg className="w-full h-full transform -rotate-90">
+                <circle
+                  cx="64"
+                  cy="64"
+                  r="56"
+                  stroke="currentColor"
+                  strokeWidth="8"
+                  fill="transparent"
+                  className="text-slate-200 dark:text-slate-700"
+                />
+                <circle
+                  cx="64"
+                  cy="64"
+                  r="56"
+                  stroke={
+                    profile.risk_level === 'Critical'
+                      ? '#DC2626'
+                      : profile.risk_level === 'Medium'
+                        ? '#F59E0B'
+                        : '#10B981'
+                  }
+                  strokeWidth="8"
+                  fill="transparent"
+                  strokeDasharray={2 * Math.PI * 56}
+                  strokeDashoffset={
+                    2 * Math.PI * 56 -
+                    (profile.risk_score / 100) * (2 * Math.PI * 56)
+                  }
+                  strokeLinecap="round"
+                  className="transition-all duration-1000 ease-out"
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <div className="text-4xl font-extrabold text-slate-900 dark:text-slate-100">
                   {profile.risk_score}
                 </div>
-                <div className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+                <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">
                   /100
                 </div>
               </div>
@@ -215,7 +236,9 @@ const StudentProfile = () => {
                         Valor Actual:
                       </span>
                       <span className="font-bold text-slate-900 dark:text-slate-100">
-                        {factor.value}
+                        {factor.name.toLowerCase().includes('barreras')
+                          ? `${factor.value.toString().replace(/\D/g, '')} Barrera(s) detectada(s)`
+                          : factor.value}
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">
