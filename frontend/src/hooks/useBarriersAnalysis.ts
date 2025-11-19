@@ -30,9 +30,9 @@ export default function useBarriersAnalysis() {
 
         const response = await getBarriersAnalysis();
         setAnalysis(response.data);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Error fetching barriers analysis:', err);
-        setError(err.message || 'Failed to load barriers analysis');
+        setError(err instanceof Error ? err.message : 'Failed to load barriers analysis');
         setAnalysis(null);
       } finally {
         setLoading(false);

@@ -4,6 +4,9 @@
     "es2021": true,
     "jest": true
   },
+  "globals": {
+    "process": "readonly"
+  },
   "extends": [
     "eslint:recommended",
     "plugin:react/recommended",
@@ -31,5 +34,13 @@
     "react": {
       "version": "detect"
     }
-  }
+  },
+  "overrides": [
+    {
+      "files": ["postcss.config.js", "tailwind.config.js"],
+      "env": {
+        "node": true
+      }
+    }
+  ]
 }

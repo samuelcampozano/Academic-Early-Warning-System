@@ -2,7 +2,17 @@
  * Esta es la respuesta simulada para GET /api/sat-list
  * Representa la lista de estudiantes priorizada por su "Score de Riesgo Compuesto"[cite: 509].
  */
-export const mockSatListData: any[] = [
+
+interface MockSatStudent {
+  id: number;
+  nombre: string;
+  curso: string;
+  score_riesgo: number;
+  nivel_riesgo: string;
+  alertas_principales: string[];
+}
+
+export const mockSatListData: MockSatStudent[] = [
   {
     id: 1,
     nombre: 'Estudiante, Crítico A',
