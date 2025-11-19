@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { getStudentProfile } from '../services/api';
+import { getStudentById } from '../services/api';
 
 export interface RiskFactor {
   name: string;
@@ -27,6 +27,24 @@ export interface Attendance {
   porcentaje_asistencia: number;
 }
 
+interface BackendKeyBarrier {
+  name: string;
+  importance?: number;
+  description?: string;
+}
+
+interface BackendStudentProfile {
+  id: string;
+  name: string;
+  course: string;
+  risk_score: number;
+  risk_level: 'Alto' | 'Medio' | 'Bajo';
+  risk_factors: RiskFactor[];
+  key_barriers: (string | BackendKeyBarrier)[];
+  key_grades: KeyGrade[];
+  asistencia: Attendance;
+}
+
 export interface StudentProfile {
   id: string;
   name: string;
@@ -39,16 +57,20 @@ export interface StudentProfile {
   asistencia: Attendance;
 }
 
-const mapRiskLevel = (level: 'Alto' | 'Medio' | 'Bajo'): 'Critical' | 'Medium' | 'Low' => {
-  const mapping: { [key in 'Alto' | 'Medio' | 'Bajo']: 'Critical' | 'Medium' | 'Low' } = {
-    'Alto': 'Critical',
-    'Medio': 'Medium',
-    'Bajo': 'Low'
+const mapRiskLevel = (
+  level: 'Alto' | 'Medio' | 'Bajo',
+): 'Critical' | 'Medium' | 'Low' => {
+  const mapping: {
+    [key in 'Alto' | 'Medio' | 'Bajo']: 'Critical' | 'Medium' | 'Low';
+  } = {
+    Alto: 'Critical',
+    Medio: 'Medium',
+    Bajo: 'Low',
   };
   return mapping[level] as 'Critical' | 'Medium' | 'Low';
 };
 
-const mapProfileData = (backendData: any): StudentProfile => {
+const mapProfileData = (backendData: BackendStudentProfile): StudentProfile => {
   return {
     id: backendData.id,
     name: backendData.name,
@@ -56,9 +78,9 @@ const mapProfileData = (backendData: any): StudentProfile => {
     risk_score: Math.round(backendData.risk_score * 10) / 10,
     risk_level: mapRiskLevel(backendData.risk_level),
     risk_factors: backendData.risk_factors || [],
-    key_barriers: Array.isArray(backendData.key_barriers) 
-      ? backendData.key_barriers.map((b: any) => 
-          typeof b === 'string' ? { name: b } : b
+    key_barriers: Array.isArray(backendData.key_barriers)
+      ? backendData.key_barriers.map((b: string | BackendKeyBarrier) =>
+          typeof b === 'string' ? { name: b } : b,
         )
       : [],
     key_grades: backendData.key_grades || [],
@@ -88,13 +110,15 @@ export default function useStudentProfile() {
         setLoading(true);
         setError(null);
 
-        const response = await getStudentProfile(id);
+        const response = await getStudentById(id);
         const formattedProfile = mapProfileData(response.data);
-        
+
         setProfile(formattedProfile);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Error fetching student profile:', err);
-        setError(err.message || 'Failed to load student profile');
+        setError(
+          err instanceof Error ? err.message : 'Failed to load student profile',
+        );
         setProfile(null);
       } finally {
         setLoading(false);

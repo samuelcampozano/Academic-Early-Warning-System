@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL =
+  process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 // Force rebuild
 
 const api = axios.create({
@@ -28,13 +29,16 @@ api.interceptors.response.use(
       console.error('Error:', error.message);
       throw new Error('An unexpected error occurred');
     }
-  }
+  },
 );
 
 export default api;
 
 // API Methods
-export const getSatList = (limit?: number, riskLevel?: 'Alto' | 'Medio' | 'Bajo') => {
+export const getSatList = (
+  limit?: number,
+  riskLevel?: 'Alto' | 'Medio' | 'Bajo',
+) => {
   const params = new URLSearchParams();
   if (limit) params.append('limit', limit.toString());
   if (riskLevel) params.append('risk_level', riskLevel);
