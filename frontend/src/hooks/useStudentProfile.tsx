@@ -110,7 +110,7 @@ export default function useStudentProfile() {
         setLoading(true);
         setError(null);
 
-        console.log('Fetching student profile for ID:', studentId);
+
         const response = await getStudentById(studentId);
         const formattedProfile = mapProfileData(response.data);
 
