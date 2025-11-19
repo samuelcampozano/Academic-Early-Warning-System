@@ -94,14 +94,14 @@ const mapProfileData = (backendData: BackendStudentProfile): StudentProfile => {
 };
 
 export default function useStudentProfile() {
-  const { id } = useParams<{ id: string }>();
+  const { studentId } = useParams<{ studentId: string }>();
   const [profile, setProfile] = useState<StudentProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchProfile() {
-      if (!id) {
+      if (!studentId) {
         setLoading(false);
         return;
       }
@@ -110,8 +110,8 @@ export default function useStudentProfile() {
         setLoading(true);
         setError(null);
 
-        console.log('Fetching student profile for ID:', id);
-        const response = await getStudentById(id);
+        console.log('Fetching student profile for ID:', studentId);
+        const response = await getStudentById(studentId);
         const formattedProfile = mapProfileData(response.data);
 
         setProfile(formattedProfile);
