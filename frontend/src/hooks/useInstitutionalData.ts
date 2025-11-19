@@ -42,13 +42,17 @@ export default function useInstitutionalData() {
         setLoading(true);
         setError(null);
 
-                const response = await getInstitutionalStats();
-        
+        const response = await getInstitutionalStats();
+
         // Backend already returns data in Chart.js format
         setStats(response.data);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Error fetching institutional stats:', err);
-        setError(err.message || 'Failed to load institutional statistics');
+        setError(
+          err instanceof Error
+            ? err.message
+            : 'Failed to load institutional statistics',
+        );
         setStats(null);
       } finally {
         setLoading(false);

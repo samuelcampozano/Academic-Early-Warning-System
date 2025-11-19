@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import useSatData from '../hooks/useSatData';
 import { SatStudent } from '../hooks/useSatData';
 
-
 const SAT_Dashboard = () => {
   const { data: students, loading, error } = useSatData();
   const [searchTerm, setSearchTerm] = useState('');
@@ -24,18 +23,24 @@ const SAT_Dashboard = () => {
 
   // Filter students based on search and risk level
   const filteredStudents = students.filter((student) => {
-    const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRisk = selectedRisk === 'all' || student.riskLevel.toLowerCase() === selectedRisk.toLowerCase();
+    const matchesSearch = student.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesRisk =
+      selectedRisk === 'all' ||
+      student.riskLevel.toLowerCase() === selectedRisk.toLowerCase();
     return matchesSearch && matchesRisk;
   });
 
   // Calculate summary statistics from real data
   const totalStudents = students.length;
-  const criticalRisk = students.filter(s => s.riskLevel === 'Critical').length;
-  const mediumRisk = students.filter(s => s.riskLevel === 'Medium').length;
-  const averageGrade = students.reduce((sum, s) => sum + s.averageGrade, 0) / (totalStudents || 1); // Avoid division by zero
-  const averageRiskScore = students.reduce((sum, s) => sum + s.riskScore, 0) / (totalStudents || 1);
+  const criticalRisk = students.filter(
+    (s) => s.riskLevel === 'Critical',
+  ).length;
+  const mediumRisk = students.filter((s) => s.riskLevel === 'Medium').length;
 
+  const averageRiskScore =
+    students.reduce((sum, s) => sum + s.riskScore, 0) / (totalStudents || 1);
 
   return (
     <div>
@@ -122,8 +127,8 @@ const SAT_Dashboard = () => {
               3 estudiantes críticos sin laptop necesitan intervención urgente
             </li>
             <li>
-              Promedio general de riesgo alto: {averageRiskScore.toFixed(1)}/100 (↑5.2% vs
-              último trimestre)
+              Promedio general de riesgo alto: {averageRiskScore.toFixed(1)}/100
+              (↑5.2% vs último trimestre)
             </li>
           </ul>
         </div>
@@ -262,4 +267,3 @@ const SAT_Dashboard = () => {
 };
 
 export default SAT_Dashboard;
-

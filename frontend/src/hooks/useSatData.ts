@@ -24,11 +24,15 @@ export interface SatStudent {
   subjectsAtRisk: number;
 }
 
-const mapRiskLevel = (level: 'Alto' | 'Medio' | 'Bajo'): 'Critical' | 'Medium' | 'Low' => {
-  const mapping: { [key in 'Alto' | 'Medio' | 'Bajo']: 'Critical' | 'Medium' | 'Low' } = {
-    'Alto': 'Critical',
-    'Medio': 'Medium',
-    'Bajo': 'Low'
+const mapRiskLevel = (
+  level: 'Alto' | 'Medio' | 'Bajo',
+): 'Critical' | 'Medium' | 'Low' => {
+  const mapping: {
+    [key in 'Alto' | 'Medio' | 'Bajo']: 'Critical' | 'Medium' | 'Low';
+  } = {
+    Alto: 'Critical',
+    Medio: 'Medium',
+    Bajo: 'Low',
   };
   return mapping[level] as 'Critical' | 'Medium' | 'Low';
 };
@@ -59,11 +63,13 @@ export default function useSatData(riskFilter?: 'Alto' | 'Medio' | 'Bajo') {
 
         const response = await getSatList(1000, riskFilter);
         const formattedData = mapStudentData(response.data);
-        
+
         setData(formattedData);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Error fetching SAT list:', err);
-        setError(err.message || 'Failed to load student data');
+        setError(
+          err instanceof Error ? err.message : 'Failed to load student data',
+        );
         setData([]);
       } finally {
         setLoading(false);
