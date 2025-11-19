@@ -1,11 +1,10 @@
-import React from 'react';
-import { Student } from '../types';
+import { StudentProfile, KeyGrade } from '../hooks/useStudentProfile';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';
 import { TrendingDown, TrendingUp, Minus } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface SubjectPerformanceProps {
-  student: Student;
+  student: StudentProfile;
 }
 
 interface PerformanceIndicatorProps {
@@ -58,42 +57,41 @@ const SubjectPerformance = ({ student }: SubjectPerformanceProps) => {
         <CardTitle>Rendimiento en Materias Clave</CardTitle>
       </CardHeader>
       <CardContent>
-        {Object.entries(student.performance).map(([subject, data]) => (
-          <div key={subject} className="mb-4">
-            <h4 className="font-bold">{subject}</h4>
-            <div className="flex justify-between text-sm text-text-secondary">
-              <span>
-                Estudiante: <strong>{data.studentGrade}</strong>
-              </span>
-              <span>
-                Promedio Curso: <strong>{data.classAverage}</strong>
-              </span>
+        {student.key_grades && student.key_grades.length > 0 ? (
+          student.key_grades.map((grade: KeyGrade, index: number) => (
+            <div key={index} className="mb-4">
+              <h4 className="font-bold">{grade.subject}</h4>
+              <div className="flex justify-between text-sm text-text-secondary">
+                <span>
+                  Estudiante: <strong>{grade.grade.toFixed(2)}</strong>
+                </span>
+                <span>
+                  Promedio Curso:{' '}
+                  <strong>
+                    {grade.avg !== null ? grade.avg.toFixed(2) : 'N/A'}
+                  </strong>
+                </span>
+              </div>
+              {grade.avg !== null && (
+                <div className="my-2">
+                  <PerformanceIndicator
+                    studentGrade={grade.grade}
+                    classAverage={grade.avg}
+                  />
+                </div>
+              )}
+              <ul className="text-sm text-text-secondary list-disc list-inside">
+                <li>Ranking: Información no disponible</li>
+                <li>Tendencia: Información no disponible</li>
+                <li>Estado: Información no disponible</li>
+              </ul>
             </div>
-            <div className="my-2">
-              <PerformanceIndicator
-                studentGrade={data.studentGrade}
-                classAverage={data.classAverage}
-              />
-            </div>
-            <ul className="text-sm text-text-secondary list-disc list-inside">
-              <li>Ranking: Puesto 8/12 en el curso (Percentil 33)</li>
-              <li>
-                Tendencia:{' '}
-                {data.trend === 'down'
-                  ? '↘️ Bajando'
-                  : data.trend === 'up'
-                    ? '↗️ Subiendo'
-                    : '➡️ Estable'}
-              </li>
-              <li>
-                Estado:{' '}
-                {data.studentGrade < data.classAverage - 1
-                  ? '⚠️ Requiere atención'
-                  : '✓ Seguimiento normal'}
-              </li>
-            </ul>
-          </div>
-        ))}
+          ))
+        ) : (
+          <p className="text-text-secondary">
+            No se encontró información de rendimiento en materias clave.
+          </p>
+        )}
       </CardContent>
     </Card>
   );

@@ -1,10 +1,10 @@
 import React from 'react';
-import { Student } from '../types';
+import { StudentProfile } from '../hooks/useStudentProfile';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';
 import { Button } from './ui/Button';
 
 interface RecommendedActionsProps {
-  student: Student;
+  student: StudentProfile;
 }
 
 interface Action {
@@ -48,38 +48,59 @@ const RecommendedActions = ({ student }: RecommendedActionsProps) => {
       <CardContent>
         <div>
           <p className="text-sm font-bold text-red-500 mb-2">
-            🎯 Prioridad Alta (Próximas 48 horas)
+            🎯 Prioridad Alta
           </p>
-          <ActionCard
-            title="Contactar Familia sobre Ausentismo"
-            reason={`Razón: ${student.alerts.absences} faltas injustificadas detectadas este trimestre`}
-            actions={[
-              { label: 'Enviar Email' },
-              { label: 'Llamar' },
-              { label: 'Agendar Reunión' },
-            ]}
-          />
-          <ActionCard
-            title="Gestionar Laptop del Programa"
-            reason="Razón: Sin acceso a tecnología (-8.5 pts impacto promedio)"
-            actions={[
-              { label: 'Crear Solicitud' },
-              { label: 'Ver Disponibilidad' },
-            ]}
-          />
+          {student.asistencia.faltas_injustificadas > 0 && (
+            <ActionCard
+              title="Contactar Familia sobre Ausentismo"
+              reason={`Razón: ${student.asistencia.faltas_injustificadas} faltas injustificadas detectadas.`}
+              actions={[
+                { label: 'Enviar Email' },
+                { label: 'Llamar' },
+                { label: 'Agendar Reunión' },
+              ]}
+            />
+          )}
+
+          {student.key_barriers
+            .filter((barrier) => barrier.name.includes('Laptop'))
+            .map((barrier, index) => (
+              <ActionCard
+                key={index}
+                title="Gestionar Laptop del Programa"
+                reason={`Razón: ${barrier.description || 'Sin acceso a tecnología.'}`}
+                actions={[
+                  { label: 'Crear Solicitud' },
+                  { label: 'Ver Disponibilidad' },
+                ]}
+              />
+            ))}
         </div>
         <div className="mt-6">
           <p className="text-sm font-bold mb-2">📋 Seguimiento Continuo</p>
-          <ActionCard
-            title="Inscribir en Tutorías de Matemáticas"
-            reason="Razón: 1.3 puntos bajo promedio, tendencia descendente"
-            actions={[{ label: 'Ver Horarios' }, { label: 'Inscribir' }]}
-          />
-          <ActionCard
-            title="Plan de Fortalecimiento Familiar"
-            reason="Razón: Índice de apoyo familiar bajo"
-            actions={[{ label: 'Agendar Taller' }, { label: 'Ver Recursos' }]}
-          />
+          {student.key_barriers
+            .filter((barrier) => barrier.name.includes('Apoyo Familiar'))
+            .map((barrier, index) => (
+              <ActionCard
+                key={index}
+                title="Plan de Fortalecimiento Familiar"
+                reason={`Razón: ${barrier.description || 'Índice de apoyo familiar bajo.'}`}
+                actions={[
+                  { label: 'Agendar Taller' },
+                  { label: 'Ver Recursos' },
+                ]}
+              />
+            ))}
+          {/* Example for academic support, assuming it comes from key_grades or other risk factors */}
+          {student.key_grades.some(
+            (grade) => grade.grade < (grade.avg || grade.grade) * 0.8,
+          ) && ( // Placeholder logic
+            <ActionCard
+              title="Inscribir en Tutorías de Materias Específicas"
+              reason="Razón: Rendimiento bajo en materias clave."
+              actions={[{ label: 'Ver Horarios' }, { label: 'Inscribir' }]}
+            />
+          )}
         </div>
         <div className="mt-6">
           <Button variant="primary" className="w-full">

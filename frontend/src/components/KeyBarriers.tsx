@@ -1,10 +1,10 @@
 import React from 'react';
-import { Student } from '../types';
+import { StudentProfile } from '../hooks/useStudentProfile';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';
 import { Info } from 'lucide-react';
 
 interface KeyBarriersProps {
-  student: Student;
+  student: StudentProfile;
 }
 
 interface BarrierCardProps {
@@ -49,18 +49,27 @@ const KeyBarriers = ({ student }: KeyBarriersProps) => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <BarrierCard
-          title="Índice de Apoyo Familiar: Bajo"
-          impact="Alto"
-          reason="El acompañamiento familiar en tareas y seguimiento de asistencia es crítico para el éxito académico. Bajo apoyo aumenta probabilidad de abandono en 45%."
-          suggestion="Reunión con familia para establecer plan de acompañamiento y seguimiento semanal."
-        />
-        <BarrierCard
-          title="Tiene Laptop: No"
-          impact="Medio"
-          reason="El acceso a tecnología correlaciona con -8.5 puntos en promedio general. Estudiantes sin laptop tienen mayor dificultad para completar tareas autónomas y acceder a recursos digitales."
-          suggestion="Solicitar laptop del programa institucional de inclusión digital."
-        />
+        {student.key_barriers && student.key_barriers.length > 0 ? (
+          student.key_barriers.map((barrier, index) => (
+            <BarrierCard
+              key={index}
+              title={barrier.name}
+              impact={
+                barrier.importance === 1
+                  ? 'Alto'
+                  : barrier.importance === 2
+                    ? 'Medio'
+                    : 'Bajo'
+              } // Assuming 1=Alto, 2=Medio, 3=Bajo or default to Bajo
+              reason={barrier.description || 'No hay descripción disponible.'}
+              suggestion="Acción sugerida pendiente." // Placeholder
+            />
+          ))
+        ) : (
+          <p className="text-text-secondary">
+            No se encontraron barreras clave para este estudiante.
+          </p>
+        )}
       </CardContent>
     </Card>
   );

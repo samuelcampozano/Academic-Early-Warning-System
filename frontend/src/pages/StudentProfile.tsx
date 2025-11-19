@@ -1,7 +1,14 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import useStudentProfile from '../hooks/useStudentProfile';
-import { LoadingSpinner, ErrorMessage, EmptyState } from '../components/ui/Feedback';
+import useStudentProfile, {
+  RiskFactor,
+  KeyGrade,
+} from '../hooks/useStudentProfile';
+import {
+  LoadingSpinner,
+  ErrorMessage,
+  EmptyState,
+} from '../components/ui/Feedback';
 import KeyBarriers from '../components/KeyBarriers';
 import SubjectPerformance from '../components/SubjectPerformance';
 import RecommendedActions from '../components/RecommendedActions';
@@ -9,6 +16,7 @@ import AlertHistory from '../components/AlertHistory';
 import Notes from '../components/Notes';
 
 const StudentProfile = () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { id } = useParams<{ id: string }>();
   const { profile, loading, error } = useStudentProfile();
 
@@ -25,23 +33,6 @@ const StudentProfile = () => {
       <EmptyState message="No se pudo cargar el perfil del estudiante. Asegúrate de que el ID es correcto." />
     );
   }
-
-  // Convert StudentProfile to Student type for components
-  // For now, create a minimal adapter that components can use
-  const student: any = {
-    ...profile,
-    grade: profile.course,
-    riskLevel: profile.risk_level,
-    riskScore: profile.risk_score,
-    performance: {}, // Empty for now, would need to map key_grades
-    alerts: {
-      absences: profile.asistencia.total_inasistencias,
-      hasLaptop: false, // Not in current API
-      familySupport: 'Medium' as const,
-      quintile: 'Q3' as const
-    },
-    riskFactors: {}
-  }; 
 
   return (
     <div>
@@ -64,24 +55,26 @@ const StudentProfile = () => {
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <h1 className="text-4xl font-extrabold text-slate-900 dark:text-slate-100 mb-2">
-              {student.name}
+              {profile.name}
             </h1>
-            <p className="text-lg text-slate-600 dark:text-slate-400 mb-4">{student.course}</p>
+            <p className="text-lg text-slate-600 dark:text-slate-400 mb-4">
+              {profile.course}
+            </p>
             <span
               className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold uppercase ${
-                student.risk_level === 'Critical'
+                profile.risk_level === 'Critical'
                   ? 'bg-red-100 text-red-800 border-2 border-red-300 dark:bg-red-900/30 dark:text-red-400 dark:border-red-600'
-                  : student.risk_level === 'Medium'
+                  : profile.risk_level === 'Medium'
                     ? 'bg-yellow-100 text-yellow-800 border-2 border-yellow-300 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-600'
                     : 'bg-green-100 text-green-800 border-2 border-green-300 dark:bg-green-900/30 dark:text-green-400 dark:border-green-600'
               }`}
             >
-              {student.risk_level === 'Critical'
+              {profile.risk_level === 'Critical'
                 ? '⚠️'
-                : student.risk_level === 'Medium'
+                : profile.risk_level === 'Medium'
                   ? '🔶'
                   : '✅'}
-              {student.risk_level}
+              {profile.risk_level}
             </span>
           </div>
           <div className="flex flex-col items-center">
@@ -89,9 +82,9 @@ const StudentProfile = () => {
               className="relative w-32 h-32 rounded-full flex items-center justify-center"
               style={{
                 border: `8px solid ${
-                  student.risk_level === 'Critical'
+                  profile.risk_level === 'Critical'
                     ? '#DC2626'
-                    : student.risk_level === 'Medium'
+                    : profile.risk_level === 'Medium'
                       ? '#F59E0B'
                       : '#10B981'
                 }`,
@@ -100,9 +93,11 @@ const StudentProfile = () => {
             >
               <div className="text-center">
                 <div className="text-5xl font-extrabold text-slate-900 dark:text-slate-100">
-                  {student.risk_score}
+                  {profile.risk_score}
                 </div>
-                <div className="text-sm text-slate-500 dark:text-slate-400 font-medium">/100</div>
+                <div className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+                  /100
+                </div>
               </div>
             </div>
             <div className="mt-3 text-sm font-medium text-slate-600 dark:text-slate-400">
@@ -123,7 +118,7 @@ const StudentProfile = () => {
             <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wide mb-4">
               Factores de Riesgo
             </h3>
-            {student.risk_factors.map((factor: any, index: number) => (
+            {profile.risk_factors.map((factor: RiskFactor, index: number) => (
               <div key={index} className="flex justify-between items-center">
                 <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
                   {factor.name}:
@@ -140,7 +135,7 @@ const StudentProfile = () => {
             <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wide mb-4">
               Situación Académica
             </h3>
-            {student.key_grades.map((grade: any, index: number) => (
+            {profile.key_grades.map((grade: KeyGrade, index: number) => (
               <div key={index} className="flex justify-between items-center">
                 <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
                   {grade.subject}:
@@ -162,7 +157,7 @@ const StudentProfile = () => {
                 Total Inasistencias:
               </span>
               <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                {student.asistencia.total_inasistencias}
+                {profile.asistencia.total_inasistencias}
               </span>
             </div>
             <div className="flex justify-between items-center">
@@ -170,7 +165,7 @@ const StudentProfile = () => {
                 Faltas Justificadas:
               </span>
               <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                {student.asistencia.faltas_justificadas}
+                {profile.asistencia.faltas_justificadas}
               </span>
             </div>
             <div className="flex justify-between items-center">
@@ -178,7 +173,7 @@ const StudentProfile = () => {
                 Faltas Injustificadas:
               </span>
               <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                {student.asistencia.faltas_injustificadas}
+                {profile.asistencia.faltas_injustificadas}
               </span>
             </div>
             <div className="flex justify-between items-center">
@@ -186,7 +181,7 @@ const StudentProfile = () => {
                 Porcentaje Asistencia:
               </span>
               <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                {student.asistencia.porcentaje_asistencia.toFixed(2)}%
+                {profile.asistencia.porcentaje_asistencia.toFixed(2)}%
               </span>
             </div>
           </div>
@@ -202,11 +197,11 @@ const StudentProfile = () => {
               Desglose del Score de Riesgo
             </h2>
             <div className="space-y-6">
-              {student.risk_factors.map((factor: any, index: number) => (
+              {profile.risk_factors.map((factor: RiskFactor, index: number) => (
                 <div
                   key={index} // Changed from factor.name as it's not unique in backend
                   className={`rounded-xl p-5 border ${
-                    parseFloat(factor.weight) > 0.20 // Assuming weight is '20%'
+                    parseFloat(factor.weight) > 0.2 // Assuming weight is '20%'
                       ? 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800'
                       : 'bg-orange-50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-800'
                   }`}
@@ -235,7 +230,7 @@ const StudentProfile = () => {
                   {/* Progress bar for weight contribution */}
                   <div className="w-full h-3 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden mb-3">
                     <div
-                      className={`h-full ${parseFloat(factor.weight) > 0.20 ? 'bg-gradient-to-r from-red-500 to-red-600' : 'bg-gradient-to-r from-orange-500 to-orange-600'}`}
+                      className={`h-full ${parseFloat(factor.weight) > 0.2 ? 'bg-gradient-to-r from-red-500 to-red-600' : 'bg-gradient-to-r from-orange-500 to-orange-600'}`}
                       style={{ width: factor.weight }}
                     ></div>
                   </div>
@@ -244,11 +239,11 @@ const StudentProfile = () => {
               ))}
             </div>
           </div>
-          <KeyBarriers student={student} />
-          <SubjectPerformance student={student} />
+          <KeyBarriers student={profile} />
+          <SubjectPerformance student={profile} />
         </div>
         <div className="space-y-6 lg:sticky lg:top-6 lg:self-start">
-          <RecommendedActions student={student} />
+          <RecommendedActions student={profile} />
           <AlertHistory />
           <Notes />
         </div>
