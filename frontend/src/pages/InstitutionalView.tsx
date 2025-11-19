@@ -63,13 +63,17 @@ const InstitutionalView = () => {
       : stats.laptopImpact.datasets[0].backgroundColor,
   }));
 
-  const educationImpactData = stats.parentEducationImpact.labels.map((label, index) => ({
-    name: label,
-    value: stats.parentEducationImpact.datasets[0].data[index],
-    fill: Array.isArray(stats.parentEducationImpact.datasets[0].backgroundColor)
-      ? stats.parentEducationImpact.datasets[0].backgroundColor[index]
-      : stats.parentEducationImpact.datasets[0].backgroundColor,
-  }));
+  const educationImpactData = stats.parentEducationImpact.labels.map(
+    (label, index) => ({
+      name: label,
+      value: stats.parentEducationImpact.datasets[0].data[index],
+      fill: Array.isArray(
+        stats.parentEducationImpact.datasets[0].backgroundColor,
+      )
+        ? stats.parentEducationImpact.datasets[0].backgroundColor[index]
+        : stats.parentEducationImpact.datasets[0].backgroundColor,
+    }),
+  );
 
   // You can uncomment and adapt other charts if they are included in the stats.
   // For now, I will only include the ones that were explicitly mentioned to be replaced.
@@ -288,4 +292,3 @@ const InstitutionalView = () => {
 };
 
 export default InstitutionalView;
-

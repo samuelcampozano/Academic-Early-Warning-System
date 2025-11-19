@@ -7,7 +7,9 @@ interface StudentDataContextType {
   error: string | null;
 }
 
-const StudentDataContext = createContext<StudentDataContextType | undefined>(undefined);
+const StudentDataContext = createContext<StudentDataContextType | undefined>(
+  undefined,
+);
 
 export const StudentDataProvider = ({ children }: { children: ReactNode }) => {
   const { data: students, loading, error } = useSatData();
