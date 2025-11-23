@@ -65,7 +65,6 @@ def get_sat_list():
                     "risk_level": risk_level,
                     "risk_score": risk_score,
                     "key_barriers": barrier_names,
-                    "promedio_general": student.get("promedio_general", 0.0),
                     "materias_en_riesgo": materias_en_riesgo,
                 }
             )
@@ -107,22 +106,12 @@ def get_student_profile(student_id):
         # Obtener barreras clave
         key_barriers = risk_calculator.get_key_barriers_list(student)
 
-        # Preparar factores de riesgo (desglose del score)
+        # Preparar factores de riesgo (solo quintil y barreras - modelo ML no usa attendance ni promedio)
         risk_factors = [
-            {
-                "name": "Ausentismo",
-                "value": _format_attendance(student.get("attendance", [])),
-                "weight": f"{int(components['attendance']['weight'] * 100)}%",
-            },
             {
                 "name": "Quintil Socioeconómico",
                 "value": _format_quintil(student.get("quintil_agrupado", "")),
                 "weight": f"{int(components['quintil']['weight'] * 100)}%",
-            },
-            {
-                "name": "Rendimiento Académico",
-                "value": f"{student.get('promedio_general', 0.0):.2f}",
-                "weight": f"{int(components['grades']['weight'] * 100)}%",
             },
             {
                 "name": "Barreras Identificadas",
@@ -134,19 +123,7 @@ def get_student_profile(student_id):
         # Preparar calificaciones en materias clave
         key_grades = _get_key_grades(student.get("academic_performance", []))
 
-        # Preparar datos de asistencia
-        attendance_data = student.get("attendance", [])
-        latest_attendance = attendance_data[-1] if attendance_data else {}
-        asistencia = {
-            "total_inasistencias": latest_attendance.get("total_inasistencias", 0),
-            "faltas_justificadas": latest_attendance.get("faltas_justificadas", 0),
-            "faltas_injustificadas": latest_attendance.get("faltas_injustificadas", 0),
-            "porcentaje_asistencia": _calculate_attendance_percentage(
-                latest_attendance
-            ),
-        }
-
-        # Construir respuesta
+        # Construir respuesta (sin asistencia ni promedio_general)
         profile = {
             "id": student.get("id"),
             "name": student.get("nombre"),
@@ -156,7 +133,6 @@ def get_student_profile(student_id):
             "risk_factors": risk_factors,
             "key_barriers": key_barriers,
             "key_grades": key_grades,
-            "asistencia": asistencia,
         }
 
         logger.info(f"Retrieved profile for student {student_id}")
@@ -168,16 +144,6 @@ def get_student_profile(student_id):
 
 
 # Funciones auxiliares
-
-
-def _format_attendance(attendance_data):
-    """Formatea los datos de asistencia para mostrar"""
-    if not attendance_data:
-        return "Sin datos"
-
-    latest = attendance_data[-1]
-    total = latest.get("total_inasistencias", 0)
-    return f"{total} faltas"
 
 
 def _format_quintil(quintil_agrupado):
@@ -231,17 +197,3 @@ def _get_key_grades(academic_performance):
     key_grades.sort(key=lambda x: x["grade"])
 
     return key_grades[:5]  # Top 5 materias
-
-
-def _calculate_attendance_percentage(attendance_data):
-    """Calcula el porcentaje de asistencia"""
-    if not attendance_data:
-        return 100.0
-
-    # Asumiendo ~20 días hábiles por mes
-    dias_habiles = 20
-    total_inasistencias = attendance_data.get("total_inasistencias", 0)
-
-    attendance_percentage = ((dias_habiles - total_inasistencias) / dias_habiles) * 100
-
-    return round(max(0, attendance_percentage), 2)
