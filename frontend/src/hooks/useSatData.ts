@@ -11,6 +11,7 @@ interface BackendStudent {
   key_barriers: string[];
   promedio_general: number;
   materias_en_riesgo: number;
+  quintil: string;
 }
 
 export interface SatStudent {
@@ -22,6 +23,7 @@ export interface SatStudent {
   keyBarriers: string[];
   averageGrade: number;
   subjectsAtRisk: number;
+  quintile: string;
 }
 
 const mapRiskLevel = (
@@ -47,6 +49,7 @@ const mapStudentData = (backendData: BackendStudent[]): SatStudent[] => {
     keyBarriers: student.key_barriers || [],
     averageGrade: student.promedio_general,
     subjectsAtRisk: student.materias_en_riesgo,
+    quintile: student.quintil || 'Desconocido',
   }));
 };
 
