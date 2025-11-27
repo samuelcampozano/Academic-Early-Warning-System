@@ -50,17 +50,6 @@ const RecommendedActions = ({ student }: RecommendedActionsProps) => {
           <p className="text-sm font-bold text-red-500 mb-2">
             🎯 Prioridad Alta
           </p>
-          {student.asistencia.faltas_injustificadas > 0 && (
-            <ActionCard
-              title="Contactar Familia sobre Ausentismo"
-              reason={`Razón: ${student.asistencia.faltas_injustificadas} faltas injustificadas detectadas.`}
-              actions={[
-                { label: 'Enviar Email' },
-                { label: 'Llamar' },
-                { label: 'Agendar Reunión' },
-              ]}
-            />
-          )}
 
           {student.key_barriers
             .filter((barrier) => barrier.name.includes('Laptop'))
