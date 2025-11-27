@@ -32,7 +32,7 @@ const LaptopImpactChart = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Impacto de Laptop en Promedio</CardTitle>
+        <CardTitle>Impacto de Laptop en Rendimiento</CardTitle>
         <CardDescription>
           Diferencia en el promedio general entre estudiantes con y sin laptop.
           (-8.5 puntos de impacto)
