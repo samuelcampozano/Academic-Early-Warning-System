@@ -14,6 +14,7 @@ import SubjectPerformance from '../components/SubjectPerformance';
 import RecommendedActions from '../components/RecommendedActions';
 import AlertHistory from '../components/AlertHistory';
 import Notes from '../components/Notes';
+import CircularProgress from '../components/ui/CircularProgress';
 
 const StudentProfile = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -78,49 +79,21 @@ const StudentProfile = () => {
             </span>
           </div>
           <div className="flex flex-col items-center">
-            <div className="relative w-32 h-32 flex items-center justify-center">
-              {/* SVG Circle for Risk Score */}
-              <svg className="w-full h-full transform -rotate-90">
-                <circle
-                  cx="64"
-                  cy="64"
-                  r="56"
-                  stroke="currentColor"
-                  strokeWidth="8"
-                  fill="transparent"
-                  className="text-slate-200 dark:text-slate-700"
-                />
-                <circle
-                  cx="64"
-                  cy="64"
-                  r="56"
-                  stroke={
-                    profile.risk_level === 'Critical'
-                      ? '#DC2626'
-                      : profile.risk_level === 'Medium'
-                        ? '#F59E0B'
-                        : '#10B981'
-                  }
-                  strokeWidth="8"
-                  fill="transparent"
-                  strokeDasharray={2 * Math.PI * 56}
-                  strokeDashoffset={
-                    2 * Math.PI * 56 -
-                    (profile.risk_score / 100) * (2 * Math.PI * 56)
-                  }
-                  strokeLinecap="round"
-                  className="transition-all duration-1000 ease-out"
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <div className="text-4xl font-extrabold text-slate-900 dark:text-slate-100">
-                  {profile.risk_score}
-                </div>
-                <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                  /100
-                </div>
-              </div>
-            </div>
+            <CircularProgress
+              value={profile.risk_score}
+              max={100}
+              size={140}
+              strokeWidth={12}
+              color={
+                profile.risk_level === 'Critical'
+                  ? 'text-red-600'
+                  : profile.risk_level === 'Medium'
+                    ? 'text-yellow-500'
+                    : 'text-green-500'
+              }
+              label={profile.risk_score.toString()}
+              subLabel="/ 100"
+            />
             <div className="mt-3 text-sm font-medium text-slate-600 dark:text-slate-400">
               Score de Riesgo
             </div>
@@ -167,45 +140,6 @@ const StudentProfile = () => {
               </div>
             ))}
           </div>
-
-          {/* Attendance */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wide mb-4">
-              Asistencia
-            </h3>
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                Total Inasistencias:
-              </span>
-              <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                {profile.asistencia.total_inasistencias}
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                Faltas Justificadas:
-              </span>
-              <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                {profile.asistencia.faltas_justificadas}
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                Faltas Injustificadas:
-              </span>
-              <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                {profile.asistencia.faltas_injustificadas}
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                Porcentaje Asistencia:
-              </span>
-              <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                {profile.asistencia.porcentaje_asistencia.toFixed(2)}%
-              </span>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -236,9 +170,7 @@ const StudentProfile = () => {
                         Valor Actual:
                       </span>
                       <span className="font-bold text-slate-900 dark:text-slate-100">
-                        {factor.name.toLowerCase().includes('barreras')
-                          ? `${factor.value.toString().replace(/\D/g, '')} Barrera(s) detectada(s)`
-                          : factor.value}
+                        {factor.value}
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">
