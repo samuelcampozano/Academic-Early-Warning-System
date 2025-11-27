@@ -13,7 +13,7 @@ const historyItems = [
   {
     icon: <TrendingDown className="w-5 h-5 text-yellow-500" />,
     date: '08 Nov 2024',
-    title: 'Nota de Matemáticas bajo promedio',
+    title: 'Nota de Matemáticas en riesgo (< 7.0)',
     description: 'Diferencia de -1.3 puntos',
   },
   {

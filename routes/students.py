@@ -66,6 +66,7 @@ def get_sat_list():
                     "risk_score": risk_score,
                     "key_barriers": barrier_names,
                     "materias_en_riesgo": materias_en_riesgo,
+                    "quintil": student.get("quintil_agrupado", "Desconocido"),
                 }
             )
 

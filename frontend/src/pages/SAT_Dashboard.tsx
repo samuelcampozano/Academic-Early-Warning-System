@@ -1,302 +1,283 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import useSatData from '../hooks/useSatData';
-import { SatStudent } from '../hooks/useSatData';
+import useSatData, { SatStudent } from '../hooks/useSatData';
+import useInstitutionalData from '../hooks/useInstitutionalData';
+import GenericBarChart from '../components/charts/GenericBarChart';
+import GenericDonutChart from '../components/charts/GenericDonutChart';
+import { Search, Filter, Users, AlertTriangle, Shield, BarChart2, HelpCircle } from 'lucide-react';
 
 const SAT_Dashboard = () => {
-  const { data: students, loading, error } = useSatData();
+  const { data: students, loading: studentsLoading, error: studentsError } = useSatData();
+  const { stats: institutionalStats, loading: statsLoading } = useInstitutionalData();
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRisk, setSelectedRisk] = useState<string>('all');
+  const [selectedQuintile, setSelectedQuintile] = useState<string>('all');
   const [selectedCourse, setSelectedCourse] = useState<string>('all');
-  const [selectedScoreRange, setSelectedScoreRange] = useState<string>('all');
+  
   const navigate = useNavigate();
 
   const handleStudentClick = (student: SatStudent) => {
     navigate(`/student/${student.id}`);
   };
 
-  if (loading) {
-    return <div>Cargando estudiantes...</div>;
-  }
+  // Derive unique courses and quintiles for filters
+  const courses = useMemo(() => {
+    const uniqueCourses = Array.from(new Set(students.map(s => s.course)));
+    
+    // Custom sort for courses (8vo, 9no, 10mo, 1ro, 2do, 3ro)
+    return uniqueCourses.sort((a, b) => {
+      const getNum = (s: string) => {
+        const match = s.match(/\d+/);
+        return match ? parseInt(match[0]) : 0;
+      };
+      
+      const numA = getNum(a);
+      const numB = getNum(b);
+      
+      // Treat 1, 2, 3 (BGU) as higher than 8, 9, 10 (EGB)
+      const adjustNum = (n: number) => (n < 7 ? n + 12 : n);
+      
+      const valA = adjustNum(numA);
+      const valB = adjustNum(numB);
+      
+      if (valA !== valB) return valA - valB;
+      return a.localeCompare(b);
+    });
+  }, [students]);
 
-  if (error) {
-    return <div className="text-red-600">Error: {error}</div>;
-  }
+  const formatCourseLabel = (course: string) => {
+    // Try to make it prettier
+    // e.g. "10mo A" -> "10° EGB 'A'"
+    // "1ro BGU A" -> "1° BGU 'A'"
+    
+    const match = course.match(/(\d+)(?:mo|vo|no|ro|do)?\s*(?:EGB|BGU)?\s*([A-Z])?/i);
+    if (!match) return course;
+    
+    const num = parseInt(match[1]);
+    const letter = match[2] || course.split(' ').pop(); // Fallback to last part if not captured
+    
+    if (num >= 8 && num <= 10) {
+      return `${num}° EGB "${letter}"`;
+    } else if (num >= 1 && num <= 3) {
+      return `${num}° Bachillerato "${letter}"`;
+    }
+    
+    return course;
+  };
 
-  // Derive unique courses for filter
-  const courses = Array.from(new Set(students.map((s) => s.course))).sort();
+  const quintiles = useMemo(() => {
+    const uniqueQuintiles = Array.from(new Set(students.map(s => s.quintile))).sort();
+    return uniqueQuintiles;
+  }, [students]);
 
-  // Filter students based on search and risk level
+  // Filter students
   const filteredStudents = students.filter((student) => {
-    const matchesSearch = student.name
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesRisk =
-      selectedRisk === 'all' ||
-      student.riskLevel.toLowerCase() === selectedRisk.toLowerCase();
-    const matchesCourse =
-      selectedCourse === 'all' || student.course === selectedCourse;
-
-    let matchesScore = true;
-    if (selectedScoreRange === '0-30')
-      matchesScore = student.riskScore >= 0 && student.riskScore <= 30;
-    if (selectedScoreRange === '31-60')
-      matchesScore = student.riskScore > 30 && student.riskScore <= 60;
-    if (selectedScoreRange === '61-80')
-      matchesScore = student.riskScore > 60 && student.riskScore <= 80;
-    if (selectedScoreRange === '81-100')
-      matchesScore = student.riskScore > 80 && student.riskScore <= 100;
-
-    return matchesSearch && matchesRisk && matchesCourse && matchesScore;
+    const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesRisk = selectedRisk === 'all' || student.riskLevel.toLowerCase() === selectedRisk.toLowerCase();
+    const matchesQuintile = selectedQuintile === 'all' || student.quintile === selectedQuintile;
+    const matchesCourse = selectedCourse === 'all' || student.course === selectedCourse;
+    
+    return matchesSearch && matchesRisk && matchesQuintile && matchesCourse;
   });
 
-  // Calculate summary statistics from real data
-  const totalStudents = students.length;
-  const criticalRisk = students.filter(
-    (s) => s.riskLevel === 'Critical',
-  ).length;
-  const mediumRisk = students.filter((s) => s.riskLevel === 'Medium').length;
+  if (studentsLoading || statsLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
-  const averageRiskScore =
-    students.reduce((sum, s) => sum + s.riskScore, 0) / (totalStudents || 1);
+  if (studentsError) {
+    return <div className="text-red-600 p-4">Error cargando estudiantes: {studentsError}</div>;
+  }
+
+  const totalStudents = students.length;
+  const criticalRisk = students.filter(s => s.riskLevel === 'Critical').length;
+  const mediumRisk = students.filter(s => s.riskLevel === 'Medium').length;
+  const averageRiskScore = students.reduce((sum, s) => sum + s.riskScore, 0) / (totalStudents || 1);
 
   return (
-    <div>
-      <div className="mb-12">
-        <h1
-          className="text-4xl font-extrabold text-slate-900 dark:text-slate-100"
-          style={{ letterSpacing: '-0.025em' }}
-        >
-          Dashboard de Alertas Tempranas
-        </h1>
-        <p className="mt-2 text-lg text-slate-600 dark:text-slate-400">
-          Vista general del riesgo estudiantil en la institución.
+    <div className="space-y-8 pb-10">
+      {/* Header */}
+      <div>
+        <div className="flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
+            Dashboard de Alertas Tempranas
+          </h1>
+          <div className="group relative">
+            <HelpCircle className="w-5 h-5 text-slate-400 cursor-help hover:text-blue-500 transition-colors" />
+            <div className="absolute left-full top-1/2 -translate-y-1/2 ml-3 w-72 p-3 bg-slate-800 text-white text-xs rounded-lg shadow-xl hidden group-hover:block z-50">
+              <p className="font-semibold mb-1">¿Cómo funciona?</p>
+              El sistema calcula un <strong>Score de Riesgo (0-100)</strong> utilizando un modelo de Machine Learning que analiza factores socioeconómicos (Quintil) y barreras de aprendizaje.
+            </div>
+          </div>
+        </div>
+        <p className="mt-2 text-slate-600 dark:text-slate-400">
+          Monitoreo en tiempo real del riesgo académico y socioeconómico.
         </p>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-card border border-slate-200 dark:border-slate-700 flex items-center gap-5">
-          <div className="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full w-14 h-14 flex items-center justify-center text-3xl">
-            👥
-          </div>
-          <div>
-            <div className="text-3xl font-extrabold text-slate-900 dark:text-slate-100">
-              {totalStudents}
-            </div>
-            <div className="text-sm font-medium text-slate-600 dark:text-slate-400">
-              Total de Estudiantes
-            </div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-card border border-slate-200 dark:border-slate-700 flex items-center gap-5">
-          <div className="bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full w-14 h-14 flex items-center justify-center text-3xl">
-            ⚠️
-          </div>
-          <div>
-            <div className="text-3xl font-extrabold text-slate-900 dark:text-slate-100">
-              {criticalRisk}
-            </div>
-            <div className="text-sm font-medium text-slate-600 dark:text-slate-400">
-              Riesgo Crítico
-            </div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-card border border-slate-200 dark:border-slate-700 flex items-center gap-5">
-          <div className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 rounded-full w-14 h-14 flex items-center justify-center text-3xl">
-            🛡️
-          </div>
-          <div>
-            <div className="text-3xl font-extrabold text-slate-900 dark:text-slate-100">
-              {mediumRisk}
-            </div>
-            <div className="text-sm font-medium text-slate-600 dark:text-slate-400">
-              Riesgo Medio
-            </div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-card border border-slate-200 dark:border-slate-700 flex items-center gap-5">
-          <div className="bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-full w-14 h-14 flex items-center justify-center text-3xl">
-            📊
-          </div>
-          <div>
-            <div className="text-3xl font-extrabold text-slate-900 dark:text-slate-100">
-              {averageRiskScore.toFixed(1)}
-            </div>
-            <div className="text-sm font-medium text-slate-600 dark:text-slate-400">
-              Nivel de Riesgo Global
-            </div>
-          </div>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <SummaryCard 
+          icon={<Users className="w-6 h-6 text-blue-600" />}
+          value={totalStudents}
+          label="Total Estudiantes"
+          color="bg-blue-50 dark:bg-blue-900/20"
+        />
+        <SummaryCard 
+          icon={<AlertTriangle className="w-6 h-6 text-red-600" />}
+          value={criticalRisk}
+          label="Riesgo Crítico"
+          color="bg-red-50 dark:bg-red-900/20"
+        />
+        <SummaryCard 
+          icon={<Shield className="w-6 h-6 text-yellow-600" />}
+          value={mediumRisk}
+          label="Riesgo Medio"
+          color="bg-yellow-50 dark:bg-yellow-900/20"
+        />
+        <SummaryCard 
+          icon={<BarChart2 className="w-6 h-6 text-purple-600" />}
+          value={averageRiskScore.toFixed(1)}
+          label="Score Promedio"
+          subLabel="/ 100"
+          color="bg-purple-50 dark:bg-purple-900/20"
+        />
       </div>
 
-      {/* Alert Banner */}
-      <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-600 dark:border-red-500 p-5 rounded-lg mb-8 flex items-start gap-4">
-        <div className="text-red-600 dark:text-red-400 text-2xl mt-1">🚨</div>
-        <div>
-          <h3 className="text-base font-bold text-red-800 dark:text-red-400">
-            Alertas Recientes
-          </h3>
-          <ul className="list-disc list-inside mt-2 text-sm text-red-700 dark:text-red-300 space-y-1">
-            <li>
-              2 estudiantes han superado 5 faltas este mes (↑ vs mes anterior)
-            </li>
-            <li>
-              3 estudiantes críticos sin laptop necesitan intervención urgente
-            </li>
-            <li>
-              Promedio general de riesgo alto: {averageRiskScore.toFixed(1)}/100
-              (↑5.2% vs último trimestre)
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      {/* Search and Filters */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-card border border-slate-200 dark:border-slate-700 mb-6 md:mb-8">
-        <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4">
-          <div className="relative w-full md:max-w-md">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <span className="text-slate-400">🔍</span>
-            </div>
-            <input
-              type="text"
-              placeholder="Buscar estudiante por nombre..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="block w-full pl-10 pr-3 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      {/* Charts Section */}
+      {institutionalStats && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+            <GenericBarChart 
+              data={institutionalStats.topBarriers} 
+              title="Top 10 Barreras Predictivas" 
+              horizontal={true}
             />
           </div>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full md:w-auto flex-wrap">
-            <select
-              value={selectedRisk}
-              onChange={(e) => setSelectedRisk(e.target.value)}
-              className="px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">Todos los Riesgos</option>
-              <option value="Critical">Crítico</option>
-              <option value="Medium">Medio</option>
-              <option value="Low">Bajo</option>
-            </select>
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+            <GenericDonutChart 
+              data={institutionalStats.riskDistribution} 
+              title="Distribución de Riesgo" 
+            />
+          </div>
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+            <GenericDonutChart 
+              data={institutionalStats.quintilDistribution} 
+              title="Distribución por Quintil" 
+            />
+          </div>
+           <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+            <GenericBarChart 
+              data={institutionalStats.laptopImpact} 
+              title="Impacto de Laptop en Promedio" 
+              yMin={8.0}
+              yMax={9.2}
+            />
+          </div>
+        </div>
+      )}
 
-            <select
-              value={selectedCourse}
-              onChange={(e) => setSelectedCourse(e.target.value)}
-              className="px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">Todos los Cursos</option>
-              {courses.map((course) => (
-                <option key={course} value={course}>
-                  {course}
-                </option>
-              ))}
-            </select>
+      {/* Filters & Search */}
+      <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+        <div className="flex flex-col lg:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+            <input
+              type="text"
+              placeholder="Buscar por nombre..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+            />
+          </div>
+          
+          <div className="flex flex-wrap gap-3">
+            <FilterSelect 
+              value={selectedRisk} 
+              onChange={setSelectedRisk} 
+              options={[
+                { value: 'all', label: 'Todos los Riesgos' },
+                { value: 'Critical', label: 'Crítico' },
+                { value: 'Medium', label: 'Medio' },
+                { value: 'Low', label: 'Bajo' },
+              ]} 
+            />
+            
+            <FilterSelect 
+              value={selectedQuintile} 
+              onChange={setSelectedQuintile} 
+              options={[
+                { value: 'all', label: 'Todos los Quintiles' },
+                ...quintiles.map(q => ({ value: q, label: q }))
+              ]} 
+            />
 
-            <select
-              value={selectedScoreRange}
-              onChange={(e) => setSelectedScoreRange(e.target.value)}
-              className="px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">Rango de Score</option>
-              <option value="0-30">0 - 30 (Bajo)</option>
-              <option value="31-60">31 - 60 (Medio)</option>
-              <option value="61-80">61 - 80 (Alto)</option>
-              <option value="81-100">81 - 100 (Crítico)</option>
-            </select>
+            <FilterSelect 
+              value={selectedCourse} 
+              onChange={setSelectedCourse} 
+              options={[
+                { value: 'all', label: 'Todos los Cursos' },
+                ...courses.map(c => ({ value: c, label: formatCourseLabel(c) }))
+              ]} 
+            />
           </div>
         </div>
       </div>
 
       {/* Students Table */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-card border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
-            <thead className="bg-slate-50 dark:bg-slate-800">
+            <thead className="bg-slate-50 dark:bg-slate-900/50">
               <tr>
-                <th
-                  scope="col"
-                  className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider"
-                >
-                  Nombre
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider"
-                >
-                  Curso
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-4 text-center text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider"
-                >
-                  Nivel de Riesgo
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-4 text-center text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider"
-                >
-                  Score
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider"
-                >
-                  Alertas Principales
-                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Estudiante</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Curso</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Quintil</th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-slate-500 uppercase tracking-wider">Riesgo</th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-slate-500 uppercase tracking-wider">Score</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Alertas</th>
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
               {filteredStudents.map((student) => (
-                <tr
-                  key={student.id}
+                <tr 
+                  key={student.id} 
                   onClick={() => handleStudentClick(student)}
-                  className="hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer transition-colors"
+                  className="hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors"
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                      {student.name}
-                    </div>
+                    <div className="font-medium text-slate-900 dark:text-slate-100">{student.name}</div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-slate-600 dark:text-slate-400">
-                      {student.course}
-                    </div>
+                  <td className="px-6 py-4 whitespace-nowrap text-slate-600 dark:text-slate-400">
+                    {student.course}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
-                    <span
-                      className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase ${
-                        student.riskLevel === 'Critical'
-                          ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-                          : student.riskLevel === 'Medium'
-                            ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
-                            : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                      }`}
-                    >
-                      {student.riskLevel === 'Critical' && '⚠️'}
-                      {student.riskLevel === 'Medium' && '🔶'}
-                      {student.riskLevel === 'Low' && '✅'}
-                      {student.riskLevel}
-                    </span>
+                  <td className="px-6 py-4 whitespace-nowrap text-slate-600 dark:text-slate-400">
+                    {student.quintile}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center">
-                    <span className="text-xl font-bold text-slate-800 dark:text-slate-100">
+                    <RiskBadge level={student.riskLevel} />
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <div className="font-bold text-slate-700 dark:text-slate-300">
                       {student.riskScore.toFixed(1)}
-                    </span>
-                    <span className="text-sm text-slate-500 dark:text-slate-400"> / 100</span>
+                    </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap gap-2">
+                      {student.keyBarriers.slice(0, 2).map((barrier, idx) => (
+                        <span key={idx} className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300">
+                          {barrier}
+                        </span>
+                      ))}
                       {student.subjectsAtRisk > 0 && (
-                        <span className="inline-flex items-center gap-1 bg-red-100 text-red-800 text-xs font-medium px-2 py-1 rounded-md">
-                          📚 {student.subjectsAtRisk} Materias en riesgo
+                        <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">
+                          {student.subjectsAtRisk} Materias
                         </span>
                       )}
-                      {student.keyBarriers.length > 0 && (
-                        <span className="inline-flex items-center gap-1 bg-orange-100 text-orange-800 text-xs font-medium px-2 py-1 rounded-md">
-                          🚧 {student.keyBarriers[0]}
-                        </span>
-                      )}
-                      {/* Add more alerts based on actual data if available */}
                     </div>
                   </td>
                 </tr>
@@ -304,8 +285,74 @@ const SAT_Dashboard = () => {
             </tbody>
           </table>
         </div>
+        {filteredStudents.length === 0 && (
+          <div className="p-8 text-center text-slate-500 dark:text-slate-400">
+            No se encontraron estudiantes con los filtros seleccionados.
+          </div>
+        )}
       </div>
     </div>
+  );
+};
+
+interface SummaryCardProps {
+  icon: React.ReactNode;
+  value: string | number;
+  label: string;
+  subLabel?: string;
+  color: string;
+}
+
+const SummaryCard = ({ icon, value, label, subLabel, color }: SummaryCardProps) => (
+  <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-4">
+    <div className={`p-3 rounded-full ${color}`}>
+      {icon}
+    </div>
+    <div>
+      <div className="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-baseline gap-1">
+        {value}
+        {subLabel && <span className="text-sm font-normal text-slate-500">{subLabel}</span>}
+      </div>
+      <div className="text-sm text-slate-600 dark:text-slate-400">{label}</div>
+    </div>
+  </div>
+);
+
+interface FilterSelectProps {
+  value: string;
+  onChange: (value: string) => void;
+  options: { value: string; label: string }[];
+}
+
+const FilterSelect = ({ value, onChange, options }: FilterSelectProps) => (
+  <div className="relative">
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="appearance-none pl-4 pr-10 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
+    >
+      {options.map((opt) => (
+        <option key={opt.value} value={opt.value}>{opt.label}</option>
+      ))}
+    </select>
+    <Filter className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+  </div>
+);
+
+const RiskBadge = ({ level }: { level: string }) => {
+  const styles = {
+    Critical: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
+    Medium: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
+    Low: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+  };
+  
+  return (
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${styles[level as keyof typeof styles]}`}>
+      {level === 'Critical' && '⚠️ '}
+      {level === 'Medium' && '🛡️ '}
+      {level === 'Low' && '✅ '}
+      {level}
+    </span>
   );
 };
 

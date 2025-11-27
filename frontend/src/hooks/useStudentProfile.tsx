@@ -20,13 +20,6 @@ export interface KeyGrade {
   avg: number | null;
 }
 
-export interface Attendance {
-  total_inasistencias: number;
-  faltas_justificadas: number;
-  faltas_injustificadas: number;
-  porcentaje_asistencia: number;
-}
-
 interface BackendKeyBarrier {
   name: string;
   importance?: number;
@@ -42,7 +35,6 @@ interface BackendStudentProfile {
   risk_factors: RiskFactor[];
   key_barriers: (string | BackendKeyBarrier)[];
   key_grades: KeyGrade[];
-  asistencia: Attendance;
 }
 
 export interface StudentProfile {
@@ -54,7 +46,6 @@ export interface StudentProfile {
   risk_factors: RiskFactor[];
   key_barriers: KeyBarrier[];
   key_grades: KeyGrade[];
-  asistencia: Attendance;
 }
 
 const mapRiskLevel = (
@@ -84,12 +75,6 @@ const mapProfileData = (backendData: BackendStudentProfile): StudentProfile => {
         )
       : [],
     key_grades: backendData.key_grades || [],
-    asistencia: backendData.asistencia || {
-      total_inasistencias: 0,
-      faltas_justificadas: 0,
-      faltas_injustificadas: 0,
-      porcentaje_asistencia: 100,
-    },
   };
 };
 

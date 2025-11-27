@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { students } from '../data/mockData';
 import Breadcrumbs from './layout/Breadcrumbs';
 import { Badge } from './ui/Badge';
+import CircularProgress from './ui/CircularProgress';
 import { AlertTriangle } from 'lucide-react';
 
 const StudentProfileHero = () => {
@@ -15,10 +16,10 @@ const StudentProfileHero = () => {
 
   const riskColor =
     student.riskLevel === 'Critical'
-      ? 'border-risk-critical-border'
+      ? 'text-red-600'
       : student.riskLevel === 'Medium'
-        ? 'border-risk-medium-border'
-        : 'border-risk-low-border';
+        ? 'text-yellow-500'
+        : 'text-green-500';
 
   return (
     <div className="bg-slate-100 dark:bg-slate-800 p-8 rounded-lg">
@@ -51,18 +52,15 @@ const StudentProfileHero = () => {
           </Badge>
         </div>
         <div className="flex items-center justify-end">
-          <div
-            className={`h-32 w-32 flex items-center justify-center rounded-full border-8 bg-white dark:bg-slate-800 ${riskColor}`}
-          >
-            <div className="text-center">
-              <div className="text-4xl font-bold text-slate-900 dark:text-slate-100">
-                {student.riskScore}
-              </div>
-              <div className="text-sm text-slate-600 dark:text-slate-400">
-                /100
-              </div>
-            </div>
-          </div>
+          <CircularProgress
+            value={student.riskScore}
+            max={100}
+            size={140}
+            strokeWidth={12}
+            color={riskColor}
+            label={student.riskScore.toString()}
+            subLabel="/ 100"
+          />
         </div>
       </div>
     </div>
