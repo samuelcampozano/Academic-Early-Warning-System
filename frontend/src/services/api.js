@@ -38,11 +38,27 @@ export const getInstitutionalStats = () => {
   return apiClient.get('/institutional-stats');
 };
 
+/**
+ * Obtiene distribuciones de notas para gráficos avanzados.
+ */
+export const getScoreDistributions = () => {
+  return apiClient.get('/score-distributions');
+};
+
+/**
+ * Obtiene insights académicos avanzados.
+ */
+export const getAcademicInsights = () => {
+  return apiClient.get('/academic-insights');
+};
+
 // Exportamos un objeto con todos los métodos para un uso fácil
 const apiService = {
   getSatList,
   getStudentById,
   getInstitutionalStats,
+  getScoreDistributions,
+  getAcademicInsights,
 };
 
 export default apiService;

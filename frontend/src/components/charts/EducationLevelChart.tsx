@@ -35,7 +35,7 @@ const EducationLevelChart = () => {
       <CardHeader>
         <CardTitle>Impacto del Nivel Educativo del Representante</CardTitle>
         <CardDescription>
-          Promedio general según el nivel educativo del representante legal.
+          Rendimiento académico según el nivel educativo del representante legal.
         </CardDescription>
       </CardHeader>
       <CardContent>

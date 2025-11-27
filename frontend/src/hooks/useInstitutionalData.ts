@@ -21,6 +21,32 @@ export interface SummaryStats {
   percentage_vulnerable: number;
 }
 
+export interface ConfusionMatrixData {
+  labels: string[];
+  data: number[][];
+}
+
+export interface BoxPlotDataPoint {
+  min: number;
+  q1: number;
+  median: number;
+  q3: number;
+  max: number;
+}
+
+export interface BoxPlotDataset {
+  label: string;
+  data: BoxPlotDataPoint[];
+  backgroundColor?: string | string[];
+  borderColor?: string | string[];
+  borderWidth?: number;
+}
+
+export interface BoxPlotChartData {
+  labels: string[];
+  datasets: BoxPlotDataset[];
+}
+
 export interface InstitutionalStats {
   summaryStats: SummaryStats;
   topBarriers: ChartData;
@@ -29,6 +55,9 @@ export interface InstitutionalStats {
   quintilDistribution: ChartData;
   riskDistribution: ChartData;
   familySupportImpact: ChartData;
+  performanceByQuintile: BoxPlotChartData;
+  confusionMatrix: ConfusionMatrixData;
+  barriersCategories: ChartData;
 }
 
 export default function useInstitutionalData() {

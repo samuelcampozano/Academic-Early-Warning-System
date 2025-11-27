@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const API_BASE_URL =
   process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-// Force rebuild
+// Force rebuild v2
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -32,8 +32,6 @@ api.interceptors.response.use(
   },
 );
 
-export default api;
-
 // API Methods
 export const getSatList = (
   limit?: number,
@@ -61,6 +59,16 @@ export const getBarriersAnalysis = () => {
   return api.get('/barriers-analysis');
 };
 
+export const getScoreDistributions = () => {
+  return api.get('/score-distributions');
+};
+
+export const getAcademicInsights = () => {
+  return api.get('/academic-insights');
+};
+
 export const predictRisk = (studentId: string) => {
   return api.post('/predict', { student_id: studentId });
 };
+
+export default api;
