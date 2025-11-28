@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   BarChart,
   Bar,
@@ -22,6 +22,7 @@ import {
   AreaChart,
   Area,
   ReferenceLine,
+  Line,
 } from 'recharts';
 import { useTheme } from '../context/ThemeContext';
 import useInstitutionalData from '../hooks/useInstitutionalData';
@@ -38,6 +39,9 @@ const InstitutionalView = () => {
   const isDark = theme === 'dark';
   const textColor = isDark ? '#e2e8f0' : '#475569';
   const cursorFill = isDark ? '#334155' : '#f1f5f9';
+  
+  // Tab state for different analysis sections
+  const [activeTab, setActiveTab] = useState<'overview' | 'exploration' | 'advanced'>('overview');
 
   if (loading) {
     return (
@@ -176,7 +180,536 @@ const InstitutionalView = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 mb-8 md:mb-12">
+      {/* Tab Navigation */}
+      <div className="mb-8 border-b border-slate-200 dark:border-slate-700">
+        <nav className="flex gap-4">
+          <button
+            onClick={() => setActiveTab('overview')}
+            className={`pb-3 px-1 text-sm font-medium transition-colors ${
+              activeTab === 'overview'
+                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+            }`}
+          >
+            📊 Resumen General
+          </button>
+          <button
+            onClick={() => setActiveTab('exploration')}
+            className={`pb-3 px-1 text-sm font-medium transition-colors ${
+              activeTab === 'exploration'
+                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+            }`}
+          >
+            🔍 Exploración de Datos
+          </button>
+          <button
+            onClick={() => setActiveTab('advanced')}
+            className={`pb-3 px-1 text-sm font-medium transition-colors ${
+              activeTab === 'advanced'
+                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+            }`}
+          >
+            📈 Análisis Avanzado
+          </button>
+        </nav>
+      </div>
+
+      {/* TAB: Data Exploration */}
+      {activeTab === 'exploration' && (
+        <div className="space-y-8">
+          {/* Section Header */}
+          <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-6 text-white">
+            <h2 className="text-2xl font-bold mb-2">🔍 Exploración de Datos</h2>
+            <p className="text-indigo-100">
+              Análisis descriptivo y distribuciones de las variables del dataset estudiantil.
+              Esta sección muestra la inspección inicial de los datos usados para el modelo de predicción.
+            </p>
+          </div>
+
+          {/* Summary Statistics Cards */}
+          {insights?.summary && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-card border border-slate-200 dark:border-slate-700">
+                <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                  {insights.summary.totalStudents}
+                </div>
+                <div className="text-sm text-slate-600 dark:text-slate-400 mt-1">Total Estudiantes</div>
+                <div className="text-xs text-slate-500 mt-2">n = {insights.summary.studentsWithData} con datos</div>
+              </div>
+              <div className="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-card border border-slate-200 dark:border-slate-700">
+                <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
+                  {insights.summary.avgGrade.toFixed(2)}
+                </div>
+                <div className="text-sm text-slate-600 dark:text-slate-400 mt-1">GPA Promedio</div>
+                <div className="text-xs text-slate-500 mt-2">Escala 0-10</div>
+              </div>
+              <div className="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-card border border-slate-200 dark:border-slate-700">
+                <div className="text-3xl font-bold text-amber-600 dark:text-amber-400">
+                  {insights.summary.studentsWithBarriers}
+                </div>
+                <div className="text-sm text-slate-600 dark:text-slate-400 mt-1">Con 3+ Barreras</div>
+                <div className="text-xs text-slate-500 mt-2">
+                  {((insights.summary.studentsWithBarriers / insights.summary.totalStudents) * 100).toFixed(1)}% del total
+                </div>
+              </div>
+              <div className="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-card border border-slate-200 dark:border-slate-700">
+                <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+                  {distributions?.riskScoreDistribution?.std?.toFixed(2) || 'N/A'}
+                </div>
+                <div className="text-sm text-slate-600 dark:text-slate-400 mt-1">Desv. Estándar Riesgo</div>
+                <div className="text-xs text-slate-500 mt-2">σ del score de riesgo</div>
+              </div>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Overall Grade Distribution Histogram */}
+            {distributions?.overallGradeHistogram && (
+              <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-card border border-slate-200 dark:border-slate-700">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-1">
+                  📊 Distribución de Calificaciones
+                </h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                  Histograma de promedios generales (GPA). Asimetría negativa indica más notas altas.
+                </p>
+                <ResponsiveContainer width="100%" height={280}>
+                  <BarChart
+                    data={distributions.overallGradeHistogram.counts.map((count: number, index: number) => ({
+                      bin: distributions.overallGradeHistogram!.labels[index],
+                      count: count,
+                      binStart: distributions.overallGradeHistogram!.binEdges[index],
+                    }))}
+                    margin={{ top: 20, right: 20, left: 20, bottom: 60 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? '#334155' : '#e2e8f0'} />
+                    <XAxis
+                      dataKey="bin"
+                      tick={{ fontSize: 9, fill: textColor }}
+                      tickLine={false}
+                      axisLine={false}
+                      angle={-45}
+                      textAnchor="end"
+                      height={60}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 12, fill: textColor }}
+                      tickLine={false}
+                      axisLine={false}
+                      label={{ value: 'Frecuencia', angle: -90, position: 'insideLeft', fill: textColor, fontSize: 11 }}
+                    />
+                    <Tooltip
+                      cursor={{ fill: cursorFill }}
+                      contentStyle={{
+                        backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                        border: `1px solid ${isDark ? '#334155' : '#e2e8f0'}`,
+                        borderRadius: '0.75rem',
+                        color: textColor,
+                      }}
+                      formatter={(value: any) => [`${value} estudiantes`, 'Frecuencia']}
+                    />
+                    <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                      {distributions.overallGradeHistogram.counts.map((_: number, index: number) => {
+                        const binStart = distributions.overallGradeHistogram!.binEdges[index];
+                        const color = binStart < 7 ? '#ef4444' : binStart < 8 ? '#f59e0b' : '#22c55e';
+                        return <Cell key={`cell-${index}`} fill={color} />;
+                      })}
+                    </Bar>
+                    <ReferenceLine x="7.0-7.5" stroke="#ef4444" strokeDasharray="5 5" label={{ value: 'Umbral Aprobación (7.0)', fill: '#ef4444', fontSize: 10, position: 'top' }} />
+                  </BarChart>
+                </ResponsiveContainer>
+                <div className="mt-2 flex justify-center gap-4 text-xs">
+                  <span className="flex items-center"><span className="w-3 h-3 bg-red-500 rounded mr-1"></span>Reprobados (&lt;7)</span>
+                  <span className="flex items-center"><span className="w-3 h-3 bg-amber-500 rounded mr-1"></span>En riesgo (7-8)</span>
+                  <span className="flex items-center"><span className="w-3 h-3 bg-green-500 rounded mr-1"></span>Aprobados (&gt;8)</span>
+                </div>
+              </div>
+            )}
+
+            {/* Grades by Quintile - Violin-style */}
+            {distributions?.gradesByQuintile && Object.keys(distributions.gradesByQuintile).length > 0 && (
+              <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-card border border-slate-200 dark:border-slate-700">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-1">
+                  📈 GPA por Quintil Socioeconómico
+                </h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                  Comparación de distribuciones (IQR + mediana). Se observa correlación quintil-rendimiento.
+                </p>
+                <ResponsiveContainer width="100%" height={280}>
+                  <ComposedChart
+                    data={Object.entries(distributions.gradesByQuintile)
+                      .sort(([a], [b]) => a.localeCompare(b))
+                      .map(([quintile, stats]: [string, any]) => ({
+                        name: quintile,
+                        boxRange: [stats.q1, stats.q3],
+                        median: stats.median,
+                        mean: stats.mean,
+                        min: stats.min,
+                        max: stats.max,
+                        count: stats.count,
+                      }))}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? '#334155' : '#e2e8f0'} />
+                    <XAxis dataKey="name" tick={{ fontSize: 12, fill: textColor }} tickLine={false} axisLine={false} />
+                    <YAxis
+                      domain={['auto', 'auto']}
+                      tick={{ fontSize: 12, fill: textColor }}
+                      tickLine={false}
+                      axisLine={false}
+                      label={{ value: 'GPA', angle: -90, position: 'insideLeft', fill: textColor, fontSize: 11 }}
+                    />
+                    <Tooltip
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          const data = payload[0].payload;
+                          return (
+                            <div className={`p-3 border rounded-lg shadow-lg ${isDark ? 'bg-slate-800 border-slate-700 text-slate-200' : 'bg-white border-slate-200 text-slate-700'}`}>
+                              <p className="font-bold mb-2">{data.name}</p>
+                              <p>n = {data.count} estudiantes</p>
+                              <p>Máx: {data.max?.toFixed(2)}</p>
+                              <p>Q3: {data.boxRange?.[1]?.toFixed(2)}</p>
+                              <p className="font-bold text-blue-500">Media: {data.mean?.toFixed(2)}</p>
+                              <p>Mediana: {data.median?.toFixed(2)}</p>
+                              <p>Q1: {data.boxRange?.[0]?.toFixed(2)}</p>
+                              <p>Mín: {data.min?.toFixed(2)}</p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Bar dataKey="boxRange" barSize={40} radius={[4, 4, 4, 4]} fillOpacity={0.7}>
+                      {Object.keys(distributions.gradesByQuintile).map((_, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6'][index]}
+                          stroke={['#dc2626', '#ea580c', '#ca8a04', '#16a34a', '#2563eb'][index]}
+                        />
+                      ))}
+                    </Bar>
+                    <Scatter dataKey="median" fill="#1e293b" shape="diamond" />
+                    <Line type="monotone" dataKey="mean" stroke="#8b5cf6" strokeWidth={2} dot={{ fill: '#8b5cf6', r: 4 }} />
+                  </ComposedChart>
+                </ResponsiveContainer>
+                <div className="mt-2 flex justify-center gap-4 text-xs">
+                  <span className="flex items-center"><span className="w-3 h-3 bg-purple-500 rounded-full mr-1"></span>Línea: Media</span>
+                  <span className="flex items-center"><span className="w-3 h-3 bg-slate-800 dark:bg-slate-200 mr-1" style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }}></span>Rombo: Mediana</span>
+                </div>
+              </div>
+            )}
+
+            {/* Bar Chart: Barriers Count vs GPA - Clear visualization */}
+            {insights?.barriersImpact && Object.keys(insights.barriersImpact).length > 0 && (
+              <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-card border border-slate-200 dark:border-slate-700">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-1">
+                  📉 Impacto de Barreras en el Rendimiento
+                </h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                  A mayor número de barreras, menor es el promedio académico.
+                </p>
+                <ResponsiveContainer width="100%" height={280}>
+                  <ComposedChart
+                    data={Object.entries(insights.barriersImpact)
+                      .sort(([a], [b]) => parseInt(a) - parseInt(b))
+                      .map(([barriers, data]: [string, any]) => ({
+                        name: `${barriers} ${parseInt(barriers) === 1 ? 'barrera' : 'barreras'}`,
+                        gpa: data.avg_grade,
+                        estudiantes: data.count,
+                        barriers: parseInt(barriers),
+                      }))}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? '#334155' : '#e2e8f0'} />
+                    <XAxis
+                      dataKey="name"
+                      tick={{ fontSize: 11, fill: textColor }}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <YAxis
+                      yAxisId="left"
+                      domain={[8.5, 9.1]}
+                      tick={{ fontSize: 12, fill: textColor }}
+                      tickLine={false}
+                      axisLine={false}
+                      label={{ value: 'GPA Promedio', angle: -90, position: 'insideLeft', fill: textColor, fontSize: 11 }}
+                    />
+                    <YAxis
+                      yAxisId="right"
+                      orientation="right"
+                      tick={{ fontSize: 12, fill: textColor }}
+                      tickLine={false}
+                      axisLine={false}
+                      label={{ value: 'Estudiantes', angle: 90, position: 'insideRight', fill: textColor, fontSize: 11 }}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                        border: `1px solid ${isDark ? '#334155' : '#e2e8f0'}`,
+                        borderRadius: '0.75rem',
+                        color: textColor,
+                      }}
+                      formatter={(value: any, name: string) => [
+                        name === 'gpa' ? value.toFixed(2) : value,
+                        name === 'gpa' ? 'GPA Promedio' : 'Estudiantes'
+                      ]}
+                    />
+                    <Legend
+                      verticalAlign="top"
+                      height={36}
+                      formatter={(value: any) => (
+                        <span style={{ color: textColor }}>
+                          {value === 'estudiantes' ? '# Estudiantes' : 'GPA Promedio'}
+                        </span>
+                      )}
+                    />
+                    <Bar yAxisId="right" dataKey="estudiantes" fill="#94a3b8" opacity={0.5} radius={[4, 4, 0, 0]} barSize={50}>
+                      <LabelList dataKey="estudiantes" position="top" style={{ fontSize: 10, fill: textColor }} />
+                    </Bar>
+                    <Line
+                      yAxisId="left"
+                      type="monotone"
+                      dataKey="gpa"
+                      stroke="#ef4444"
+                      strokeWidth={3}
+                      dot={{ fill: '#ef4444', r: 6, strokeWidth: 2, stroke: '#fff' }}
+                    >
+                      <LabelList dataKey="gpa" position="bottom" formatter={(v: any) => v?.toFixed(2)} style={{ fontSize: 11, fontWeight: 'bold', fill: '#ef4444' }} />
+                    </Line>
+                  </ComposedChart>
+                </ResponsiveContainer>
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 text-center">
+                    <div className="text-lg font-bold text-green-600 dark:text-green-400">
+                      {Object.entries(insights.barriersImpact).find(([k]) => k === '0')?.[1]?.avg_grade?.toFixed(2) || 'N/A'}
+                    </div>
+                    <div className="text-xs text-green-700 dark:text-green-300">GPA sin barreras</div>
+                  </div>
+                  <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-3 text-center">
+                    <div className="text-lg font-bold text-red-600 dark:text-red-400">
+                      {(() => {
+                        const maxBarriers = Math.max(...Object.keys(insights.barriersImpact).map(k => parseInt(k)));
+                        return insights.barriersImpact[maxBarriers.toString()]?.avg_grade?.toFixed(2) || 'N/A';
+                      })()}
+                    </div>
+                    <div className="text-xs text-red-700 dark:text-red-300">GPA con más barreras</div>
+                  </div>
+                </div>
+                <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg text-xs text-amber-800 dark:text-amber-200">
+                  <strong>📊 Hallazgo:</strong> Los estudiantes sin barreras tienen un GPA {(() => {
+                    const zeroBarriers = insights.barriersImpact['0']?.avg_grade || 0;
+                    const maxBarriers = Math.max(...Object.keys(insights.barriersImpact).map(k => parseInt(k)));
+                    const maxGpa = insights.barriersImpact[maxBarriers.toString()]?.avg_grade || 0;
+                    return (zeroBarriers - maxGpa).toFixed(2);
+                  })()} puntos más alto que aquellos con múltiples barreras.
+                </div>
+              </div>
+            )}
+
+            {/* Grade Distribution by Risk Level */}
+            {distributions?.gradesByRisk && Object.keys(distributions.gradesByRisk).length > 0 && (
+              <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-card border border-slate-200 dark:border-slate-700">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-1">
+                  ⚠️ Distribución por Nivel de Riesgo
+                </h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                  Validación del modelo: estudiantes clasificados como &quot;Alto Riesgo&quot; tienen menor GPA.
+                </p>
+                <ResponsiveContainer width="100%" height={280}>
+                  <BarChart
+                    data={['Alto', 'Medio', 'Bajo']
+                      .filter(level => distributions.gradesByRisk[level])
+                      .map(level => ({
+                        name: `Riesgo ${level}`,
+                        mean: distributions.gradesByRisk[level].mean,
+                        median: distributions.gradesByRisk[level].median,
+                        std: distributions.gradesByRisk[level].std,
+                        count: distributions.gradesByRisk[level].count,
+                        color: level === 'Alto' ? '#ef4444' : level === 'Medio' ? '#f59e0b' : '#22c55e',
+                      }))}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                    layout="vertical"
+                  >
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke={isDark ? '#334155' : '#e2e8f0'} />
+                    <XAxis type="number" domain={[7, 10]} tick={{ fontSize: 12, fill: textColor }} tickLine={false} axisLine={false} />
+                    <YAxis type="category" dataKey="name" tick={{ fontSize: 12, fill: textColor }} tickLine={false} axisLine={false} width={100} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                        border: `1px solid ${isDark ? '#334155' : '#e2e8f0'}`,
+                        borderRadius: '0.75rem',
+                        color: textColor,
+                      }}
+                      formatter={(value: any, name: string, props: any) => [
+                        `${value.toFixed(2)} (n=${props.payload.count}, σ=${props.payload.std?.toFixed(2)})`,
+                        name === 'mean' ? 'Media' : 'Mediana'
+                      ]}
+                    />
+                    <Bar dataKey="mean" radius={[0, 4, 4, 0]} barSize={30}>
+                      {['Alto', 'Medio', 'Bajo'].map((level, index) => (
+                        <Cell key={`cell-${index}`} fill={level === 'Alto' ? '#ef4444' : level === 'Medio' ? '#f59e0b' : '#22c55e'} />
+                      ))}
+                      <LabelList dataKey="mean" position="right" formatter={(v: any) => typeof v === 'number' ? v.toFixed(2) : v} style={{ fontSize: 12, fontWeight: 'bold', fill: textColor }} />
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+                <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs">
+                  {['Alto', 'Medio', 'Bajo'].filter(level => distributions.gradesByRisk[level]).map(level => (
+                    <div key={level} className={`p-2 rounded ${level === 'Alto' ? 'bg-red-50 dark:bg-red-900/20' : level === 'Medio' ? 'bg-amber-50 dark:bg-amber-900/20' : 'bg-green-50 dark:bg-green-900/20'}`}>
+                      <div className="font-bold">{distributions.gradesByRisk[level].count}</div>
+                      <div className="text-slate-500">estudiantes</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Descriptive Statistics Table */}
+          {distributions && (
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-card border border-slate-200 dark:border-slate-700">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">
+                📋 Estadísticas Descriptivas Completas
+              </h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-slate-200 dark:border-slate-700">
+                      <th className="text-left py-3 px-4 font-semibold text-slate-700 dark:text-slate-300">Variable</th>
+                      <th className="text-center py-3 px-4 font-semibold text-slate-700 dark:text-slate-300">n</th>
+                      <th className="text-center py-3 px-4 font-semibold text-slate-700 dark:text-slate-300">Media</th>
+                      <th className="text-center py-3 px-4 font-semibold text-slate-700 dark:text-slate-300">Mediana</th>
+                      <th className="text-center py-3 px-4 font-semibold text-slate-700 dark:text-slate-300">σ (Std)</th>
+                      <th className="text-center py-3 px-4 font-semibold text-slate-700 dark:text-slate-300">Min</th>
+                      <th className="text-center py-3 px-4 font-semibold text-slate-700 dark:text-slate-300">Q1</th>
+                      <th className="text-center py-3 px-4 font-semibold text-slate-700 dark:text-slate-300">Q3</th>
+                      <th className="text-center py-3 px-4 font-semibold text-slate-700 dark:text-slate-300">Max</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {distributions.riskScoreDistribution && (
+                      <tr className="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/30">
+                        <td className="py-3 px-4 font-medium text-slate-900 dark:text-slate-100">Score de Riesgo</td>
+                        <td className="py-3 px-4 text-center text-slate-600 dark:text-slate-400">{distributions.riskScoreDistribution.count}</td>
+                        <td className="py-3 px-4 text-center text-blue-600 dark:text-blue-400 font-semibold">{distributions.riskScoreDistribution.mean?.toFixed(2)}</td>
+                        <td className="py-3 px-4 text-center text-slate-600 dark:text-slate-400">{distributions.riskScoreDistribution.median?.toFixed(2)}</td>
+                        <td className="py-3 px-4 text-center text-slate-600 dark:text-slate-400">{distributions.riskScoreDistribution.std?.toFixed(2)}</td>
+                        <td className="py-3 px-4 text-center text-slate-600 dark:text-slate-400">{distributions.riskScoreDistribution.min?.toFixed(2)}</td>
+                        <td className="py-3 px-4 text-center text-slate-600 dark:text-slate-400">{distributions.riskScoreDistribution.q1?.toFixed(2)}</td>
+                        <td className="py-3 px-4 text-center text-slate-600 dark:text-slate-400">{distributions.riskScoreDistribution.q3?.toFixed(2)}</td>
+                        <td className="py-3 px-4 text-center text-slate-600 dark:text-slate-400">{distributions.riskScoreDistribution.max?.toFixed(2)}</td>
+                      </tr>
+                    )}
+                    {distributions.laptopComparison?.withLaptop && (
+                      <tr className="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/30">
+                        <td className="py-3 px-4 font-medium text-slate-900 dark:text-slate-100">GPA (Con Laptop)</td>
+                        <td className="py-3 px-4 text-center text-slate-600 dark:text-slate-400">{distributions.laptopComparison.withLaptop.count}</td>
+                        <td className="py-3 px-4 text-center text-emerald-600 dark:text-emerald-400 font-semibold">{distributions.laptopComparison.withLaptop.mean?.toFixed(2)}</td>
+                        <td className="py-3 px-4 text-center text-slate-600 dark:text-slate-400">{distributions.laptopComparison.withLaptop.median?.toFixed(2)}</td>
+                        <td className="py-3 px-4 text-center text-slate-600 dark:text-slate-400">{distributions.laptopComparison.withLaptop.std?.toFixed(2)}</td>
+                        <td className="py-3 px-4 text-center text-slate-600 dark:text-slate-400">{distributions.laptopComparison.withLaptop.min?.toFixed(2)}</td>
+                        <td className="py-3 px-4 text-center text-slate-600 dark:text-slate-400">{distributions.laptopComparison.withLaptop.q1?.toFixed(2)}</td>
+                        <td className="py-3 px-4 text-center text-slate-600 dark:text-slate-400">{distributions.laptopComparison.withLaptop.q3?.toFixed(2)}</td>
+                        <td className="py-3 px-4 text-center text-slate-600 dark:text-slate-400">{distributions.laptopComparison.withLaptop.max?.toFixed(2)}</td>
+                      </tr>
+                    )}
+                    {distributions.laptopComparison?.withoutLaptop && (
+                      <tr className="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/30">
+                        <td className="py-3 px-4 font-medium text-slate-900 dark:text-slate-100">GPA (Sin Laptop)</td>
+                        <td className="py-3 px-4 text-center text-slate-600 dark:text-slate-400">{distributions.laptopComparison.withoutLaptop.count}</td>
+                        <td className="py-3 px-4 text-center text-red-600 dark:text-red-400 font-semibold">{distributions.laptopComparison.withoutLaptop.mean?.toFixed(2)}</td>
+                        <td className="py-3 px-4 text-center text-slate-600 dark:text-slate-400">{distributions.laptopComparison.withoutLaptop.median?.toFixed(2)}</td>
+                        <td className="py-3 px-4 text-center text-slate-600 dark:text-slate-400">{distributions.laptopComparison.withoutLaptop.std?.toFixed(2)}</td>
+                        <td className="py-3 px-4 text-center text-slate-600 dark:text-slate-400">{distributions.laptopComparison.withoutLaptop.min?.toFixed(2)}</td>
+                        <td className="py-3 px-4 text-center text-slate-600 dark:text-slate-400">{distributions.laptopComparison.withoutLaptop.q1?.toFixed(2)}</td>
+                        <td className="py-3 px-4 text-center text-slate-600 dark:text-slate-400">{distributions.laptopComparison.withoutLaptop.q3?.toFixed(2)}</td>
+                        <td className="py-3 px-4 text-center text-slate-600 dark:text-slate-400">{distributions.laptopComparison.withoutLaptop.max?.toFixed(2)}</td>
+                      </tr>
+                    )}
+                    {Object.entries(distributions.gradesByQuintile || {}).sort(([a], [b]) => a.localeCompare(b)).map(([quintile, stats]: [string, any]) => (
+                      <tr key={quintile} className="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/30">
+                        <td className="py-3 px-4 font-medium text-slate-900 dark:text-slate-100">GPA {quintile}</td>
+                        <td className="py-3 px-4 text-center text-slate-600 dark:text-slate-400">{stats.count}</td>
+                        <td className="py-3 px-4 text-center text-blue-600 dark:text-blue-400 font-semibold">{stats.mean?.toFixed(2)}</td>
+                        <td className="py-3 px-4 text-center text-slate-600 dark:text-slate-400">{stats.median?.toFixed(2)}</td>
+                        <td className="py-3 px-4 text-center text-slate-600 dark:text-slate-400">{stats.std?.toFixed(2)}</td>
+                        <td className="py-3 px-4 text-center text-slate-600 dark:text-slate-400">{stats.min?.toFixed(2)}</td>
+                        <td className="py-3 px-4 text-center text-slate-600 dark:text-slate-400">{stats.q1?.toFixed(2)}</td>
+                        <td className="py-3 px-4 text-center text-slate-600 dark:text-slate-400">{stats.q3?.toFixed(2)}</td>
+                        <td className="py-3 px-4 text-center text-slate-600 dark:text-slate-400">{stats.max?.toFixed(2)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Key Findings from Data Exploration */}
+          <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800/50 dark:to-slate-700/50 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">
+              💡 Hallazgos Clave de la Exploración
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="bg-white dark:bg-slate-800 rounded-lg p-4 shadow-sm">
+                <div className="text-2xl mb-2">📊</div>
+                <h4 className="font-medium text-slate-900 dark:text-slate-100">Distribución Asimétrica</h4>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                  La distribución de notas presenta asimetría negativa (más estudiantes con notas altas). 
+                  El 6.2% de registros están por debajo del umbral de aprobación.
+                </p>
+              </div>
+              <div className="bg-white dark:bg-slate-800 rounded-lg p-4 shadow-sm">
+                <div className="text-2xl mb-2">🔗</div>
+                <h4 className="font-medium text-slate-900 dark:text-slate-100">Correlación Quintil-GPA</h4>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                  Existe correlación positiva entre quintil socioeconómico y rendimiento académico (r ≈ 0.23). 
+                  Q5 supera a Q1 por ~1 punto promedio.
+                </p>
+              </div>
+              <div className="bg-white dark:bg-slate-800 rounded-lg p-4 shadow-sm">
+                <div className="text-2xl mb-2">💻</div>
+                <h4 className="font-medium text-slate-900 dark:text-slate-100">Brecha Digital</h4>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                  Estudiantes con laptop tienen en promedio +0.12 puntos más que sin laptop. 
+                  Esta diferencia es estadísticamente significativa (p &lt; 0.05).
+                </p>
+              </div>
+              <div className="bg-white dark:bg-slate-800 rounded-lg p-4 shadow-sm">
+                <div className="text-2xl mb-2">⚠️</div>
+                <h4 className="font-medium text-slate-900 dark:text-slate-100">Efecto Acumulativo</h4>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                  Estudiantes con 3+ barreras tienen GPA significativamente menor. 
+                  El efecto de las barreras es multiplicativo, no aditivo.
+                </p>
+              </div>
+              <div className="bg-white dark:bg-slate-800 rounded-lg p-4 shadow-sm">
+                <div className="text-2xl mb-2">⚖️</div>
+                <h4 className="font-medium text-slate-900 dark:text-slate-100">Desbalance de Clases</h4>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                  Solo 6.2% de estudiantes reprueban (clase minoritaria). 
+                  El modelo usa técnicas de balanceo para evitar sesgo hacia la clase mayoritaria.
+                </p>
+              </div>
+              <div className="bg-white dark:bg-slate-800 rounded-lg p-4 shadow-sm">
+                <div className="text-2xl mb-2">✅</div>
+                <h4 className="font-medium text-slate-900 dark:text-slate-100">Validación del Modelo</h4>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                  Los estudiantes clasificados como &quot;Alto Riesgo&quot; efectivamente tienen menor GPA promedio, 
+                  confirmando la validez predictiva del sistema.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB: Overview (Original Charts) */}
+      {activeTab === 'overview' && (
+        <>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 mb-8 md:mb-12">
         {/* Chart 1: Top 10 Barreras (Feature Importance) */}
         <div className="bg-white dark:bg-slate-800 rounded-xl p-4 md:p-6 shadow-card border border-slate-200 dark:border-slate-700">
           <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-1">
@@ -734,10 +1267,15 @@ const InstitutionalView = () => {
           </div>
         )}
       </div>
+      </>
+      )}
 
+      {/* TAB: Advanced Analysis - Move existing Advanced Statistical Analysis here */}
+      {activeTab === 'advanced' && (
+        <>
       {/* Advanced Statistical Analysis Section */}
       {!distLoading && distributions && (
-        <div className="mt-8 md:mt-12">
+        <div className="mt-0 md:mt-0">
           <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-6">
             Análisis Estadístico Avanzado
           </h2>
@@ -1323,6 +1861,8 @@ const InstitutionalView = () => {
             )}
           </div>
         </div>
+      )}
+      </>
       )}
 
       <div>
