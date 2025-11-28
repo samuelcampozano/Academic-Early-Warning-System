@@ -326,6 +326,9 @@ Detalle individual con score de riesgo, factores y recomendaciones.
 
 Proyecto de Tesis - Universidad Laica Eloy Alfaro de Manabí (ULEAM)
 
+**Tutor de Tesis:** Jonathan Marcos Vera Parrales
+
+[![Portfolio](https://img.shields.io/badge/Portfolio-Visitar-4285F4?style=for-the-badge&logo=google-chrome&logoColor=white)](https://portfolio-seven-jade-tg9cqnc8rj.vercel.app/)
 [![GitHub](https://img.shields.io/badge/GitHub-samuelcampozano-181717?style=for-the-badge&logo=github)](https://github.com/samuelcampozano)
 
 </div>
