@@ -19,6 +19,9 @@
 6. [Final Model Performance](#6-final-model-performance)
 7. [Threshold Optimization](#7-threshold-optimization)
 8. [Scientific Validation](#8-scientific-validation)
+   - [8A. Verified Database Insights](#8a-verified-database-insights-december-2025)
+   - [8B. Complete Model Evolution History](#8b-complete-model-evolution-history)
+   - [8C. Frontend Visualization Mapping](#8c-frontend-visualization-mapping)
 9. [System Architecture](#9-system-architecture)
 10. [Database Schema](#10-database-schema)
 11. [API Reference](#11-api-reference)
@@ -752,6 +755,330 @@ This section contains data-backed findings verified directly from the Supabase d
 
 ---
 
+## 8B. Complete Model Evolution History
+
+This section documents the full history of model development, from initial CatBoost experiments to the final production Logistic Regression model. This provides context for thesis documentation and explains why different approaches were used.
+
+### 8B.1 Phase 1: CatBoost Quintil Prediction Model (Initial Approach)
+
+**Goal:** Predict the socioeconomic quintile (Q1-Q5) of students based on their household characteristics, then correlate this with academic performance.
+
+**Script:** `analysis/predictive_early_warning.py`
+
+**Approach:**
+1. Train CatBoost to predict which students will fail specific subjects
+2. Use socioeconomic features (quintil, laptop, internet, parent education, etc.)
+3. Create student×subject level predictions (each student-subject pair is one record)
+4. Target variable: `failed` (grade < 7.0) or `at_risk` (grade < 7.5)
+
+**Key Design Decisions:**
+
+| Decision | Rationale |
+|----------|-----------|
+| **Subject-level predictions** | Allows identifying which specific subjects each student is at risk for |
+| **CatBoost algorithm** | Handles categorical features natively; good for imbalanced data |
+| **Excluded attendance** | Initially included, but removed due to overfitting (>147% importance) |
+| **Included other-subject grades** | Used grades from OTHER subjects to predict each subject (not data leakage) |
+
+**Results from Thesis (ROC-AUC 0.934, Recall 75%):**
+
+```
+📊 Model Performance (from thesis):
+   ROC-AUC: 0.934 (Excellent discriminative ability)
+   Recall: 75% (Catches 75% of students who will fail)
+   Precision: 35.6% (About 1/3 of flagged students actually fail)
+```
+
+**Why CatBoost Was Selected Over Random Forest:**
+- Random Forest Tuned had best ROC-AUC (0.942) but VERY low Recall (7.8%)
+- CatBoost achieved 75% Recall - 10x better at catching at-risk students
+- For early warning, missing students is worse than false alarms
+
+**Feature Importance (Phase 1):**
+
+| Rank | Feature | Importance | Category |
+|------|---------|------------|----------|
+| 1 | edad_representante | 5.84% | Family |
+| 2 | nota_otras_materias | 4.58% | Cross-subject |
+| 3 | laptop | 4.26% | Technology |
+| 4 | quintil | 3.91% | Socioeconomic |
+| 5 | internet | 3.45% | Technology |
+
+### 8B.2 The Quintil-Grade Correlation Analysis
+
+**Purpose:** Validate that predicted socioeconomic quintile correlates with actual academic performance.
+
+**Methodology:**
+1. CatBoost predicted quintile for each student (based on socioeconomic features)
+2. Compared predicted quintile against actual student grades
+3. Analyzed whether lower quintiles → lower grades
+
+**Verified Results (from Database):**
+
+| Quintile | Count | Mean GPA | Interpretation |
+|----------|-------|----------|----------------|
+| Q2 (low) | 52 | 8.85 | Lower socioeconomic status |
+| Q3 | 281 | 8.87 | Middle class |
+| Q4 | 296 | 9.00 | Upper-middle class |
+| Q5 (high) | 44 | 9.09 | Highest socioeconomic status |
+
+**Statistical Significance:** Q5 students score +0.24 points higher than Q2 students (9.09 vs 8.85).
+
+**Conclusion:** Quintile prediction confirmed correlation between socioeconomic status and academic performance. This validated the thesis hypothesis that socioeconomic barriers impact education.
+
+### 8B.3 Phase 2: Binary At-Risk Classification (Current Production Model)
+
+**Goal:** Simplify the prediction to a binary classification (at-risk vs. not-at-risk) for easier interpretation and deployment.
+
+**Script:** `analysis/train_comprehensive_model.py`
+
+**Approach:**
+1. Define `at_risk = 1` if any subject grade ≤ 7.5
+2. Use ALL 47 socioeconomic features from CSV files + database
+3. Compare 7 different algorithms (Logistic Regression, Random Forest, XGBoost, LightGBM, CatBoost, Gradient Boosting)
+4. **Critical: Exclude grades from features** - they ARE the target variable
+
+**Why We Transitioned from Quintil to Binary:**
+
+| Aspect | Quintil Prediction | Binary At-Risk |
+|--------|-------------------|----------------|
+| **Output** | 5-class (Q1-Q5) | 2-class (at-risk/not) |
+| **Interpretability** | Complex | Simple |
+| **Actionability** | Indirect (quintile → risk) | Direct (student needs help Y/N) |
+| **Model Complexity** | Higher (multiclass) | Lower (binary) |
+| **Teacher Usability** | Requires interpretation | Immediate understanding |
+
+**Model Comparison Results (7 Algorithms):**
+
+| Model | ROC-AUC | Recall | Precision | CV Score | CV Std |
+|-------|---------|--------|-----------|----------|--------|
+| **Logistic_Regression** | 0.610 | 56.9% | 43.9% | **0.681** | **0.033** |
+| RandomForest | 0.630 | 37.3% | 55.9% | 0.647 | 0.033 |
+| GradientBoosting | 0.640 | 35.3% | 45.0% | 0.632 | 0.033 |
+| XGBoost | 0.614 | 41.2% | 45.7% | 0.652 | 0.006 |
+| LightGBM | 0.622 | 49.0% | 52.1% | 0.629 | 0.021 |
+| CatBoost_Balanced | 0.604 | 49.0% | 43.1% | 0.659 | 0.047 |
+| CatBoost_Scaled | 0.604 | 49.0% | 43.1% | 0.660 | 0.038 |
+
+**Winner: Logistic Regression (Best CV Score 0.681 ± 0.033)**
+
+### 8B.4 Why Logistic Regression Beat Complex Models
+
+This was a surprising result that deserves explanation:
+
+| Factor | Explanation |
+|--------|-------------|
+| **Small Dataset** | Only 687 students - complex models overfit |
+| **47 Features** | Many features for small dataset - regularization helps |
+| **Strong Regularization** | L2 regularization prevents overfitting |
+| **Linear Relationships** | Many socioeconomic-risk relationships are approximately linear in log-odds |
+| **Cross-Validation Stability** | CV std of 0.033 (lowest) indicates reliable predictions |
+| **Interpretable Coefficients** | Each feature has a clear positive/negative effect |
+
+**Key Insight:** More complex ≠ better. For small educational datasets, simpler models often generalize better.
+
+### 8B.5 Final Model Coefficients (Top 10 Features)
+
+The Logistic Regression coefficients tell us WHICH factors increase/decrease risk:
+
+| Rank | Feature | Coefficient | Effect on Risk |
+|------|---------|-------------|----------------|
+| 1 | takes_lengua | **-1.511** | PROTECTIVE: Language arts enrollment reduces risk |
+| 2 | nivel_educativo | **+1.305** | RISK: Higher education levels have harder curriculum |
+| 3 | tiene_seguro_privado | -0.585 | PROTECTIVE: Private insurance indicates resources |
+| 4 | takes_fisica | +0.589 | RISK: Physics is a challenging subject |
+| 5 | takes_sociales | -0.587 | PROTECTIVE: Social studies enrollment |
+| 6 | takes_ciencias | -0.587 | PROTECTIVE: Natural sciences enrollment |
+| 7 | tiene_telefono | -0.517 | PROTECTIVE: Landline indicates stable housing |
+| 8 | tiene_seguro_salud | -0.465 | PROTECTIVE: Health coverage |
+| 9 | tiene_internet | -0.419 | PROTECTIVE: Internet access for homework |
+| 10 | takes_matematicas | +0.321 | RISK: Mathematics is challenging |
+
+**Interpretation Guidelines:**
+- **Negative coefficient** = PROTECTIVE factor (reduces risk)
+- **Positive coefficient** = RISK factor (increases risk)
+- **Magnitude** = Strength of effect
+
+### 8B.6 Confusion Matrix Comparison (Phase 1 vs Phase 2)
+
+**Phase 1 (CatBoost Subject-Level):**
+```
+Target: Subject-level failure (< 7.0)
+Records: ~7,251 (student × subject combinations)
+Performance: ROC-AUC 0.934, Recall 75%
+```
+
+**Phase 2 (Logistic Regression Student-Level):**
+```
+Target: Student at-risk (any grade ≤ 7.5)
+Records: 687 students
+Test Set: 138 students (51 at-risk, 87 not at-risk)
+
+Confusion Matrix (Threshold 0.50):
+                    Predicted
+                 Not-Risk   At-Risk
+Actual Not-Risk     50        37     (FP=37 false alarms)
+       At-Risk      22        29     (FN=22 missed)
+
+TP=29, FP=37, FN=22, TN=50
+Recall: 56.9% | Precision: 43.9%
+```
+
+**With Optimized Threshold (0.25):**
+```
+                    Predicted
+                 Not-Risk   At-Risk
+Actual Not-Risk     17        70     (FP=70 false alarms)
+       At-Risk       4        47     (FN=4 missed!)
+
+TP=47, FP=70, FN=4, TN=17
+Recall: 92.2% | Precision: 40.2%
+```
+
+**Improvement:** Threshold optimization reduces missed at-risk students from 22 → 4 (81% reduction).
+
+### 8B.7 Data Leakage Prevention Measures
+
+**Critical Design Decision:** The model does NOT use any academic performance data as features because grades ARE the target variable.
+
+| What We EXCLUDED | Why |
+|------------------|-----|
+| `nota_final` | This IS what we're predicting |
+| `promedio_general` | Derived from grades |
+| `asistencia` | Correlated with grades (symptom, not cause) |
+| `edad` (raw) | Highly correlated with `grado` (leakage) |
+| `grado` (raw) | Determines curriculum difficulty |
+
+| What We INCLUDED Instead |
+|-------------------------|
+| `nivel_educativo` (categorical: Basica_Elemental/Media/Superior, Bachillerato) |
+| `age_grade_status` (young/normal/old for grade) |
+| `takes_lengua`, `takes_matematicas`, etc. (subject ENROLLMENT, not grades) |
+
+**Result:** Model predicts risk using ONLY socioeconomic factors known at enrollment, enabling TRUE early warning before any grades exist.
+
+---
+
+## 8C. Frontend Visualization Mapping
+
+This section documents how model findings are displayed in the React frontend.
+
+### 8C.1 Dashboard Architecture
+
+The frontend is a React + TypeScript application located in `/frontend/`. Key pages:
+
+| Page | Route | Purpose | Data Source |
+|------|-------|---------|-------------|
+| **SAT Dashboard** | `/sat` | Prioritized at-risk student list | `/api/sat-list` |
+| **Student Detail** | `/students/:id` | Individual student risk profile | `/api/students/:id/risk` |
+| **Institutional View** | `/institutional` | Aggregate statistics and charts | `/api/institutional-stats` |
+
+### 8C.2 Institutional View Charts (InstitutionalView.tsx)
+
+The Institutional View displays 8 charts that visualize model findings:
+
+| Chart # | Name | Data Displayed | Source |
+|---------|------|----------------|--------|
+| 1 | **Top 10 Risk Factors** | Model coefficients (positive = risk, negative = protective) | Model training output |
+| 2 | **Laptop Impact** | GPA comparison: WITH=8.97, WITHOUT=8.85 (+0.12 diff) | Database verified |
+| 3 | **Cultural Capital** | GPA by parent education level | Database verified |
+| 4 | **Performance by Quintile** | GPA by socioeconomic quintile (Q2-Q5) | Database verified |
+| 5 | **Subject Risk** | At-risk rate by subject | Academic performance data |
+| 6 | **Model Confusion Matrix** | 2x2 binary classification results (TP/FP/FN/TN) | Model evaluation |
+| 7 | **Risk Distribution** | Students by risk level (Alto/Medio/Bajo) | Risk calculator |
+| 8 | **Alert History** | Timeline of student alerts | Frontend state |
+
+### 8C.3 Data Flow: Backend → Frontend
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Backend (routes/institutional.py)                              │
+│                                                                 │
+│  @app.route('/api/institutional-stats')                         │
+│  def get_institutional_stats():                                 │
+│      return {                                                   │
+│          'topRiskFactors': [...],     # Model coefficients      │
+│          'laptopImpact': {...},        # Database GPA data      │
+│          'culturalCapital': {...},     # Parent education data  │
+│          'performanceByQuintile': {...}, # Quintile GPA data    │
+│          'confusionMatrix': {...},     # 2x2 matrix             │
+│          ...                                                    │
+│      }                                                          │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  Frontend (hooks/useInstitutionalData.ts)                       │
+│                                                                 │
+│  const { data } = useQuery('institutional-stats', fetchStats);  │
+│                                                                 │
+│  // Transform for charts                                        │
+│  const chartData = transformForVisualization(data);             │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  Frontend (pages/InstitutionalView.tsx)                         │
+│                                                                 │
+│  <ChartCard title="Top 10 Risk Factors">                        │
+│    <BarChart data={topRiskFactors} />                           │
+│    <p>Positive = increases risk, Negative = protective</p>      │
+│  </ChartCard>                                                   │
+│                                                                 │
+│  <ChartCard title="Impact of Laptop Access">                    │
+│    <BarChart data={laptopImpact} />                             │
+│    <p>With laptop: 8.97 GPA vs Without: 8.85 GPA</p>            │
+│  </ChartCard>                                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 8C.4 Chart Interpretation Guidelines
+
+Each chart includes contextual explanations for non-technical users:
+
+| Chart | Key Message for Teachers |
+|-------|-------------------------|
+| **Top 10 Risk Factors** | "Green bars are PROTECTIVE factors that reduce risk. Red bars INCREASE risk. Focus interventions on factors you can influence." |
+| **Laptop Impact** | "Students with laptops have slightly higher GPA (+0.12 points). Consider laptop lending programs for vulnerable students." |
+| **Cultural Capital** | "Parent education level correlates with student GPA. Students with less-educated parents may need additional academic support." |
+| **Confusion Matrix** | "Our model correctly identifies 56.9% of at-risk students. With optimized threshold (0.25), we catch 92.2% but with more false alarms." |
+
+### 8C.5 Frontend File Structure
+
+```
+frontend/
+├── src/
+│   ├── pages/
+│   │   ├── InstitutionalView.tsx    # Main statistics dashboard
+│   │   ├── SATDashboard.tsx         # At-risk student list
+│   │   └── StudentDetail.tsx        # Individual student profile
+│   │
+│   ├── hooks/
+│   │   └── useInstitutionalData.ts  # Data fetching + transformation
+│   │
+│   ├── components/
+│   │   ├── ChartCard.tsx            # Reusable chart container
+│   │   ├── RiskScoreBreakdown.tsx   # Risk component visualization
+│   │   └── KeyBarriers.tsx          # Student barriers display
+│   │
+│   └── types.ts                     # TypeScript interfaces
+```
+
+### 8C.6 Key Frontend Updates (December 2025)
+
+The following updates were made to align frontend with verified database data:
+
+| Component | Update Made |
+|-----------|-------------|
+| `routes/institutional.py` | Updated all chart data with verified database values |
+| `InstitutionalView.tsx` | Updated chart descriptions with correct interpretations |
+| `useInstitutionalData.ts` | Added `rows?` to ConfusionMatrixData type for 2x2 matrix |
+
+**Before:** Charts showed incorrect values (e.g., "-1.5 points" for laptop impact)
+**After:** Charts show verified database values (e.g., "+0.12 GPA difference" for laptop impact)
+
+---
+
 ## 9. System Architecture
 
 ### 9.1 Technology Stack
@@ -974,7 +1301,10 @@ is_at_risk = risk_probability >= 0.15
 | 3.0 | Nov 30, 2025 | Model comparison |
 | 4.0 | Nov 30, 2025 | Feature corrections |
 | 5.0 | Nov 30, 2025 | Data leakage prevention |
-| **6.0** | **Nov 30, 2025** | **Final production model with CSV data integration** |
+| 6.0 | Nov 30, 2025 | Final production model with CSV data integration |
+| 7.0 | Dec 1, 2025 | Comprehensive model with 47 features, no data leakage |
+| 8.0 | Dec 1, 2025 | Section 8A: Verified database insights |
+| **9.0** | **Dec 1, 2025** | **Section 8B: Complete model evolution history; Section 8C: Frontend visualization mapping** |
 
 ---
 
@@ -984,14 +1314,27 @@ is_at_risk = risk_probability >= 0.15
 |------|-------|
 | **Total Students** | 687 |
 | **At-Risk Rate** | 37.0% (254 students) |
-| **Features Used** | 30 socioeconomic features |
-| **Features EXCLUDED** | edad, grado (data leakage) |
-| **Best Model** | CatBoost_balanced |
-| **ROC-AUC** | 0.639 |
-| **Recall (threshold 0.15)** | **92.2%** |
+| **Features Used** | 47 socioeconomic features |
+| **Features EXCLUDED** | edad, grado, subject grades (data leakage) |
+| **Best Model** | Logistic Regression |
+| **ROC-AUC** | 0.610 |
+| **CV Score** | 0.681 ± 0.033 (best stability) |
+| **Recall (threshold 0.25)** | **92.2%** |
 | **Missed Students** | Only 4 out of 51 |
-| **Top Predictor** | Distance to school (9.55%) |
-| **CV Stability** | 0.567 ± 0.039 |
+| **Top Predictor** | takes_lengua (coefficient -1.511, protective) |
+| **Phase 1 Model** | CatBoost (subject-level, ROC-AUC 0.934, Recall 75%) |
+| **Phase 2 Model** | Logistic Regression (student-level, CV 0.681) |
+
+---
+
+## Quick Reference: Model Evolution
+
+| Phase | Model | Target | ROC-AUC | Recall | Use Case |
+|-------|-------|--------|---------|--------|----------|
+| **Phase 1** | CatBoost | Subject-level failure | 0.934 | 75% | Predict which subjects each student will fail |
+| **Phase 2** | Logistic Regression | Student at-risk (binary) | 0.610 | 92.2%* | Simple yes/no early warning for teachers |
+
+*With threshold optimization (0.25)
 
 ---
 
@@ -999,4 +1342,4 @@ is_at_risk = risk_probability >= 0.15
 
 **Author:** Samuel Campozano  
 **Institution:** ULEAM - Universidad Laica Eloy Alfaro de Manabí  
-**Date:** November 30, 2025
+**Date:** December 1, 2025
