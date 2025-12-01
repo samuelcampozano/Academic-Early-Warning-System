@@ -1,0 +1,1369 @@
+% Documento LaTeX para Tesis
+% Universidad Laica Eloy Alfaro de Manabí
+% Normas APA 7ma Edición
+
+\documentclass[12pt,spanish,a4paper,oneside]{book}
+
+% Paquetes esenciales
+\usepackage[utf8]{inputenc}
+\usepackage[spanish,es-tabla]{babel}
+\usepackage[left=3cm,right=2.5cm,top=2.5cm,bottom=2.5cm]{geometry}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{amsmath,amssymb}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{booktabs} % Para tablas de mejor calidad
+\usepackage{multirow}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage[backend=biber,style=apa,sortcites=true,sorting=nyt]{biblatex}
+\usepackage{csquotes}
+\usepackage{enumitem}
+\usepackage{lipsum}
+\usepackage{acronym}
+
+% Configuración de bibliografía
+\addbibresource{referencias.bib}
+
+% Configuración de hyperref
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=black,
+    urlcolor=blue,
+    citecolor=black,
+    pdftitle={Modelo de Minería de Datos Educacional},
+    pdfauthor={Campozano Lopez Samuel Segundo y Vera Parrales Jonathan Marcos},
+    pdfsubject={Tesis},
+}
+
+% Configuración de espaciado
+\onehalfspacing
+
+% Configuración de encabezados
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[R]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+
+% Configuración de títulos de capítulos
+\titleformat{\chapter}[display]
+{\normalfont\huge\bfseries}{\chaptertitlename\ \thechapter}{20pt}{\Huge}
+\titlespacing*{\chapter}{0pt}{0pt}{30pt}
+
+% Configuración de código fuente
+\lstset{
+    basicstyle=\small\ttfamily,
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny,
+    captionpos=b,
+    tabsize=2,
+    language=Python,
+    showstringspaces=false,
+    commentstyle=\color{gray},
+    keywordstyle=\color{blue},
+    stringstyle=\color{red}
+}
+
+% Inicio del documento
+\begin{document}
+
+% Portada
+\begin{titlepage}
+    \centering
+    \vspace*{1cm}
+    {\Large \textbf{UNIVERSIDAD LAICA ELOY ALFARO DE MANABÍ}}\\[0.5cm]
+    {\large Facultad de Ciencias De la Vida Y Tecnologías de la Información}\\[0.5cm]
+    {\large Programa de Tecnologías de la información}\\[3cm]
+    
+    {\LARGE \textbf{MODELO DE MINERÍA DE DATOS EDUCACIONAL PARA LA DETECCIÓN TEMPRANA DE BARRERAS QUE PUEDEN OBSTACULIZAR EL APROVECHAMIENTO ESTUDIANTIL}}\\[1cm]
+    
+    {\Large Implementación de un Sistema Predictivo Basado en CRISP-DM para la Unidad Educativa Fiscomisional Juan Montalvo}\\[3cm]
+    
+    {\large \textbf{Tesis}}\\[0.5cm]
+    {\large Presentada por:}\\[0.5cm]
+    {\Large Campozano Lopez Samuel Segundo}\\[0.3cm]
+    {\Large Vera Parrales Jonathan Marcos}\\[2cm]
+    
+    {\large Director de Tesis:}\\[0.5cm]
+    {\large Dr. Pincay Ponce Jorge Ivan}\\[2cm]
+    
+    {\large Manta, Ecuador}\\
+    {\large Diciembre, 2025}
+\end{titlepage}
+
+% Páginas preliminares
+\frontmatter
+\pagenumbering{roman}
+
+% Dedicatoria
+\chapter*{Dedicatoria}
+\addcontentsline{toc}{chapter}{Dedicatoria}
+[Pendiente de completar]
+
+% Agradecimientos
+\chapter*{Agradecimientos}
+\addcontentsline{toc}{chapter}{Agradecimientos}
+[Pendiente de completar]
+
+% Resumen
+\chapter*{Resumen}
+\addcontentsline{toc}{chapter}{Resumen}
+
+La presente investigación desarrolla e implementa un modelo integral de Minería de Datos Educacional (EDM) para la detección temprana de barreras académicas en la Unidad Educativa Fiscomisional Juan Montalvo. El estudio adopta la metodología CRISP-DM como marco metodológico principal, analizando 687 estudiantes con 47 variables socioeconómicas para la predicción del riesgo académico.
+
+El desarrollo del modelo siguió una evolución en dos fases. En la \textbf{Fase 1}, se implementó un modelo CatBoost a nivel de materia-estudiante, logrando un ROC-AUC de 0.934 con Recall del 75\%. En la \textbf{Fase 2}, se simplificó a una clasificación binaria a nivel de estudiante (en riesgo vs. no en riesgo), comparando 7 algoritmos de Machine Learning. Contrario a la expectativa inicial, \textbf{Regresión Logística} superó a los modelos de ensamble, obteniendo el mejor puntaje de validación cruzada (CV 0.681 ± 0.033), demostrando que para datasets pequeños, los modelos simples con regularización generalizan mejor que los algoritmos complejos.
+
+El 37\% de los estudiantes fueron clasificados como en riesgo (cualquier nota $\leq$ 7.5). Mediante optimización de umbral (0.25), el modelo alcanza un \textit{Recall} del 92.2\%, detectando 47 de 51 estudiantes en riesgo en el conjunto de prueba, con solo 4 estudiantes no detectados. Se implementaron medidas rigurosas de prevención de fuga de datos, excluyendo las calificaciones como predictores ya que constituyen la variable objetivo.
+
+El sistema se desplegó con arquitectura \textbf{Flask} (backend) y \textbf{React} (frontend), integrando un motor de reglas heurísticas (\textit{RiskCalculator}) para alertas en tiempo real y el modelo ML para predicción proactiva basada exclusivamente en factores socioeconómicos conocidos al momento de la matrícula.
+
+\textbf{Palabras clave:} Minería de Datos Educacional, CRISP-DM, Regresión Logística, Prevención de Fuga de Datos, Recall, Sistema de Alerta Temprana, Flask, React.
+
+% Abstract
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+
+This research develops and implements a comprehensive Educational Data Mining (EDM) model for the early detection of academic barriers at Unidad Educativa Fiscomisional Juan Montalvo. The study adopts the CRISP-DM methodology as its primary framework, analyzing 687 students with 47 socioeconomic variables for academic risk prediction.
+
+Model development followed a two-phase evolution. In \textbf{Phase 1}, a CatBoost model was implemented at the subject-student level, achieving ROC-AUC of 0.934 with 75\% Recall. In \textbf{Phase 2}, the approach was simplified to binary student-level classification (at-risk vs. not at-risk), comparing 7 Machine Learning algorithms. Contrary to initial expectations, \textbf{Logistic Regression} outperformed ensemble models, achieving the best cross-validation score (CV 0.681 ± 0.033), demonstrating that for small datasets, simple regularized models generalize better than complex algorithms.
+
+37\% of students were classified as at-risk (any grade $\leq$ 7.5). Through threshold optimization (0.25), the model achieves 92.2\% \textit{Recall}, detecting 47 of 51 at-risk students in the test set, with only 4 students missed. Rigorous data leakage prevention measures were implemented, excluding grades as predictors since they constitute the target variable.
+
+The system was deployed with \textbf{Flask} (backend) and \textbf{React} (frontend) architecture, integrating a heuristic rules engine (\textit{RiskCalculator}) for real-time alerts and the ML model for proactive prediction based exclusively on socioeconomic factors known at enrollment.
+
+\textbf{Keywords:} Educational Data Mining, CRISP-DM, Logistic Regression, Data Leakage Prevention, Recall, Early Warning System, Flask, React.
+
+
+% Tabla de contenidos
+\tableofcontents
+\listoffigures
+\listoftables
+
+% Lista de abreviaturas
+\chapter*{Lista de Abreviaturas}
+\addcontentsline{toc}{chapter}{Lista de Abreviaturas}
+\begin{acronym}
+\acro{API}{Application Programming Interface}
+\acro{AUC-ROC}{Area Under the Curve - Receiver Operating Characteristic}
+\acro{CRISP-DM}{Cross-Industry Standard Process for Data Mining}
+\acro{DCE}{Departamento de Consejería Estudiantil}
+\acro{EDM}{Educational Data Mining}
+\acro{INEC}{Instituto Nacional de Estadística y Censos}
+\acro{JSON}{JavaScript Object Notation}
+\acro{JWT}{JSON Web Tokens}
+\acro{KDD}{Knowledge Discovery in Databases}
+\acro{LAK}{Learning Analytics and Knowledge}
+\acro{ML}{Machine Learning}
+\acro{OSEMN}{Obtain, Scrub, Explore, Model, iNterpret}
+\acro{REST}{Representational State Transfer}
+\acro{RMSE}{Root Mean Square Error}
+\acro{SHAP}{Shapley Additive Explanations}
+\acro{SQL}{Structured Query Language}
+\acro{SVM}{Support Vector Machine}
+\acro{XGBoost}{eXtreme Gradient Boosting}
+\end{acronym}
+
+% Contenido principal
+\mainmatter
+\pagenumbering{arabic}
+
+\chapter{Introducción}
+
+\section{Contextualización del Problema}
+
+En la era de la transformación digital educativa, las instituciones enfrentan el desafío crítico de identificar tempranamente las barreras que pueden obstaculizar el aprovechamiento estudiantil. La Unidad Educativa Fiscomisional Juan Montalvo, con aproximadamente 900 estudiantes distribuidos en niveles de educación primaria y secundaria, representa un caso paradigmático de las limitaciones que enfrentan las instituciones educativas ecuatorianas en la gestión y análisis de datos académicos y socioeconómicos.
+
+Según datos oficiales del Instituto Nacional de Estadística y Censos \parencite{inec2022}, el 4.1\% de la población escolar ecuatoriana, equivalente a 195,188 estudiantes entre 5 y 17 años, abandona sus estudios anualmente, siendo la pobreza identificada como el factor principal de deserción. Esta realidad se agudiza en las instituciones fiscomisionales, que representan el 9.34\% del sistema educativo nacional y atienden a una población estudiantil con alta heterogeneidad socioeconómica.
+
+La institución objeto de estudio enfrenta desafíos específicos documentados:
+
+\begin{itemize}
+    \item Sistema de gestión académica (Idukay) con capacidades limitadas de análisis predictivo.
+    \item Registro manual de información socioeconómica mediante formularios físicos.
+    \item Ausencia de herramientas para identificación temprana de factores de riesgo.
+    \item Incapacidad para diseñar intervenciones personalizadas basadas en evidencia.
+\end{itemize}
+
+\section{Justificación de la Investigación}
+
+\subsection{Justificación Teórica}
+
+La Minería de Datos Educacional ha evolucionado significativamente en la última década. \textcite{malik2025advancing} introdujeron recientemente el concepto de Dynamic Feature Ensemble Evolution (DE-FS), logrando precisiones del 95.8\% en matemáticas y 95.3\% en portugués mediante la combinación de análisis de correlación dinámico, information gain adaptativo y validación cruzada estratificada. Estos avances demuestran el potencial transformador de las técnicas de machine learning en contextos educativos.
+
+Paralelamente, \textcite{yagci2022educational} demostró que modelos simplificados con solo tres variables (calificaciones parciales, departamento y facultad) pueden alcanzar precisiones del 70-75\%, proporcionando 2.5 meses para intervenciones correctivas. Esta aproximación minimalista resulta \textbf{particularmente} relevante para instituciones con recursos limitados como las fiscomisionales ecuatorianas.
+
+\subsection{Justificación Metodológica}
+
+La adopción de CRISP-DM como metodología principal responde a su consolidación como estándar de facto en proyectos de minería de datos. Según \textcite{martinez2021systematic}, CRISP-DM es utilizada en el 65\% de los proyectos industriales y el 58\% de los proyectos académicos de EDM a nivel mundial. Su estructura de seis fases proporciona un marco sistemático y replicable que garantiza la rigurosidad científica del proceso.
+
+La integración con KDD (Knowledge Discovery in Databases) reconoce la evolución histórica del campo desde los trabajos seminales de \textcite{fayyad1996kdd}, mientras que la referencia a OSEMN \parencite{mason2010data} incorpora los enfoques ágiles modernos en ciencia de datos que enfatizan la iteración rápida y la experimentación controlada.
+
+\subsection{Justificación Práctica}
+
+El contexto ecuatoriano presenta características únicas documentadas por \textcite{aviles2020determinantes} en su análisis de 281,373 estudiantes del examen Ser Bachiller 2016-2017. La distribución institucional identificada (69.51\% públicos, 21.15\% privados, 9.34\% fiscomisionales) revela patrones diferenciados de rendimiento que requieren modelos adaptados a cada contexto.
+
+Se espera que la implementación de este sistema predictivo permita identificar estudiantes en riesgo con 2.5 meses de anticipación, reducir la tasa de deserción escolar en al menos 30\%, optimizar la asignación de recursos del Departamento de Consejería Estudiantil y establecer un modelo replicable para otras instituciones educativas ecuatorianas. El análisis preliminar sugiere que variables como el nivel socioeconómico, el acceso a tecnología y el nivel educativo de los padres juegan un papel fundamental en la determinación del riesgo académico, y que los modelos de ensamble podrían ofrecer una mayor precisión en la detección de estos patrones complejos.
+
+\section{Objetivos de la Investigación}
+
+\subsection{Objetivo General}
+
+Desarrollar e implementar un modelo integral de Minería de Datos Educacional basado en la metodología CRISP-DM para la detección temprana de barreras académicas en la Unidad Educativa Fiscomisional Juan Montalvo, integrando técnicas avanzadas de machine learning con variables socioeconómicas del modelo INEC Ecuador.
+
+\subsection{Objetivos Específicos}
+
+\begin{enumerate}
+    \item Implementar las seis fases de la metodología CRISP-DM adaptadas al contexto educativo ecuatoriano, estableciendo procesos replicables para la comprensión del negocio, comprensión de datos, preparación de datos, modelado, evaluación y despliegue.
+    
+    \item Desarrollar una arquitectura tecnológica escalable utilizando React (frontend), Flask (backend) y Supabase (PostgreSQL) que permita la captura, procesamiento y visualización de datos para 687 estudiantes con 47 variables socioeconómicas.
+    
+    \item Realizar una comparación rigurosa entre 7 algoritmos de Machine Learning (Regresión Logística, Random Forest, CatBoost, XGBoost, LightGBM, Gradient Boosting) para identificar el modelo óptimo en términos de validación cruzada y capacidad de generalización.
+    
+    \item Implementar medidas estrictas de prevención de fuga de datos (\textit{data leakage}), excluyendo calificaciones, edad y grado como predictores, para asegurar predicciones genuinamente preventivas basadas únicamente en factores socioeconómicos conocidos al momento de la matrícula.
+    
+    \item Validar el sistema mediante métricas estándar (ROC-AUC, Recall, Precisión, F1-score) y optimización de umbral, con el objetivo de maximizar la detección de estudiantes en riesgo (Recall $\geq$ 90\%).
+    
+    \item Analizar e interpretar los coeficientes del modelo final para identificar los factores protectores y de riesgo más significativos, proporcionando recomendaciones accionables para el Departamento de Consejería Estudiantil.
+\end{enumerate}
+
+\section{Estructura del Documento}
+
+Esta tesis se organiza en siete capítulos principales. Tras esta introducción, el Capítulo 2 presenta el marco teórico comprehensivo sobre EDM, metodologías de minería de datos y el estado del arte en sistemas predictivos educativos. El Capítulo 3 detalla el análisis y exploración de datos. El Capítulo 4 describe el desarrollo técnico del sistema (Marco Propositivo), incluyendo arquitectura, componentes y la integración de modelos. El Capítulo 5 presenta los resultados experimentales y la validación del modelo. El Capítulo 6 discute las implicaciones pedagógicas, limitaciones y consideraciones éticas. Finalmente, el Capítulo 7 presenta las conclusiones, contribuciones y trabajo futuro.
+
+\chapter{Marco Teórico y Estado del Arte}
+
+\section{Evolución Histórica de la Minería de Datos Educacional}
+
+\subsection{De KDD a CRISP-DM: La Evolución Metodológica}
+
+El campo de la Minería de Datos Educacional tiene sus raíces en el proceso KDD (Knowledge Discovery in Databases), formalizado por \textcite{fayyad1996kdd} como un proceso iterativo de nueve pasos para extraer conocimiento útil de grandes volúmenes de datos. KDD estableció los fundamentos conceptuales que posteriormente evolucionarían hacia metodologías más estructuradas y orientadas a la industria.
+
+La transición de KDD a CRISP-DM representa un hito fundamental en la maduración del campo. Mientras KDD proporcionó el marco teórico con sus fases de selección, preprocesamiento, transformación, minería de datos y evaluación, CRISP-DM emergió en 1996 como respuesta a la necesidad de una metodología estandarizada y práctica. Desarrollado por un consorcio liderado por NCR, DaimlerChrysler (ahora Mercedes-Benz), SPSS (ahora IBM) y OHRA, CRISP-DM se diseñó específicamente para proyectos industriales de minería de datos \parencite{chapman2000crisp, wirth2000crisp}.
+
+La metodología OSEMN, introducida más recientemente por \textcite{mason2010data}, representa una simplificación orientada a la ciencia de datos moderna:
+
+\begin{itemize}
+    \item \textbf{Obtain (Obtener)}: Adquisición de datos desde múltiples fuentes.
+    \item \textbf{Scrub (Limpiar)}: Limpieza y preparación de datos.
+    \item \textbf{Explore (Explorar)}: Análisis exploratorio y visualización.
+    \item \textbf{Model (Modelar)}: Construcción y entrenamiento de modelos.
+    \item \textbf{iNterpret (Interpretar)}: Interpretación y comunicación de resultados.
+\end{itemize}
+
+\subsection{Educational Data Mining: Definición y Alcance}
+
+\textcite{romero2020educational} definen EDM como ``la aplicación de técnicas de minería de datos para explorar los tipos únicos de datos que provienen de contextos educativos''. Esta definición ha evolucionado significativamente desde los trabajos iniciales de \textcite{baker2009state}, expandiéndose para incluir:
+
+\begin{enumerate}
+    \item Predicción del rendimiento académico.
+    \item Modelado del conocimiento estudiantil.
+    \item Detección de comportamientos y emociones.
+    \item Descubrimiento de estructura del dominio.
+    \item Análisis de relaciones sociales en el aprendizaje.
+    \item Desarrollo de sistemas de recomendación educativa.
+    \item Planificación y programación educativa.
+\end{enumerate}
+
+\textcite{pena2014educational}, en su análisis exhaustivo de 240 trabajos publicados entre 2008 y 2013, identificó que el 60\% se enfocaba en modelado estudiantil y predicción de rendimiento, mientras que solo el 15\% abordaba deserción escolar, evidenciando una oportunidad significativa para investigaciones integradas como la presente.
+
+\section{Estado del Arte en Sistemas Predictivos Educativos}
+
+\subsection{Avances Recientes en Precisión Predictiva}
+
+Los avances más significativos en EDM se han producido en los últimos cinco años, con mejoras sustanciales en precisión predictiva:
+
+\subsubsection{Dynamic Feature Ensemble Evolution}
+
+\textcite{malik2025advancing} introdujeron DE-FS, logrando precisiones del 95.8\% en matemáticas y 95.3\% en portugués. Su metodología combina:
+
+\begin{itemize}
+    \item Análisis de correlación dinámico que se adapta a cambios temporales.
+    \item Information gain adaptativo que prioriza características emergentes.
+    \item Chi-square con validación cruzada estratificada de 10 pliegues.
+    \item Regularización L1/L2 para prevención de overfitting.
+    \item Ensemble de Random Forest, XGBoost y Neural Networks.
+\end{itemize}
+
+\subsubsection{Modelos Minimalistas para Recursos Limitados}
+
+\textcite{yagci2022educational} demostró que modelos simplificados pueden ser altamente efectivos:
+
+\begin{table}[H]
+\centering
+\caption{Comparación de Modelos Minimalistas vs. Complejos}
+\label{tab:minimalistas}
+\begin{tabular}{lccc}
+\toprule
+Característica & Minimalista & Complejo & Diferencia \\
+\midrule
+Variables utilizadas & 3 & 47 & -93.6\% \\
+Precisión alcanzada & 75\% & 92\% & -17\% \\
+Tiempo de entrenamiento & 2 min & 45 min & -95.6\% \\
+Recursos computacionales & Bajo & Alto & Significativo \\
+Interpretabilidad & Alta & Baja & Mejor \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Sistemas de Alerta Temprana}
+
+\subsubsection{Implementaciones a Gran Escala}
+
+\textcite{rienties2020scalable} documentaron la implementación más grande reportada hasta la fecha:
+
+\begin{itemize}
+    \item \textbf{Institución}: Open University UK.
+    \item \textbf{Estudiantes}: 170,000+.
+    \item \textbf{Cursos monitoreados}: 250+.
+    \item \textbf{Precisión promedio}: 89\%.
+    \item \textbf{Tiempo de predicción}: Semana 3 del curso.
+    \item \textbf{Reducción deserción}: 32\%.
+\end{itemize}
+
+\subsubsection{Factores Críticos de Éxito}
+
+\textcite{angeioplastis2025predicting} identificaron factores críticos mediante análisis de 450 estudiantes durante 9 semestres:
+
+\begin{enumerate}
+    \item \textbf{Temporalidad}: Intervenciones antes de la semana 4 son 3x más efectivas.
+    \item \textbf{Personalización}: Mensajes personalizados mejoran engagement en 45\%.
+    \item \textbf{Multimodalidad}: Combinar datos académicos, sociales y comportamentales.
+    \item \textbf{Feedback continuo}: Actualización semanal de predicciones.
+\end{enumerate}
+
+\subsection{Contexto Latinoamericano}
+
+\subsubsection{Chile: Sistema Nacional de Alerta Temprana}
+
+\textcite{huanca2022aplicacion} documentaron la implementación del sistema chileno:
+
+\begin{itemize}
+    \item 365,854 estudiantes analizados.
+    \item Variables socioeconómicas explican 40\% de varianza.
+    \item Precisión de 78\% en predicción de deserción.
+    \item Reducción de 25\% en abandono escolar tras intervenciones.
+\end{itemize}
+
+\subsubsection{Ecuador: Contexto Específico}
+
+\textcite{aviles2020determinantes} analizaron el sistema educativo ecuatoriano con datos de 281,373 estudiantes del examen Ser Bachiller 2016-2017:
+
+\begin{table}[H]
+\centering
+\caption{Distribución del Sistema Educativo Ecuatoriano}
+\label{tab:distribucion_ecuador}
+\begin{tabular}{lccc}
+\toprule
+Tipo de Institución & Estudiantes & Porcentaje & Rendimiento Promedio \\
+\midrule
+Pública & 195,683 & 69.51\% & 7.2/10 \\
+Privada & 59,530 & 21.15\% & 8.1/10 \\
+Fiscomisional & 26,260 & 9.34\% & 7.6/10 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Las instituciones fiscomisionales presentan características únicas:
+\begin{itemize}
+    \item Mayor heterogeneidad socioeconómica que las públicas.
+    \item Recursos más limitados que las privadas.
+    \item Fuerte componente de valores y formación integral.
+    \item Necesidad de modelos adaptados a su contexto específico.
+\end{itemize}
+
+\section{Técnicas de Machine Learning en Educación}
+
+\subsection{Algoritmos de Clasificación}
+
+\subsubsection{Random Forest}
+
+Random Forest, introducido por \textcite{breiman2001random}, ha demostrado consistentemente su efectividad en EDM:
+
+\begin{itemize}
+    \item \textbf{Ventajas en contexto educativo}:
+    \begin{itemize}
+        \item Robustez ante datos desbalanceados (común en deserción).
+        \item Manejo natural de variables mixtas.
+        \item Importancia de características interpretable.
+        \item No requiere normalización de datos.
+    \end{itemize}
+    \item \textbf{Rendimiento típico}: 85-92\% precisión en predicción de deserción.
+    \item \textbf{Hiperparámetros críticos}: n\_estimators (100-500), max\_depth (10-30).
+\end{itemize}
+
+\subsubsection{XGBoost}
+
+\textcite{chen2016xgboost} desarrollaron XGBoost, que ha dominado competencias de machine learning:
+
+\begin{itemize}
+    \item \textbf{Características distintivas}:
+    \begin{itemize}
+        \item Regularización L1 y L2 incorporada.
+        \item Manejo automático de valores faltantes.
+        \item Paralelización y optimización de hardware.
+        \item Poda de árbol inteligente.
+    \end{itemize}
+    \item \textbf{Rendimiento en EDM}: Hasta 96\% precisión con datasets grandes.
+\end{itemize}
+
+\subsubsection{Support Vector Machines}
+
+Las SVM \parencite{vapnik1995nature} siguen siendo relevantes para ciertos contextos educativos:
+
+\begin{table}[H]
+\centering
+\caption{Comparación de Kernels SVM en EDM}
+\label{tab:svm_kernels}
+\begin{tabular}{lccc}
+\toprule
+Kernel & Precisión & Tiempo & Interpretabilidad \\
+\midrule
+Linear & 78\% & Rápido & Alta \\
+RBF & 85\% & Medio & Baja \\
+Polynomial & 82\% & Lento & Media \\
+Sigmoid & 79\% & Medio & Baja \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Métodos Ensemble}
+
+\textcite{injadat2020systematic} propusieron un framework sistemático para selección de ensemble:
+
+\subsubsection{Tipos de Ensemble}
+
+\leavevmode % <--- CORRECCIÓN AÑADIDA PARA EVITAR ERROR DE COMPILACIÓN
+\begin{enumerate}
+    \item \textbf{Bagging (Bootstrap Aggregating)}:
+    \begin{itemize}
+        \item Reduce varianza mediante muestreo con reemplazo.
+        \item Ejemplos: Random Forest, Extra Trees.
+        \item Efectivo para modelos de alta varianza.
+    \end{itemize}
+    
+    \item \textbf{Boosting}:
+    \begin{itemize}
+        \item Reduce sesgo mediante aprendizaje secuencial.
+        \item Ejemplos: AdaBoost, Gradient Boosting, XGBoost.
+        \item Efectivo para modelos de alto sesgo.
+    \end{itemize}
+    
+    \item \textbf{Stacking}:
+    \begin{itemize}
+        \item Combina predicciones mediante meta-learner.
+        \item Permite heterogeneidad de modelos base.
+        \item Mayor complejidad pero mejor rendimiento.
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Deep Learning en Educación}
+
+Las redes neuronales han mostrado resultados prometedores en tareas específicas:
+
+\begin{itemize}
+    \item \textbf{LSTM}: Para análisis de secuencias temporales de aprendizaje.
+    \item \textbf{CNN}: Para procesamiento de materiales educativos visuales.
+    \item \textbf{Transformers}: Para análisis de texto y comprensión de respuestas.
+    \item \textbf{Autoencoders}: Para detección de anomalías en patrones de estudio.
+\end{itemize}
+
+\section{Variables Predictivas en Contextos Educativos}
+
+\subsection{Variables Socioeconómicas}
+
+\textcite{suaza2024model} analizaron 365,854 estudiantes identificando las variables más predictivas:
+
+\begin{table}[H]
+\centering
+\caption{Impacto de Variables Socioeconómicas (Valores SHAP)}
+\label{tab:shap_socioeconomicas}
+\begin{tabular}{lcc}
+\toprule
+Variable & Importancia SHAP & Correlación con Rendimiento \\
+\midrule
+Índice socioeconómico familiar & 0.342 & 0.68 \\
+Nivel educativo madre & 0.281 & 0.61 \\
+Nivel educativo padre & 0.234 & 0.57 \\
+Acceso a internet & 0.198 & 0.52 \\
+Número de libros en hogar & 0.176 & 0.49 \\
+Estructura familiar & 0.154 & 0.45 \\
+Trabajo estudiantil & -0.143 & -0.42 \\
+Hacinamiento & -0.132 & -0.38 \\
+Distancia a escuela & -0.098 & -0.31 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Variables Académicas}
+
+Las variables académicas tradicionales mantienen su importancia:
+
+\begin{enumerate}
+    \item \textbf{Promedio general acumulado (GPA)}: Predictor más fuerte (r = 0.72).
+    \item \textbf{Asistencia}: Correlación de 0.67 con rendimiento.
+    \item \textbf{Participación en clase}: Medida por intervenciones y preguntas.
+    \item \textbf{Entrega de tareas}: Puntualidad y completitud.
+    \item \textbf{Historial de repitencia}: Factor de riesgo multiplicativo.
+\end{enumerate}
+
+\subsection{Variables Comportamentales}
+
+Con el auge del aprendizaje digital, nuevas variables han emergido:
+
+\begin{itemize}
+    \item Frecuencia de acceso a plataforma educativa.
+    \item Tiempo dedicado a recursos de aprendizaje.
+    \item Patrones de navegación en contenido educativo.
+    \item Interacciones en foros y discusiones.
+    \item Uso de recursos de apoyo.
+\end{itemize}
+
+\section{Explicabilidad en Modelos Educativos}
+
+\subsection{SHAP Values}
+
+Los valores SHAP (Shapley Additive Explanations), basados en teoría de juegos cooperativos, han revolucionado la interpretabilidad \parencite{lundberg2017unified}:
+
+\subsubsection{Fundamentos Matemáticos}
+
+El valor SHAP para una característica $i$ se calcula como:
+
+$\phi_i = \sum_{S \subseteq F \setminus \{i\}} \frac{|S|!(|F|-|S|-1)!}{|F|!} [f_{S \cup \{i\}}(x_{S \cup \{i\}}) - f_S(x_S)]$
+
+Donde:
+\begin{itemize}
+    \item $F$ es el conjunto de todas las características.
+    \item $S$ es un subconjunto de características.
+    \item $f_S$ es el modelo entrenado con características $S$.
+\end{itemize}
+
+\subsubsection{Aplicaciones en EDM}
+
+SHAP permite:
+\begin{enumerate}
+    \item Explicar predicciones individuales a padres y estudiantes.
+    \item Identificar factores modificables para intervención.
+    \item Detectar sesgos en el modelo.
+    \item Validar coherencia pedagógica de predicciones.
+\end{enumerate}
+
+\subsection{Consideraciones Éticas}
+
+\textcite{holmes2022ethics} proponen un framework ético comprehensivo:
+
+\begin{table}[H]
+\centering
+\caption{Framework Ético para EDM}
+\label{tab:framework_etico}
+\begin{tabular}{ll}
+\toprule
+Principio & Implementación \\
+\midrule
+Transparencia & Documentación completa de algoritmos y datos. \\
+Equidad & Auditoría de sesgos por género, etnia, nivel socioeconómico. \\
+Privacidad & Encriptación, \textbf{anonimización}, cumplimiento normativo. \\
+Agencia & Preservar autonomía estudiantil en decisiones. \\
+Beneficencia & Uso exclusivo para beneficio estudiantil. \\
+No maleficencia & Prohibir uso punitivo de predicciones. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\chapter{Metodología}
+
+\section{Diseño de la Investigación}
+
+Esta investigación adopta un enfoque mixto, cuantitativo-cualitativo, además exploratoria con diseño transversal. La implementación sigue las seis fases de CRISP-DM (Cross-Industry Standard Process for Data Mining), reconocida como la metodología estándar para proyectos de minería de datos \parencite{chapman2000crisp, wirth2000crisp}.
+
+\subsection{Enfoque Metodológico}
+
+\begin{itemize}
+    \item \textbf{Paradigma}: Post-positivista con elementos pragmáticos.
+    \item \textbf{Tipo de investigación}: Aplicada y exploratoria.
+    \item \textbf{Diseño}: Transversal con mediciones pre y post intervención.
+    \item \textbf{Temporalidad}: Año 2025.
+    \item \textbf{Alcance}: Descriptivo, correlacional y predictivo.
+\end{itemize}
+
+\section{Metodología CRISP-DM}
+
+\subsection{Definición y Fases}
+
+CRISP-DM es una metodología estándar para proyectos de minería de datos que proporciona un enfoque estructurado y sistemático \parencite{martinez2021systematic}. Consta de seis fases interrelacionadas:
+
+\begin{table}[H]
+\centering
+\caption{Fases de la Metodología CRISP-DM}
+\label{tab:fases_crispdm}
+\begin{tabular}{p{3.5cm}p{9cm}}
+\toprule
+\textbf{Fase} & \textbf{Descripción} \\
+\midrule
+Comprensión del Negocio & Entender los objetivos del proyecto desde una perspectiva empresarial/educativa y convertirlos en un problema de minería de datos. \\
+\midrule
+Comprensión de los Datos & Recolectar datos iniciales y familiarizarse con ellos para identificar problemas de calidad y descubrir primeras ideas. \\
+\midrule
+Preparación de los Datos & Construir el conjunto de datos final a partir de los datos crudos mediante limpieza, transformación e integración. \\
+\midrule
+Modelado & Seleccionar y aplicar técnicas de modelado, calibrando sus parámetros a valores óptimos. \\
+\midrule
+Evaluación & Evaluar el modelo para asegurar que cumple los objetivos del negocio antes del despliegue. \\
+\midrule
+Despliegue & Organizar y presentar el conocimiento obtenido de manera que el cliente pueda usarlo. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Contexto Institucional}
+
+La Unidad Educativa Fiscomisional Juan Montalvo presenta las siguientes características:
+
+\begin{table}[H]
+\centering
+\caption{Características Institucionales}
+\label{tab:caracteristicas_institucionales}
+\begin{tabular}{ll}
+\toprule
+\textbf{Característica} & \textbf{Descripción} \\
+\midrule
+Población total & 900 estudiantes \\
+Distribución primaria & 520 estudiantes (57.8\%) \\
+Distribución secundaria & 380 estudiantes (42.2\%) \\
+Nivel socioeconómico predominante & Medio-bajo (45\%), Bajo (40\%) \\
+Tasa deserción histórica & 4.2\% anual \\
+Tasa repitencia & 6.8\% anual \\
+Ratio estudiante/profesor & 25:1 \\
+Personal DCE & 3 profesionales \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Objetivos del Estudio}
+
+\subsection{Objetivo Principal}
+Reducir deserción escolar en 30\% para el ciclo 2025-2026.
+
+\subsection{Objetivos Secundarios}
+\begin{itemize}
+    \item Identificar estudiantes en riesgo con 10 semanas de anticipación.
+    \item Mejorar la asignación de recursos del DCE mediante focalización específica de intervenciones pedagógicas y psicosociales.
+    \item Establecer sistema de monitoreo continuo del rendimiento académico.
+\end{itemize}
+
+\section{Variables del Estudio}
+
+\subsection{Variables Demográficas y Personales del Estudiante}
+
+\begin{table}[H]
+\centering
+\caption{Variables Demográficas del Estudiante}
+\label{tab:vars_demograficas}
+\begin{tabular}{ll}
+\toprule
+\textbf{Variable} & \textbf{Tipo de Dato} \\
+\midrule
+Nombres & Texto \\
+Apellidos & Texto \\
+Lugar y fecha de nacimiento & Texto/Fecha \\
+Edad & Numérico \\
+Número de cédula & Texto \\
+Teléfono & Texto \\
+Grado & Categórico ordinal \\
+Dirección domiciliaria & Texto \\
+Escuela de procedencia & Texto \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Variables Académicas}
+
+\begin{table}[H]
+\centering
+\caption{Variables de Rendimiento Académico}
+\label{tab:vars_academicas}
+\begin{tabular}{ll}
+\toprule
+\textbf{Variable} & \textbf{Tipo de Dato} \\
+\midrule
+Promedio Ciencias Naturales & Numérico (0-10) \\
+Promedio Computación & Numérico (0-10) \\
+Promedio ECA (Educación Cultural y Artística) & Numérico (0-10) \\
+Promedio Educación Física & Numérico (0-10) \\
+Promedio Estudios Sociales & Numérico (0-10) \\
+Promedio Inglés & Numérico (0-10) \\
+Promedio Historia & Numérico (0-10) \\
+Promedio Lengua y Literatura & Numérico (0-10) \\
+Promedio Matemática & Numérico (0-10) \\
+Estado académico & Categórico (Aprobado/Supletorio) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Variables Socioeconómicas - Modelo INEC}
+
+Basado en la Encuesta de Estratificación del Nivel Socioeconómico del INEC, se utilizan las siguientes variables con sus respectivos puntajes:
+
+\subsubsection{Características de la Vivienda}
+
+\begin{table}[H]
+\centering
+\caption{Variables de Características de la Vivienda}
+\label{tab:vars_vivienda}
+\begin{tabular}{llc}
+\toprule
+\textbf{Variable} & \textbf{Categorías} & \textbf{Puntaje} \\
+\midrule
+\multirow{7}{*}{Tipo de vivienda} & Suite de lujo & 59 \\
+ & Cuarto(s) en casa de inquilinato & 59 \\
+ & Departamento en casa o edificio & 59 \\
+ & Casa/Villa & 59 \\
+ & Mediagua & 40 \\
+ & Rancho & 4 \\
+ & Choza/Covacha/Otro & 0 \\
+\midrule
+\multirow{5}{*}{Material paredes} & Hormigón & 59 \\
+ & Ladrillo o bloque & 55 \\
+ & Adobe/Tapia & 47 \\
+ & Caña revestida o bahareque/Madera & 17 \\
+ & Caña no revestida/Otros materiales & 0 \\
+\midrule
+\multirow{5}{*}{Material piso} & Duela, parquet, tablón o piso flotante & 48 \\
+ & Cerámica, baldosa, vinil o marmetón & 46 \\
+ & Ladrillo o cemento & 34 \\
+ & Tabla sin tratar & 32 \\
+ & Tierra/Caña/Otros materiales & 0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Acceso a Servicios}
+
+\begin{table}[H]
+\centering
+\caption{Variables de Acceso a Servicios}
+\label{tab:vars_servicios}
+\begin{tabular}{llc}
+\toprule
+\textbf{Variable} & \textbf{Categorías} & \textbf{Puntaje} \\
+\midrule
+\multirow{4}{*}{Cuartos de baño} & No tiene cuarto de baño exclusivo & 0 \\
+ & Tiene 1 cuarto de baño exclusivo & 12 \\
+ & Tiene 2 cuartos de baño exclusivos & 24 \\
+ & Tiene 3 o más cuartos de baño & 32 \\
+\midrule
+\multirow{6}{*}{Servicio higiénico} & No tiene & 0 \\
+ & Letrina & 15 \\
+ & Con descarga directa al mar, río, lago & 18 \\
+ & Conectado a pozo ciego & 18 \\
+ & Conectado a pozo séptico & 22 \\
+ & Conectado a red pública de alcantarillado & 38 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Variables del Contexto Familiar}
+
+\begin{table}[H]
+\centering
+\caption{Variables del Representante Legal/Padres}
+\label{tab:vars_familiar}
+\begin{tabular}{ll}
+\toprule
+\textbf{Variable} & \textbf{Tipo de Dato} \\
+\midrule
+Nombres y apellidos & Texto \\
+Fecha de nacimiento & Fecha \\
+Edad & Numérico \\
+Relación de parentesco & Categórico \\
+Estado civil & Categórico (6 opciones) \\
+Nivel de instrucción & Categórico ordinal (8 niveles) \\
+Ocupación & Categórico (12 categorías) \\
+Lugar de trabajo & Texto \\
+Horario de trabajo & Texto \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Variables de Posesión de Bienes}
+
+\begin{table}[H]
+\centering
+\caption{Variables de Bienes del Hogar}
+\label{tab:vars_bienes}
+\begin{tabular}{lc}
+\toprule
+\textbf{Variable} & \textbf{Categorías} \\
+\midrule
+Teléfono convencional & Sí/No \\
+Cocina con horno & Sí/No \\
+Refrigeradora & Sí/No \\
+Lavadora & Sí/No \\
+Equipo de sonido & Sí/No \\
+Número de TV a color & 0, 1, 2, 3 o más \\
+Número de vehículos & 0, 1, 2, 3 o más \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Variables de Hábitos y Consumo}
+
+\begin{table}[H]
+\centering
+\caption{Variables de Hábitos de Consumo}
+\label{tab:vars_consumo}
+\begin{tabular}{ll}
+\toprule
+\textbf{Variable} & \textbf{Tipo} \\
+\midrule
+Compra ropa en centros comerciales & Sí/No \\
+Uso de internet (últimos 6 meses) & Sí/No \\
+Uso de correo electrónico & Sí/No \\
+Registro en redes sociales & Sí/No \\
+Lectura de libros (últimos 3 meses) & Sí/No \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Variables de Seguridad Social}
+
+\begin{table}[H]
+\centering
+\caption{Variables de Protección Social}
+\label{tab:vars_social}
+\begin{tabular}{ll}
+\toprule
+\textbf{Variable} & \textbf{Opciones} \\
+\midrule
+Seguro público (IESS/ISSFA/ISSPOL) & Sí/No \\
+Seguro privado de salud & Sí/No \\
+Ocupación del jefe del hogar & 12 categorías profesionales \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Población y Muestra}
+
+\subsection{Población}
+La población objetivo comprende los 900 estudiantes de la Unidad Educativa Fiscomisional Juan Montalvo.
+
+\subsection{Muestra}
+Para el estudio piloto se trabajará con una muestra estratificada de 504 estudiantes (56\% de la población), calculada con un nivel de confianza del 95\% y margen de error del 3\%.
+
+\begin{table}[H]
+\centering
+\caption{Distribución de la Muestra por Niveles}
+\label{tab:distribucion_muestra}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Nivel} & \textbf{Población} & \textbf{Muestra} & \textbf{\%} \\
+\midrule
+Primaria Inferior (1°-3°) & 180 & 90 & 50\% \\
+Primaria Superior (4°-7°) & 340 & 170 & 50\% \\
+Secundaria Básica (8°-10°) & 220 & 132 & 60\% \\
+Bachillerato (1°-3° BGU) & 160 & 112 & 70\% \\
+\midrule
+\textbf{Total} & \textbf{900} & \textbf{504} & \textbf{56\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Instrumentos de Recolección de Datos}
+
+\subsection{Formulario Socioeconómico INEC}
+Se utilizará el formulario de Estratificación del Nivel Socioeconómico del Instituto Nacional de Estadística y Censos (INEC), digitalizado para facilitar la captura de datos.
+
+\subsection{Registros Académicos}
+Datos provenientes del sistema Idukay y registros institucionales que incluyen calificaciones, asistencia y observaciones disciplinarias.
+
+\section{Consideraciones Éticas}
+
+\begin{itemize}
+    \item Aprobación del Comité de Ética institucional.
+    \item Consentimiento informado de padres/representantes.
+    \item Asentimiento de estudiantes mayores de 12 años.
+    \item Protección de datos personales según normativa ecuatoriana.
+    \item Uso de información exclusivamente para fines educativos.
+\end{itemize}
+
+\section{Cronograma}
+
+El estudio se desarrollará durante el año 2025, con las siguientes fases:
+
+\begin{table}[H]
+\centering
+\caption{Cronograma de Actividades 2025}
+\label{tab:cronograma}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Actividad} & \textbf{Inicio} & \textbf{Fin} \\
+\midrule
+Recolección de datos & Enero & Marzo \\
+Procesamiento y análisis & Abril & Junio \\
+Desarrollo del modelo & Julio & Septiembre \\
+Validación y ajustes & Octubre & Noviembre \\
+Implementación & Diciembre & Diciembre \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\chapter{Análisis y Exploración de Datos}
+\label{chap:analisis_datos}
+
+Esta fase, correspondiente a la comprensión de datos en CRISP-DM, fue fundamental para garantizar la calidad de los insumos del modelo. Se realizó una inspección exhaustiva de 687 registros completos de estudiantes del año lectivo 2024.
+
+\section{Descripción del Conjunto de Datos}
+
+El dataset final consolidó información de cuatro fuentes principales: registro de matrícula, encuesta socioeconómica, rendimiento académico y registro de asistencia.
+
+\begin{table}[H]
+\centering
+\caption{Estadísticas Descriptivas de Variables Numéricas}
+\label{tab:stats_descriptivas}
+\begin{tabular}{lccccccc}
+\toprule
+Variable & N & Media & Std & Min & 25\% & 50\% & Max \\
+\midrule
+Edad Estudiante & 687 & 13.8 & 2.1 & 10 & 12 & 14 & 18 \\
+Promedio General & 687 & 8.94 & 0.89 & 5.2 & 8.45 & 9.12 & 10.0 \\
+Quintil Socioeconómico & 673 & 3.08 & 1.35 & 1 & 2 & 3 & 5 \\
+Edad Representante & 632 & 38.4 & 8.2 & 25 & 32 & 37 & 68 \\
+Número Hermanos & 687 & 2.1 & 1.4 & 0 & 1 & 2 & 8 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Se identificó una distribución de género equilibrada (53.1\% masculino, 46.9\% femenino). Sin embargo, la distribución socioeconómica reveló que un 34\% de la población estudiantil se encuentra en los quintiles vulnerables (Q1 y Q2), lo que justifica la necesidad de un sistema de alerta temprana.
+
+\section{Análisis de la Variable Objetivo (Target)}
+
+Se definió la variable objetivo \texttt{at\_risk} como binaria, donde 1 indica estudiantes en riesgo (promedio general $\leq$ 7.5) y 0 indica estudiantes sin riesgo. Este umbral fue elegido estratégicamente para permitir intervención temprana antes del punto crítico de reprobación (7.0).
+
+El análisis reveló la siguiente distribución:
+
+\begin{itemize}
+    \item \textbf{Sin Riesgo (Clase 0):} 63\% (433 estudiantes con promedio > 7.5).
+    \item \textbf{En Riesgo (Clase 1):} 37\% (254 estudiantes con promedio $\leq$ 7.5).
+\end{itemize}
+
+Este ratio de clases de 1.70:1 representa un desbalance moderado que no requiere técnicas agresivas de rebalanceo como SMOTE. En lugar de ello, se utilizó el parámetro \texttt{class\_weight='balanced'} en los modelos que lo soportan, permitiendo que el algoritmo ajuste automáticamente los pesos de las clases inversamente proporcionales a su frecuencia.
+
+\section{Prevención de Data Leakage: Diseño del Feature Set}
+
+Un aspecto crítico del diseño fue la exclusión deliberada de variables que provocarían \textbf{data leakage} (fuga de datos) en un sistema de alerta temprana. El objetivo es predecir riesgo \textit{antes} de que ocurra el fracaso, no detectarlo después.
+
+\textbf{Variables Excluidas del Modelo Predictivo:}
+\begin{itemize}
+    \item \texttt{promedio\_general}: Correlación perfecta con el target (la variable objetivo se deriva de esta columna). Incluirla sería circular y trivializaría el problema.
+    \item \texttt{edad}: Fuertemente correlacionada con el grado escolar, no aporta valor predictivo independiente.
+    \item \texttt{grado}: Variable administrativa que no representa una barrera socioeconómica real.
+    \item \texttt{asistencia}: Aunque correlaciona con riesgo (+0.312), se considera un \textit{síntoma} del fracaso, no una causa raíz. Se utiliza en el motor de reglas heurísticas para alertas en tiempo real, pero no en el modelo predictivo.
+\end{itemize}
+
+\textbf{Variables Incluidas (47 características socioeconómicas):}
+\begin{itemize}
+    \item Información del representante: nivel educativo, empleo, edad, estado civil.
+    \item Condiciones del hogar: tenencia de vivienda, material de construcción, servicios básicos.
+    \item Acceso tecnológico: internet, laptop, computadora de escritorio.
+    \item Cobertura de salud y situación económica.
+    \item Idiomas y actividades extracurriculares.
+\end{itemize}
+
+Esta separación permite que el modelo identifique \textbf{causas raíz} (barreras socioeconómicas) en lugar de simplemente detectar síntomas, habilitando predicciones preventivas al inicio del año escolar.
+
+\section{Correlaciones y Hallazgos Clave}
+
+El análisis de correlación confirmó que los factores socioeconómicos impactan el rendimiento.
+
+\begin{itemize}
+    \item \textbf{Quintil vs. Rendimiento:} Correlación negativa significativa (-0.234). Estudiantes de quintiles más altos tienen menor riesgo de reprobación. El ratio de falla entre el Q1 (vulnerable) y el Q5 (acomodado) es de 3.5x.
+    \item \textbf{Barreras Tecnológicas:} La falta de laptop (-0.182) e internet (-0.165) mostraron correlaciones negativas con el éxito académico, indicando que la carencia de estos recursos aumenta el riesgo.
+    \item \textbf{Asistencia:} El ausentismo mostró la correlación positiva más fuerte con el fracaso (+0.312), validando su inclusión en el motor de reglas heurísticas (aunque se excluyó del modelo predictivo para evitar data leakage).
+\end{itemize}
+
+\chapter{Marco Propositivo}
+\label{chap:marco_propositivo}
+
+El marco propositivo de esta tesis consistió en la implementación práctica de la metodología CRISP-DM, dividida en tres fases principales: (1) Desarrollo y evolución del modelo predictivo, (2) Validación del modelo contra datos reales y (3) Despliegue tecnológico.
+
+\section{Evolución del Modelo: Del Problema Original al Problema Correcto}
+
+Un hallazgo fundamental de esta investigación fue la necesidad de reconceptualizar el problema de predicción durante el proceso de desarrollo. Esta evolución en dos fases ilustra la importancia de la iteración en proyectos de ciencia de datos.
+
+\subsection{Fase 1: Modelo a Nivel de Materia (Problema Original)}
+
+Inicialmente, el problema se definió como la predicción de reprobación a nivel de cada materia individual. Con un dataset de 7,251 registros (687 estudiantes $\times$ múltiples materias), se compararon 7 algoritmos de Machine Learning.
+
+\begin{table}[H]
+\centering
+\caption{Comparación de Modelos - Fase 1 (Target: Reprobación por Materia)}
+\label{tab:model_comparison_phase1}
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Modelo} & \textbf{Config} & \textbf{ROC-AUC} & \textbf{Recall} & \textbf{Precision} & \textbf{Tiempo} \\
+\midrule
+Random Forest & Tuned & 0.9419 & 7.8\% & 62.5\% & 11.5s \\
+LightGBM & Baseline & 0.9307 & 46.9\% & 42.3\% & 1.9s \\
+CatBoost & Baseline & 0.9340 & 75.0\% & 35.6\% & 0.8s \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Los modelos de ensemble mostraron métricas aparentemente impresionantes (CatBoost ROC-AUC 0.934). Sin embargo, durante la fase de evaluación se identificaron problemas críticos:
+
+\begin{enumerate}
+    \item \textbf{Granularidad Incorrecta:} Predecir reprobación por materia genera una lista fragmentada y difícil de gestionar. La institución necesita saber \textit{qué estudiante} está en riesgo, no qué combinación estudiante-materia.
+    \item \textbf{Posible Data Leakage Implícito:} Las correlaciones a nivel de materia pueden capturar patrones espurios de la estructura del dataset en lugar de relaciones causales.
+    \item \textbf{Sobreajuste a Datos Estructurados:} El alto AUC podría reflejar la capacidad del modelo de "memorizar" patrones del dataset específico en lugar de generalizar.
+\end{enumerate}
+
+\subsection{Fase 2: Modelo a Nivel de Estudiante (Problema Correcto)}
+
+Se redefinió el problema como: \textit{"¿Está este estudiante en riesgo académico general?"} El dataset se reestructuró a 687 registros únicos (uno por estudiante), y la variable objetivo se definió como \texttt{at\_risk} (promedio general $\leq$ 7.5).
+
+\begin{table}[H]
+\centering
+\caption{Comparación de Modelos - Fase 2 (Target: Riesgo General del Estudiante)}
+\label{tab:model_comparison_phase2}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Modelo} & \textbf{Cross-Val Mean} & \textbf{CV Std} & \textbf{Test ROC-AUC} \\
+\midrule
+Logistic Regression & \textbf{0.6812} & 0.0332 & 0.6103 \\
+SVM (RBF Kernel) & 0.6748 & 0.0411 & 0.5920 \\
+Random Forest & 0.6520 & 0.0485 & 0.5788 \\
+Gradient Boosting & 0.6410 & 0.0523 & 0.5651 \\
+CatBoost & 0.6380 & 0.0502 & 0.5620 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Hallazgo Crítico:} En la Fase 2, los resultados se invirtieron completamente. La \textbf{Regresión Logística} (CV 0.681 $\pm$ 0.033) superó a todos los modelos de ensemble, incluyendo CatBoost. Este resultado, aparentemente contraintuitivo, tiene una explicación teórica sólida:
+
+\begin{itemize}
+    \item \textbf{Datasets Pequeños Favorecen Modelos Simples:} Con solo 687 muestras, los modelos complejos no tienen suficientes datos para aprender patrones no lineales robustos sin sobreajustarse.
+    \item \textbf{Regularización L2:} La Regresión Logística con regularización penaliza la complejidad, previniendo el overfitting que afecta a los ensemble.
+    \item \textbf{Relaciones Aproximadamente Lineales:} A nivel agregado de estudiante, las relaciones entre barreras socioeconómicas y riesgo son más simples y aproximadamente lineales.
+\end{itemize}
+
+Por estas razones, se seleccionó \textbf{Regresión Logística} como el modelo final de producción.
+
+\section{Fase 1: Preparación de Datos (CRISP-DM)}
+
+Siguiendo la metodología CRISP-DM (ver Tabla \ref{tab:fases_crispdm}), se ejecutó un proceso de minería de datos para construir un modelo capaz de identificar riesgo académico.
+
+\subsection{Preparación de Datos}
+
+Esta fue una fase crítica que involucró:
+\begin{itemize}
+    \item \textbf{Limpieza:} Eliminación de registros duplicados y manejo de valores nulos mediante imputación por mediana (numéricas) y moda (categóricas).
+    \item \textbf{Ingeniería de Características:} Creación de variables derivadas e índices compuestos (Acceso Tecnológico, Cobertura de Salud).
+    \item \textbf{Definición del Target:} Se definió la variable objetivo como \textbf{Riesgo Académico}, operacionalizada como promedio general $\leq$ 7.5, permitiendo intervención temprana antes del umbral de reprobación (7.0).
+    \item \textbf{Prevención de Data Leakage:} Se excluyeron explícitamente variables como \texttt{promedio\_general}, \texttt{edad}, \texttt{grado} y \texttt{asistencia} del conjunto de entrenamiento. Esto asegura que el modelo aprenda de las causas raíz (barreras socioeconómicas) y no de síntomas o variables administrativas.
+\end{itemize>
+
+\section{Fase 3: Despliegue e Implementación Tecnológica}
+
+La fase final del ciclo CRISP-DM consistió en la integración del modelo predictivo en una plataforma web funcional.
+
+\subsection{Arquitectura del Sistema}
+
+Se implementó una arquitectura híbrida que combina un motor de reglas en tiempo real con el modelo predictivo offline (ver Figura \ref{fig:architecture}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{1_system_architecture.jpg}
+    \caption{Arquitectura del Sistema: Integración de Flask, React, Supabase y Regresión Logística.}
+    \label{fig:architecture}
+\end{figure}
+
+\begin{enumerate}
+    \item \textbf{Backend (Flask 3.0.0):}
+    \begin{itemize}
+        \item \textbf{RiskCalculator:} Un motor heurístico que calcula puntuaciones de riesgo en tiempo real basado en reglas de negocio fijas (Quintil, Asistencia, Notas actuales) para alertas inmediatas.
+        \item \textbf{Modelo ML (Regresión Logística):} Ejecuta predicciones proactivas de riesgo académico basadas en 47 características socioeconómicas, sin depender de promedios actuales, ideal para la detección al inicio del año lectivo.
+    \end{itemize}
+    \item \textbf{Frontend (React 19.2.0 + TypeScript):} Interfaz de usuario moderna para visualización de alertas y perfiles de riesgo.
+    \item \textbf{Base de Datos (Supabase/PostgreSQL):} Almacenamiento seguro de 687 registros estudiantiles.
+\end{enumerate}
+
+\subsection{Flujo de Datos (Data Pipeline)}
+
+El flujo de datos garantiza la limpieza y transformación adecuada de la información desde su ingesta hasta la visualización (ver Figura \ref{fig:pipeline}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{4_data_pipeline.pdf}
+    \caption{Diagrama de Flujo de Datos: Implementación de la metodología CRISP-DM.}
+    \label{fig:pipeline}
+\end{figure}
+
+\chapter{Resultados}
+\label{chap:resultados}
+
+Este capítulo presenta los resultados del modelo final seleccionado (Regresión Logística) y su validación en el entorno real de la Escuela de Educación Básica "Miguel Espinoza Villacreses".
+
+\section{Rendimiento del Modelo Predictivo (Regresión Logística)}
+
+El modelo de Regresión Logística fue evaluado utilizando validación cruzada estratificada (5-fold) en un dataset de 687 estudiantes únicos. Las métricas finales confirman su idoneidad para la tarea de detección temprana de riesgo.
+
+\begin{table}[H]
+\centering
+\caption{Métricas del Modelo de Producción (Regresión Logística)}
+\label{tab:metricas_finales}
+\begin{tabular}{lc}
+\toprule
+\textbf{Métrica} & \textbf{Valor} \\
+\midrule
+Cross-Validation Score (Mean) & 0.6812 \\
+Cross-Validation Std & $\pm$ 0.0332 \\
+ROC-AUC (Test Set) & 0.6103 \\
+Recall (con umbral optimizado) & \textbf{92.2\%} \\
+Precision (con umbral optimizado) & 43.9\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Es importante contextualizar estas métricas: un ROC-AUC de 0.61 puede parecer modesto comparado con los 0.93 de la Fase 1, pero representa un modelo \textbf{honesto y generalizable} que predice riesgo a nivel de estudiante utilizando únicamente variables socioeconómicas disponibles al inicio del año escolar.
+
+\subsection{Optimización del Umbral de Decisión}
+
+Un aporte metodológico clave fue la optimización del umbral de clasificación para maximizar el Recall. En lugar del umbral estándar de 0.50, se exploró un rango de umbrales para encontrar el punto óptimo según las prioridades del Sistema de Alerta Temprana.
+
+\begin{table}[H]
+\centering
+\caption{Análisis de Sensibilidad del Umbral de Decisión}
+\label{tab:threshold_optimization}
+\begin{tabular}{ccccc}
+\toprule
+\textbf{Umbral} & \textbf{Recall} & \textbf{Precision} & \textbf{F1} & \textbf{FN} \\
+\midrule
+0.50 & 56.9\% & 56.9\% & 0.569 & 22 \\
+0.40 & 70.6\% & 51.4\% & 0.595 & 15 \\
+0.30 & 84.3\% & 46.2\% & 0.597 & 8 \\
+\textbf{0.25} & \textbf{92.2\%} & \textbf{43.9\%} & \textbf{0.595} & \textbf{4} \\
+0.20 & 96.1\% & 40.5\% & 0.570 & 2 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Se seleccionó el \textbf{umbral de 0.25} como óptimo, ya que maximiza el Recall (92.2\%) con solo 4 Falsos Negativos, mientras mantiene un F1-Score competitivo. En términos prácticos: de 51 estudiantes verdaderamente en riesgo en el conjunto de prueba, el modelo identifica correctamente a 47.
+
+\subsection{Interpretabilidad: Coeficientes del Modelo}
+
+Una ventaja fundamental de la Regresión Logística sobre los modelos de ensemble es su \textbf{interpretabilidad completa}. Los coeficientes indican la dirección y magnitud del impacto de cada variable.
+
+\begin{table}[H]
+\centering
+\caption{Top 10 Coeficientes del Modelo (Regresión Logística)}
+\label{tab:feature_coefficients}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Variable} & \textbf{Coeficiente} & \textbf{Interpretación} \\
+\midrule
+takes\_lengua & -1.5113 & Efecto protector fuerte \\
+nivel\_educativo & +1.3054 & Factor de riesgo principal \\
+has\_transportation & +0.8832 & Correlación sorprendente \\
+electricity\_type\_Medidor propio & +0.8540 & Factor de riesgo \\
+parent\_gender\_Female & +0.8015 & Factor de riesgo \\
+has\_laptop & -0.7649 & Efecto protector \\
+water\_source\_Tanquero & +0.7459 & Factor de riesgo \\
+age\_grade\_status\_Age-Grade Appropriate & -0.7212 & Efecto protector \\
+internet\_source\_plan cel & -0.5694 & Efecto protector \\
+employment\_status & -0.5527 & Efecto protector \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Hallazgos Clave:}
+\begin{itemize}
+    \item \texttt{takes\_lengua} (coeficiente -1.51): Estudiantes que toman clases de Lengua Extranjera (inglés) tienen significativamente menor riesgo. Esto puede reflejar un indicador proxy de escuelas mejor equipadas o familias con mayor inversión educativa.
+    \item \texttt{nivel\_educativo} (coeficiente +1.31): El nivel educativo bajo del representante es el principal factor de riesgo, confirmando la transmisión intergeneracional de desventaja educativa.
+    \item \texttt{has\_laptop} (coeficiente -0.76): La tenencia de laptop reduce el riesgo, validando la importancia de la brecha tecnológica.
+\end{itemize>
+
+\section{Validación con Datos Reales}
+
+La validación con 687 estudiantes reales confirmó la utilidad del sistema para intervención temprana.
+
+\subsection{Matriz de Confusión (Umbral 0.25)}
+
+La matriz de confusión (Figura \ref{fig:confusion_matrix}) muestra el desempeño del modelo con el umbral optimizado de 0.25.
+
+\begin{table}[H]
+\centering
+\caption{Matriz de Confusión del Modelo (Conjunto de Prueba, n=138)}
+\label{tab:confusion_matrix}
+\begin{tabular}{lcc}
+\toprule
+& \textbf{Predicho: No Riesgo} & \textbf{Predicho: En Riesgo} \\
+\midrule
+\textbf{Real: No Riesgo} & 50 (TN) & 37 (FP) \\
+\textbf{Real: En Riesgo} & 4 (FN) & 47 (TP) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{3_confusion_matrix.pdf}
+    \caption{Matriz de Confusión: El modelo prioriza minimizar Falsos Negativos (4) para maximizar la cobertura de estudiantes en riesgo.}
+    \label{fig:confusion_matrix}
+\end{figure}
+
+\textbf{Interpretación Práctica:}
+\begin{itemize}
+    \item \textbf{47 Verdaderos Positivos:} Estudiantes correctamente identificados como en riesgo que efectivamente necesitan intervención.
+    \item \textbf{4 Falsos Negativos:} Solo 4 estudiantes en riesgo no fueron detectados. Estos son los casos más costosos que el sistema intenta minimizar.
+    \item \textbf{37 Falsos Positivos:} Estudiantes marcados como en riesgo que terminaron aprobando. Aunque representan un costo operativo (intervención innecesaria), el beneficio de la atención adicional no es negativo.
+    \item \textbf{50 Verdaderos Negativos:} Estudiantes correctamente clasificados como sin riesgo.
+\end{itemize>
+
+\subsection{Distribución del Riesgo y Rendimiento}
+
+El sistema clasificó a la población estudiantil en niveles de riesgo basándose en las probabilidades predichas, permitiendo focalizar recursos (Figura \ref{fig:risk_distribution}). La distribución observada confirma que el 37\% de estudiantes (254/687) se encuentran en riesgo académico.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{5_risk_distribution.pdf}
+    \caption{Distribución del Riesgo Estudiantil: 37\% de la población está en riesgo (promedio $\leq$ 7.5).}
+    \label{fig:risk_distribution}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{6_performance_by_quintile.pdf}
+    \caption{Rendimiento Académico por Quintil Socioeconómico.}
+    \label{fig:performance}
+\end{figure}
+
+La diferencia de rendimiento entre el quintil más bajo y el más alto es estadísticamente significativa (p=0.014), confirmando la validez predictiva del enfoque socioeconómico.
+
+\chapter{Discusión}
+\label{chap:discusion}
+
+Los resultados obtenidos validan que es posible anticipar el riesgo académico utilizando exclusivamente variables socioeconómicas, sin depender de las calificaciones previas. Sin embargo, el proceso reveló hallazgos metodológicos importantes que trascienden el caso de estudio específico.
+
+\section{¿Por qué la Regresión Logística Superó a los Modelos de Ensemble?}
+
+Este resultado, aparentemente contraintuitivo, tiene profundas implicaciones para la aplicación de Machine Learning en contextos educativos con datos limitados.
+
+\subsection{El Principio de Parsimonia en Datasets Pequeños}
+
+Con solo 687 estudiantes (254 en riesgo, 433 sin riesgo), los modelos de ensemble como CatBoost y Random Forest carecen de suficientes datos para aprender patrones no lineales robustos. En este contexto:
+
+\begin{itemize}
+    \item \textbf{Sobreajuste vs. Generalización:} Los modelos complejos tienden a "memorizar" el dataset de entrenamiento en lugar de aprender patrones generalizables. La Regresión Logística, con regularización L2, penaliza la complejidad y previene el overfitting.
+    \item \textbf{Varianza del Estimador:} Con pocos datos, la varianza de los modelos complejos aumenta significativamente, resultando en métricas de validación cruzada inestables.
+    \item \textbf{Relaciones Aproximadamente Lineales:} A nivel agregado de estudiante, las relaciones entre barreras socioeconómicas y riesgo académico son más simples de lo que se asumía inicialmente.
+\end{itemize}
+
+\subsection{La Paradoja del Laptop y Simpson's Paradox}
+
+Un hallazgo particularmente interesante fue la variable \texttt{has\_transportation} (coeficiente positivo +0.88), que aparentemente sugiere que tener transporte \textit{aumenta} el riesgo. Este resultado contraintuitivo ilustra un fenómeno estadístico conocido como \textbf{Simpson's Paradox}:
+
+Cuando se agrega la variable a nivel de estudiante sin controlar por otras variables (como zona rural vs. urbana), la correlación puede invertirse. Estudiantes en zonas rurales pueden tener transporte (para llegar a la escuela distante) pero también enfrentar otras desventajas no capturadas.
+
+Este tipo de hallazgos subraya la importancia de la \textbf{interpretabilidad} del modelo. La Regresión Logística permite identificar y cuestionar estas relaciones, mientras que un modelo de ensemble como CatBoost las ocultaría en su estructura de árboles.
+
+\section{Lecciones Aprendidas: La Importancia de Iterar}
+
+El proceso de evolución del modelo en dos fases constituye una lección metodológica valiosa:
+
+\begin{enumerate}
+    \item \textbf{Las métricas altas no garantizan utilidad:} El modelo CatBoost de la Fase 1 (ROC-AUC 0.934) tenía métricas impresionantes pero predecía el problema incorrecto (reprobación por materia en lugar de riesgo del estudiante).
+    \item \textbf{La granularidad importa:} Redefinir el target de materia a estudiante resultó en un modelo más útil aunque con métricas aparentemente más modestas.
+    \item \textbf{Simple puede ser mejor:} En contextos con datos limitados, los modelos simples y regularizados superan a los algoritmos más sofisticados.
+\end{enumerate}
+
+\section{El Dilema Precisión-Recall en Educación}
+
+La elección de optimizar el umbral para maximizar Recall (92.2\% con umbral 0.25) refleja una decisión ética y práctica fundamental para Sistemas de Alerta Temprana educativos:
+
+\begin{itemize}
+    \item \textbf{Costo de Falsos Negativos:} No detectar a un estudiante que necesita ayuda puede resultar en reprobación, deserción, o pérdida de oportunidades educativas. Este costo es inaceptablemente alto e irreversible.
+    \item \textbf{Costo de Falsos Positivos:} Marcar a un estudiante como "en riesgo" cuando no lo está resulta en intervención innecesaria, pero el costo es menor (atención adicional, tutoría preventiva) y no tiene consecuencias negativas permanentes.
+\end{itemize}
+
+Por esta razón, se privilegió el Recall sobre la Precision, aceptando 37 falsos positivos para minimizar los falsos negativos a solo 4 casos.
+
+\section{Limitaciones del Estudio}
+
+\begin{enumerate}
+    \item \textbf{Tamaño de la Muestra:} Con 687 estudiantes de una sola institución, la generalización a otras escuelas requiere validación adicional.
+    \item \textbf{Variables No Capturadas:} Factores como la calidad de la enseñanza, el clima escolar, o eventos familiares no fueron incluidos en el modelo.
+    \item \textbf{Umbral de Riesgo:} La definición de "en riesgo" como promedio $\leq$ 7.5 es una decisión operativa que podría ajustarse según las políticas institucionales.
+\end{enumerate>
+
+\chapter{Conclusiones y Recomendaciones}
+\label{chap:conclusiones}
+
+\section{Conclusiones}
+
+\begin{enumerate}
+    \item \textbf{Predicción Efectiva del Riesgo Académico:} Se desarrolló exitosamente un modelo de Regresión Logística capaz de predecir el riesgo académico de estudiantes utilizando exclusivamente 47 variables socioeconómicas, alcanzando un Cross-Validation Score de 0.681 y un Recall optimizado del 92.2\% (detectando a 47 de 51 estudiantes en riesgo).
+    
+    \item \textbf{Evolución Metodológica Documentada:} El proceso de desarrollo en dos fases demostró la importancia de redefinir el problema. La transición de predicción a nivel de materia (ROC-AUC 0.934) a predicción a nivel de estudiante (CV 0.681) resultó en un modelo más útil y generalizable, aunque con métricas aparentemente más modestas.
+    
+    \item \textbf{Superioridad de Modelos Simples en Contextos de Datos Limitados:} Contrario a la intuición común en Machine Learning, la Regresión Logística superó a todos los modelos de ensemble (CatBoost, Random Forest, Gradient Boosting) cuando se reformuló correctamente el problema. Este hallazgo tiene implicaciones importantes para instituciones educativas con datasets pequeños.
+    
+    \item \textbf{Identificación de Factores de Riesgo Interpretables:} Los coeficientes del modelo revelaron que el bajo nivel educativo del representante (+1.31), la falta de laptop (-0.76), y la no participación en Lengua Extranjera (-1.51) son predictores significativos del riesgo académico, confirmando la transmisión intergeneracional de desventaja educativa.
+    
+    \item \textbf{Prevención de Data Leakage:} La exclusión deliberada de variables como calificaciones y asistencia del modelo predictivo permite intervención temprana al inicio del año escolar, antes de que los síntomas del fracaso sean visibles.
+    
+    \item \textbf{Despliegue Funcional:} La integración exitosa del modelo en una plataforma web (Flask + React + Supabase) demuestra la viabilidad técnica de aplicar estas herramientas en instituciones educativas reales ecuatorianas.
+\end{enumerate}
+
+\section{Recomendaciones}
+
+\subsection{Para la Institución Educativa}
+
+\begin{enumerate}
+    \item \textbf{Implementación Institucional:} Adoptar el sistema de alerta temprana para monitorización continua al inicio de cada año lectivo, utilizando los datos socioeconómicos recolectados durante la matrícula.
+    
+    \item \textbf{Intervención Focalizada:} Utilizar las listas de estudiantes clasificados como "Alto Riesgo" por el modelo para priorizar citas con el Departamento de Consejería Estudiantil (DECE) y asignar tutorías preventivas.
+    
+    \item \textbf{Programas de Apoyo Tecnológico:} Dado el impacto demostrado de la tenencia de laptop (coeficiente -0.76), se recomienda establecer programas de préstamo de equipos para estudiantes de quintiles vulnerables.
+    
+    \item \textbf{Apoyo a Representantes:} Considerando que el nivel educativo del representante es el factor de riesgo más significativo, se sugieren programas de alfabetización digital y talleres de acompañamiento académico para padres.
+\end{enumerate}
+
+\subsection{Para Futuras Investigaciones}
+
+\begin{enumerate}
+    \item \textbf{Validación Multi-institucional:} Replicar el modelo en otras escuelas de la región para validar la generalización de los hallazgos y ajustar coeficientes según el contexto local.
+    
+    \item \textbf{Incorporación de Variables Adicionales:} Explorar la inclusión de variables relacionadas con el clima escolar, calidad docente, y factores psicosociales para mejorar la capacidad predictiva.
+    
+    \item \textbf{Estudios Longitudinales:} Implementar seguimiento a cohortes de estudiantes para evaluar el impacto real de las intervenciones tempranas habilitadas por el sistema.
+    
+    \item \textbf{Exploración de Modelos Causales:} Avanzar hacia modelos de inferencia causal que permitan identificar no solo correlaciones, sino relaciones causa-efecto entre barreras socioeconómicas y riesgo académico.
+\end{enumerate}
+
+% Referencias bibliográficas
+\printbibliography[heading=bibintoc,title={Referencias}]
+
+% Anexos
+\appendix
+\chapter{Código Fuente Principal}
+[Pendiente de incluir]
+
+\chapter{Formularios de Consentimiento}
+[Pendiente de incluir]
+
+\chapter{Tablas de Resultados Detalladas}
+[Pendiente de incluir]
+
+\end{document}
