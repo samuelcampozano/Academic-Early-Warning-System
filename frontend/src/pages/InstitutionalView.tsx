@@ -939,8 +939,8 @@ const InstitutionalView = () => {
             Variables que más influyen cuando el modelo predice el riesgo académico de un estudiante.
           </p>
           <p className="text-xs text-blue-600 dark:text-blue-400 mb-4 bg-blue-50 dark:bg-blue-900/20 p-2 rounded">
-            💡 <strong>¿Cómo leer este gráfico?</strong> El porcentaje indica qué tan importante es cada variable para la predicción. 
-            &quot;Cobertura de Salud&quot; al {topBarriersData[0]?.value}% significa que es el factor más determinante.
+            💡 <strong>¿Cómo leer este gráfico?</strong> El coeficiente indica el impacto en riesgo. 
+            Valores negativos (verde) son protectores, positivos (rojo) aumentan riesgo. Modelo: Logistic Regression (CV 0.681).
           </p>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart
@@ -1039,9 +1039,10 @@ const InstitutionalView = () => {
           <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">
             Comparación del promedio académico (GPA) entre estudiantes CON y SIN computadora portátil.
           </p>
-          <p className="text-xs text-red-600 dark:text-red-400 mb-4 bg-red-50 dark:bg-red-900/20 p-2 rounded">
-            🔴 <strong>Hallazgo crítico:</strong> Los estudiantes sin laptop tienen en promedio 
-            <span className="font-bold"> -1.5 puntos menos</span> que aquellos con acceso a tecnología.
+          <p className="text-xs text-blue-600 dark:text-blue-400 mb-4 bg-blue-50 dark:bg-blue-900/20 p-2 rounded">
+            📊 <strong>Dato verificado:</strong> Estudiantes con laptop tienen GPA promedio de 
+            <span className="font-bold"> 8.97</span> vs <span className="font-bold">8.85</span> sin laptop 
+            (diferencia de +0.12 puntos). Incluye 521 con laptop y 166 sin laptop.
           </p>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart
@@ -1087,8 +1088,8 @@ const InstitutionalView = () => {
             Promedio académico del estudiante según el nivel educativo de su representante legal (padre/madre/tutor).
           </p>
           <p className="text-xs text-purple-600 dark:text-purple-400 mb-4 bg-purple-50 dark:bg-purple-900/20 p-2 rounded">
-            💡 <strong>Interpretación:</strong> A mayor nivel educativo del representante, mejor rendimiento del estudiante. 
-            Esto refleja el &quot;capital cultural&quot; del hogar.
+            💡 <strong>Dato verificado:</strong> Postgrado (GPA 9.07, n=78), Ed. Superior (9.00, n=339), 
+            Secundaria Completa (8.83, n=217). Diferencia de +0.35 puntos entre niveles extremos.
           </p>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart
@@ -1456,30 +1457,29 @@ const InstitutionalView = () => {
           </ResponsiveContainer>
         </div>
 
-        {/* Chart 8: Confusion Matrix */}
+        {/* Chart 8: Confusion Matrix - Binary Classification */}
         {stats.confusionMatrix && (
           <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-card border border-slate-200 dark:border-slate-700 lg:col-span-3">
             <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-1">
               🤖 Precisión del Modelo: Matriz de Confusión
             </h3>
             <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">
-              Comparación entre el quintil REAL del estudiante vs. el quintil PREDICHO por el modelo de ML.
+              Resultados del modelo Logistic Regression en el test set (138 estudiantes).
             </p>
             <p className="text-xs text-teal-600 dark:text-teal-400 mb-4 bg-teal-50 dark:bg-teal-900/20 p-2 rounded">
-              💡 <strong>¿Cómo leer este gráfico?</strong> Los números en la diagonal (de arriba-izquierda a abajo-derecha) 
-              son predicciones correctas. Números fuera de la diagonal son errores del modelo. 
-              Mayor intensidad de azul = más estudiantes en esa categoría.
+              💡 <strong>Métricas:</strong> Accuracy 57.2%, Recall 56.9%, Precision 43.9%, ROC-AUC 0.610. 
+              Con threshold=0.25 se alcanza 92.2% recall (solo 4 estudiantes en riesgo perdidos).
             </p>
             <div className="flex flex-col items-center justify-center h-auto py-4 overflow-x-auto w-full">
-              <div className="grid grid-cols-6 gap-1 min-w-[350px]">
+              <div className="grid grid-cols-3 gap-2 min-w-[300px]">
                 {/* Header Row */}
-                <div className="h-10 w-16 flex items-center justify-center font-bold text-xs text-slate-500">
+                <div className="h-12 w-24 flex items-center justify-center font-bold text-xs text-slate-500">
                   Real \ Pred
                 </div>
                 {stats.confusionMatrix.labels.map((label, i) => (
                   <div
                     key={`head-${i}`}
-                    className="h-10 w-16 flex items-center justify-center font-bold text-xs text-slate-700 dark:text-slate-300"
+                    className="h-12 w-24 flex items-center justify-center font-bold text-xs text-slate-700 dark:text-slate-300"
                   >
                     {label}
                   </div>
@@ -1489,27 +1489,37 @@ const InstitutionalView = () => {
                 {stats.confusionMatrix.data.map((row, i) => (
                   <React.Fragment key={`row-${i}`}>
                     {/* Row Label */}
-                    <div className="h-16 w-16 flex items-center justify-center font-bold text-xs text-slate-700 dark:text-slate-300">
-                      {stats.confusionMatrix.labels[i]}
+                    <div className="h-20 w-24 flex items-center justify-center font-bold text-xs text-slate-700 dark:text-slate-300 text-center">
+                      {i === 0 ? "Real: En Riesgo" : "Real: Sin Riesgo"}
                     </div>
                     {/* Cells */}
                     {row.map((value, j) => {
-                      // Calculate intensity based on value (assuming max around 50 for this dataset)
+                      // Calculate intensity based on value
                       const intensity = Math.min(value / 50, 1);
-                      const bgColor = `rgba(59, 130, 246, ${intensity})`; // Blue base
-                      const cellTextColor = intensity > 0.5 ? '#ffffff' : (isDark ? '#e2e8f0' : '#1e293b');
+                      // Green for correct (diagonal), Red for incorrect
+                      const isCorrect = i === j;
+                      const bgColor = isCorrect 
+                        ? `rgba(34, 197, 94, ${intensity})` // Green for TP/TN
+                        : `rgba(239, 68, 68, ${intensity})`; // Red for FP/FN
+                      const cellTextColor = intensity > 0.4 ? '#ffffff' : (isDark ? '#e2e8f0' : '#1e293b');
 
                       return (
                         <div
                           key={`cell-${i}-${j}`}
-                          className="h-16 w-16 flex items-center justify-center text-sm font-medium border border-slate-100 dark:border-slate-700 rounded"
+                          className="h-20 w-24 flex flex-col items-center justify-center text-lg font-bold border border-slate-100 dark:border-slate-700 rounded"
                           style={{
                             backgroundColor:
                               value > 0 ? bgColor : (isDark ? 'rgba(51, 65, 85, 0.3)' : 'transparent'),
                             color: cellTextColor,
                           }}
                         >
-                          {value}
+                          <span>{value}</span>
+                          <span className="text-xs font-normal opacity-75">
+                            {i === 0 && j === 0 && 'TP'}
+                            {i === 0 && j === 1 && 'FN'}
+                            {i === 1 && j === 0 && 'FP'}
+                            {i === 1 && j === 1 && 'TN'}
+                          </span>
                         </div>
                       );
                     })}

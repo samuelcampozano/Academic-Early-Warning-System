@@ -428,24 +428,25 @@ def get_institutional_stats():
 
         # 1. Top 10 Barreras Predictivas (Importancia del Modelo %)
         # Based on Comprehensive Model (Logistic Regression) - December 2025
+        # ACTUAL coefficients from trained model (verified from best_model.joblib)
         # Positive coefficients = increases risk, Negative = decreases risk
         top_barriers = {
             "labels": [
-                "Toma Lengua y Lit. (-)",  # -1.51 (protective)
-                "Nivel Educativo (+)",      # +1.31 (higher = more risk)
-                "Escuela Procedencia (+)",  # +0.74
-                "Compra en Centros (-)",    # -0.68 (protective)
-                "Núm. Materias (+)",        # +0.60
-                "Toma Física (+)",          # +0.59
-                "Seguro Privado (-)",       # -0.58 (protective)
-                "Tiene Teléfono (-)",       # -0.52 (protective)
-                "Equipo de Sonido (+)",     # +0.51
-                "Género (+)",               # +0.49
+                "Toma Lengua y Lit. (-)",    # -1.511 (protective - strongest)
+                "Nivel Educativo (+)",        # +1.305 (higher grades = harder curriculum)
+                "Escuela Procedencia (+)",    # +0.740 (from other school = risk)
+                "Compra en Centros (-)",      # -0.682 (economic indicator - protective)
+                "Núm. Materias (+)",          # +0.601 (more subjects = more risk)
+                "Toma Física (+)",            # +0.589 (advanced physics = harder)
+                "Toma Sociales (-)",          # -0.587 (protective)
+                "Toma Ciencias (-)",          # -0.587 (protective)
+                "Seguro Privado (-)",         # -0.585 (has resources - protective)
+                "Tiene Teléfono (-)",         # -0.517 (has resources - protective)
             ],
             "datasets": [
                 {
                     "label": "Coeficiente (Impacto en Riesgo)",
-                    "data": [-1.51, 1.31, 0.74, -0.68, 0.60, 0.59, -0.58, -0.52, 0.51, 0.49],
+                    "data": [-1.511, 1.305, 0.740, -0.682, 0.601, 0.589, -0.587, -0.587, -0.585, -0.517],
                     "backgroundColor": [
                         "rgba(75, 192, 192, 0.6)",   # Negative = protective (green)
                         "rgba(255, 99, 132, 0.6)",  # Positive = risk (red)
@@ -455,8 +456,8 @@ def get_institutional_stats():
                         "rgba(255, 99, 132, 0.6)",
                         "rgba(75, 192, 192, 0.6)",
                         "rgba(75, 192, 192, 0.6)",
-                        "rgba(255, 99, 132, 0.6)",
-                        "rgba(255, 99, 132, 0.6)",
+                        "rgba(75, 192, 192, 0.6)",
+                        "rgba(75, 192, 192, 0.6)",
                     ],
                     "borderColor": "rgba(0, 0, 0, 0.8)",
                     "borderWidth": 1,
@@ -464,42 +465,64 @@ def get_institutional_stats():
             ],
         }
 
-        # 2. Impacto de Laptop en Riesgo Académico
-        # Comprehensive Model: tiene_laptop coefficient = +0.124 (slight risk increase!)
-        # This is counterintuitive - may indicate correlation with higher education levels
+        # 2. Impacto de Laptop - ACTUALIZADO con datos reales
+        # DATOS REALES DE LA BASE DE DATOS (verificados):
+        # - Con laptop: 521 estudiantes, GPA promedio = 8.97
+        # - Sin laptop: 166 estudiantes, GPA promedio = 8.85
+        # - Diferencia: +0.12 puntos (con laptop tienen GPA ligeramente mayor)
+        # NOTA: El coeficiente del modelo es +0.124 (aumenta riesgo) debido a confounding
+        # con nivel educativo (estudiantes de grados superiores tienen más laptops Y más riesgo)
         laptop_impact = {
             "labels": ["Con Laptop", "Sin Laptop"],
             "datasets": [
                 {
-                    "label": "Coef. de Riesgo (Modelo)",
-                    "data": [0.124, 0],  # Reference point is "without laptop"
+                    "label": "GPA Promedio",
+                    "data": [8.97, 8.85],  # Datos reales de la base de datos
                     "backgroundColor": [
-                        "rgba(255, 159, 64, 0.6)",  # Orange - slight risk
-                        "rgba(75, 192, 192, 0.6)",  # Green - reference
+                        "rgba(54, 162, 235, 0.6)",  # Blue
+                        "rgba(255, 159, 64, 0.6)",  # Orange
                     ],
                     "borderColor": [
+                        "rgba(54, 162, 235, 1)",
                         "rgba(255, 159, 64, 1)",
-                        "rgba(75, 192, 192, 1)",
                     ],
                     "borderWidth": 1,
                 }
             ],
-            "note": "Coeficiente positivo indica que tener laptop se asocia con MAYOR riesgo - posiblemente porque estudiantes de grados superiores (más difíciles) tienen más laptops"
+            "statistics": {
+                "withLaptop": {"count": 521, "mean": 8.97, "median": 9.07},
+                "withoutLaptop": {"count": 166, "mean": 8.85, "median": 8.94},
+                "difference": 0.12
+            },
+            "note": "Diferencia de +0.12 puntos a favor de estudiantes con laptop. Sin embargo, el modelo muestra coef. +0.124 (riesgo) debido a que estudiantes de niveles superiores (curricula más difícil) tienen más laptops."
         }
 
-        # 3. Impacto de Nivel Educativo del Representante (Sección 5.2.2 - Fase 2)
-        # Superior: 9.12, Bachillerato: 8.95, Básica: 8.87, Primaria: 8.73
+        # 3. Impacto de Nivel Educativo del Representante
+        # DATOS REALES DE LA BASE DE DATOS (verificados):
+        # - Postgrado: 78 estudiantes, GPA = 9.07
+        # - Educación superior: 339 estudiantes, GPA = 9.00
+        # - Secundaria completa: 217 estudiantes, GPA = 8.83
+        # - Primaria completa: 9 estudiantes, GPA = 8.76
+        # - Secundaria incompleta: 6 estudiantes, GPA = 8.72
         parent_education_impact = {
-            "labels": ["Superior", "Bachillerato", "Básica", "Primaria"],
+            "labels": ["Postgrado", "Ed. Superior", "Sec. Completa", "Primaria", "Sec. Incompleta"],
             "datasets": [
                 {
-                    "label": "Promedio General",
-                    "data": [9.12, 8.95, 8.87, 8.73],
+                    "label": "GPA Promedio",
+                    "data": [9.07, 9.00, 8.83, 8.76, 8.72],
                     "backgroundColor": "rgba(153, 102, 255, 0.6)",
                     "borderColor": "rgba(153, 102, 255, 1)",
                     "borderWidth": 1,
                 }
             ],
+            "statistics": {
+                "Postgrado": {"count": 78, "mean": 9.07},
+                "Educación superior": {"count": 339, "mean": 9.00},
+                "Secundaria completa": {"count": 217, "mean": 8.83},
+                "Primaria completa": {"count": 9, "mean": 8.76},
+                "Secundaria incompleta": {"count": 6, "mean": 8.72}
+            },
+            "insight": "Existe una correlación positiva entre el nivel educativo del representante y el GPA del estudiante. Estudiantes con padres con postgrado tienen +0.35 puntos más que aquellos con padres con secundaria incompleta."
         }
 
         # 4. Distribución por Quintil (de base_stats)
@@ -569,35 +592,49 @@ def get_institutional_stats():
             ],
         }
 
-        # 7. Rendimiento Académico por Quintil (Datos para Boxplot)
-        # Min, Q1, Median, Q3, Max
+        # 7. Rendimiento Académico por Quintil (Datos REALES de la base de datos)
+        # VERIFICADO: Datos extraídos directamente de Supabase
+        # Q1: 1 estudiante (muestra muy pequeña)
+        # Q2: 52 estudiantes
+        # Q3: 281 estudiantes  
+        # Q4: 296 estudiantes
+        # Q5: 44 estudiantes
         performance_by_quintile = {
             "labels": ["Q1 (Vulnerable)", "Q2", "Q3 (Medio)", "Q4", "Q5 (Alto)"],
             "datasets": [
                 {
                     "label": "Distribución de Notas",
                     "data": [
-                        {"min": 6.5, "q1": 7.2, "median": 7.8, "q3": 8.2, "max": 8.8},  # Q1
-                        {"min": 7.0, "q1": 7.8, "median": 8.2, "q3": 8.6, "max": 9.2},  # Q2
-                        {"min": 7.2, "q1": 8.0, "median": 8.5, "q3": 8.9, "max": 9.5},  # Q3
-                        {"min": 7.5, "q1": 8.4, "median": 8.9, "q3": 9.3, "max": 9.8},  # Q4
-                        {"min": 8.0, "q1": 8.8, "median": 9.2, "q3": 9.6, "max": 10.0}, # Q5
+                        {"min": 9.02, "q1": 9.02, "median": 9.02, "q3": 9.02, "max": 9.02, "count": 1},  # Q1 - solo 1 estudiante
+                        {"min": 7.27, "q1": 8.41, "median": 8.90, "q3": 9.43, "max": 9.91, "count": 52},  # Q2
+                        {"min": 5.32, "q1": 8.48, "median": 8.99, "q3": 9.40, "max": 9.96, "count": 281},  # Q3
+                        {"min": 6.85, "q1": 8.66, "median": 9.11, "q3": 9.43, "max": 9.98, "count": 296},  # Q4
+                        {"min": 7.69, "q1": 8.72, "median": 9.12, "q3": 9.55, "max": 9.95, "count": 44},   # Q5
                     ],
                 }
             ],
+            "insight": "Los quintiles superiores muestran GPAs ligeramente más altos. Q5 (alto) tiene mediana de 9.12, mientras Q2 tiene 8.90. La diferencia es de ~0.22 puntos."
         }
 
-        # 8. Matriz de Confusión (Simulada del Modelo)
-        # Filas: Real, Columnas: Predicho
+        # 8. Matriz de Confusión del Modelo de Riesgo Binario
+        # DATOS REALES del modelo Logistic Regression (threshold 0.5)
+        # Basado en test set de 138 estudiantes
+        # TP=29, FP=37, FN=22, TN=50
         confusion_matrix = {
-            "labels": ["Q1", "Q2", "Q3", "Q4", "Q5"],
+            "labels": ["Predicho: En Riesgo", "Predicho: Sin Riesgo"],
+            "rows": ["Real: En Riesgo", "Real: Sin Riesgo"],
             "data": [
-                [45, 5, 2, 0, 0],  # Real Q1
-                [8, 38, 6, 1, 0],  # Real Q2
-                [1, 7, 42, 5, 1],  # Real Q3
-                [0, 2, 8, 35, 4],  # Real Q4
-                [0, 0, 3, 6, 40],  # Real Q5
-            ]
+                [29, 22],   # Real En Riesgo: 29 detectados (TP), 22 perdidos (FN)
+                [37, 50],   # Real Sin Riesgo: 37 falsas alarmas (FP), 50 correctos (TN)
+            ],
+            "metrics": {
+                "accuracy": 0.572,
+                "precision": 0.439,
+                "recall": 0.569,
+                "f1": 0.496,
+                "rocAuc": 0.610
+            },
+            "thresholdNote": "Con threshold=0.25, recall sube a 92.2% (solo 4 estudiantes en riesgo perdidos)"
         }
 
         # 9. Análisis de Categorías de Barreras (Para Radar Chart)

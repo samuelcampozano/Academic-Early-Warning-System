@@ -23,7 +23,16 @@ export interface SummaryStats {
 
 export interface ConfusionMatrixData {
   labels: string[];
+  rows?: string[];
   data: number[][];
+  metrics?: {
+    accuracy: number;
+    precision: number;
+    recall: number;
+    f1: number;
+    rocAuc: number;
+  };
+  thresholdNote?: string;
 }
 
 export interface BoxPlotDataPoint {
