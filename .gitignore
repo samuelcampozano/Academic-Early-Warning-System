@@ -9,26 +9,17 @@ __pycache__/
 *.egg-info/
 dist/
 build/
-.env
-.venv
-venv/
-ENV/
-env/
-instance/
 .pytest_cache/
 .coverage
 htmlcov/
 
-# Base de datos local
-*.db
-*.sqlite
-*.sqlite3
-
-# Archivos de configuración con datos sensibles
-config/secrets.py
-
-# Logs
-*.log
+# Virtual environments
+.env
+.venv/
+venv/
+venv311/
+ENV/
+env/
 
 # IDE
 .vscode/
@@ -36,29 +27,52 @@ config/secrets.py
 *.swp
 *.swo
 
-# Sistema operativo
+# Operating System
 .DS_Store
 Thumbs.db
 
-# Modelos ML entrenados (pueden ser muy grandes)
-models/trained/*.pkl
-models/trained/*.joblib
-models/trained/*.h5
+# Logs
+*.log
 
-# Datos sensibles
-data/raw/*.csv
-data/raw/*.xlsx
-data/processed/*.csv
-test_supabase_connection.py
-check_database_schema.py
+# Local database
+*.db
+*.sqlite
+*.sqlite3
 
-# AI/Development prompts (not for production repo)
+# CatBoost training info (auto-generated)
+catboost_info/
+
+# Raw data files (sensitive student data)
+*.csv
+!analysis/comprehensive_model_output/model_comparison_results.csv
+
+# Student data folders
+Student score and assistance/
+
+# Thesis documents (LaTeX)
+Thesis text in latexx/
+
+# Development/AI prompts (not for production)
+.gemini/
+PROJECT_ANALYSIS_RESUME.md
+THESIS_GRAPHS_PROMPT.md
 FRONTEND_INTEGRATION_PROMPT.md
 INTEGRATION_PACKAGE.md
 BACKEND_VERIFICATION.md
 
-.gemini/
-PROJECT_ANALYSIS_RESUME.md
-THESIS_GRAPHS_PROMPT.md
+# Large model files
+models/trained/*.pkl
+models/trained/*.h5
+*.cbm
+
+# Test files
+test_*.py
+check_*.py
+
+# Config with secrets
+config/secrets.py
+instance/
 DATA_EXPLORATION_REPORT.md
 TECHNICAL_DOCUMENTATION.md
+THESIS_VS_IMPLEMENTATION_ANALYSIS.md
+Thesis text in latexx

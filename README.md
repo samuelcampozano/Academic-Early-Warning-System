@@ -1,5 +1,5 @@
-# 🎓 Sistema de Alerta Temprana Académica (SAT)
-## Academic Early Warning System
+# 🎓 Academic Early Warning System (SAT)
+## Sistema de Alerta Temprana Académica
 
 <div align="center">
 
@@ -10,57 +10,57 @@
 ![TailwindCSS](https://img.shields.io/badge/Tailwind-3.0+-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
 ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
 
-**Sistema de predicción de riesgo académico basado en Machine Learning para identificar estudiantes en riesgo de deserción o bajo rendimiento académico.**
+**A Machine Learning-based academic risk prediction system to identify students at risk of dropout or low academic performance.**
 
-[Características](#-características) • [Instalación](#-instalación) • [Documentación](#-documentación) • [Arquitectura](#-arquitectura)
+[Features](#-features) • [Installation](#-installation) • [Documentation](#-documentation) • [Architecture](#-architecture)
 
 </div>
 
 ---
 
-## 📋 Descripción
+## 📋 Description
 
-El **Sistema de Alerta Temprana Académica (SAT)** es una aplicación full-stack desarrollada como proyecto de tesis que utiliza técnicas de Machine Learning para predecir el riesgo académico de estudiantes universitarios. El sistema analiza datos socioeconómicos, historial académico y barreras educativas para generar un score de riesgo personalizado y recomendaciones de intervención.
+The **Academic Early Warning System (SAT)** is a full-stack application developed as a thesis project that uses Machine Learning techniques to predict academic risk for students. The system analyzes socioeconomic data, academic history, and educational barriers to generate a personalized risk score and intervention recommendations.
 
-### 🎯 Objetivo
+### 🎯 Objective
 
-Proporcionar a las instituciones educativas una herramienta basada en datos para:
-- **Identificar tempranamente** estudiantes en riesgo de bajo rendimiento o deserción
-- **Priorizar intervenciones** según el nivel de riesgo calculado
-- **Analizar factores** socioeconómicos y académicos que impactan el rendimiento
-- **Generar insights** institucionales para la toma de decisiones
+Provide educational institutions with a data-driven tool to:
+- **Early identification** of students at risk of low performance or dropout
+- **Prioritize interventions** based on calculated risk level
+- **Analyze factors** (socioeconomic and academic) that impact performance
+- **Generate insights** for institutional decision-making
 
 ---
 
-## ✨ Características
+## ✨ Features
 
 ### 🤖 Machine Learning
-- **Modelo CatBoost** optimizado para predicción de riesgo académico
-- Análisis de **+30 variables** socioeconómicas y académicas
-- **Feature Importance** para identificar factores de mayor impacto
-- Precisión del modelo validada con datos reales
+- **Logistic Regression** model optimized for academic risk prediction
+- Analysis of **47 socioeconomic variables** (no data leakage)
+- **Feature Importance** with interpretable coefficients
+- Model validated with real student data (CV Score: 0.681)
 
-### 📊 Dashboard Institucional
-- **Vista general** con KPIs y métricas clave
-- **Exploración de datos** con histogramas, box plots y distribuciones
-- **Análisis avanzado** de correlaciones y comparativas
-- Gráficos interactivos con **Recharts**
+### 📊 Institutional Dashboard
+- **Overview** with KPIs and key metrics
+- **Data exploration** with histograms, box plots, and distributions
+- **Advanced analysis** of correlations and comparisons
+- Interactive charts with **Recharts**
 
-### 👤 Perfiles de Estudiantes
-- Score de riesgo individualizado (0-100)
-- Desglose de factores de riesgo
-- Historial de alertas y seguimiento
-- Recomendaciones personalizadas de intervención
+### 👤 Student Profiles
+- Individualized risk score (0-100)
+- Risk factor breakdown
+- Alert history and tracking
+- Personalized intervention recommendations
 
-### 🎨 Interfaz Moderna
-- Diseño **responsivo** (mobile-first)
-- Modo **claro/oscuro** automático
-- Navegación intuitiva con tabs
-- Componentes reutilizables
+### 🎨 Modern Interface
+- **Responsive** design (mobile-first)
+- Automatic **light/dark mode**
+- Intuitive tab navigation
+- Reusable components
 
 ---
 
-## 🏗 Arquitectura
+## 🏗 Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -100,39 +100,39 @@ Proporcionar a las instituciones educativas una herramienta basada en datos para
 │         ┌──────────────────┼──────────────────┐                 │
 │         │                  │                  │                  │
 │  ┌──────▼──────┐    ┌──────▼──────┐    ┌─────▼─────┐           │
-│  │  Supabase   │    │   CatBoost  │    │   NumPy   │           │
-│  │   Client    │    │    Model    │    │   Pandas  │           │
+│  │  Supabase   │    │  Logistic   │    │   NumPy   │           │
+│  │   Client    │    │  Regression │    │   Pandas  │           │
 │  └──────┬──────┘    └─────────────┘    └───────────┘           │
 └─────────┼───────────────────────────────────────────────────────┘
           │
 ┌─────────▼───────────────────────────────────────────────────────┐
 │                     Supabase (PostgreSQL)                        │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
-│  │  estudiantes │  │  califica-   │  │ socioecono-  │          │
-│  │              │  │   ciones     │  │   mic_data   │          │
+│  │   students   │  │  academic_   │  │ socioeconomic│          │
+│  │              │  │  performance │  │    _data     │          │
 │  └──────────────┘  └──────────────┘  └──────────────┘          │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🚀 Instalación
+## 🚀 Installation
 
-### Prerrequisitos
+### Prerequisites
 
-- **Python 3.9+**
+- **Python 3.9+** (3.11 recommended for best compatibility)
 - **Node.js 18+**
-- **npm** o **yarn**
-- Cuenta en **Supabase** (PostgreSQL)
+- **npm** or **yarn**
+- **Supabase** account (PostgreSQL)
 
 ### Backend
 
 ```bash
-# 1. Clonar el repositorio
+# 1. Clone the repository
 git clone https://github.com/samuelcampozano/Academic-Early-Warning-System.git
 cd Academic-Early-Warning-System
 
-# 2. Crear y activar entorno virtual
+# 2. Create and activate virtual environment
 python -m venv venv
 
 # Windows
@@ -140,82 +140,76 @@ venv\Scripts\activate
 # Linux/Mac
 source venv/bin/activate
 
-# 3. Instalar dependencias
+# 3. Install dependencies
 pip install -r requirements.txt
 
-# 4. Configurar variables de entorno
-copy .env.example .env
-# Editar .env con tus credenciales de Supabase
+# 4. Configure environment variables
+cp .env.example .env
+# Edit .env with your Supabase credentials
 
-# 5. Ejecutar el servidor
+# 5. Run the server
 python app.py
 ```
 
-El backend estará disponible en `http://localhost:5000`
+Backend will be available at `http://localhost:5000`
 
 ### Frontend
 
 ```bash
-# 1. Navegar al directorio frontend
+# 1. Navigate to frontend directory
 cd frontend
 
-# 2. Instalar dependencias
+# 2. Install dependencies
 npm install
 
-# 3. Ejecutar en modo desarrollo
+# 3. Run in development mode
 npm start
 ```
 
-El frontend estará disponible en `http://localhost:3000`
+Frontend will be available at `http://localhost:3000`
 
 ---
 
-## 📁 Estructura del Proyecto
+## 📁 Project Structure
 
 ```
 Academic-Early-Warning-System/
 │
-├── 📄 app.py                    # Punto de entrada Flask
-├── 📄 config.py                 # Configuración de la aplicación
-├── 📄 requirements.txt          # Dependencias Python
+├── 📄 app.py                    # Flask entry point
+├── 📄 config.py                 # Application configuration
+├── 📄 requirements.txt          # Python dependencies
 │
-├── 📁 models/                   # Modelos de datos y ML
-│   ├── database.py              # Esquemas de base de datos
-│   ├── schema.sql               # DDL de PostgreSQL
-│   └── trained/                 # Modelos ML entrenados
-│       └── catboost_model.pkl
+├── 📁 models/                   # Data and ML models
+│   ├── database.py              # Database schemas
+│   ├── schema.sql               # PostgreSQL DDL
+│   └── trained/                 # Trained ML models
 │
-├── 📁 routes/                   # Endpoints de la API
-│   ├── students.py              # CRUD de estudiantes
-│   ├── predictions.py           # Predicciones ML
-│   └── institutional.py         # Estadísticas institucionales
+├── 📁 routes/                   # API endpoints
+│   ├── students.py              # Student CRUD
+│   ├── predictions.py           # ML predictions
+│   └── institutional.py         # Institutional statistics
 │
-├── 📁 services/                 # Lógica de negocio
-│   ├── supabase_client.py       # Cliente de Supabase
-│   └── risk_calculator.py       # Cálculo de scores de riesgo
+├── 📁 services/                 # Business logic
+│   ├── supabase_client.py       # Supabase client
+│   └── risk_calculator.py       # Risk score calculation
 │
-├── 📁 utils/                    # Utilidades
-│   ├── validators.py            # Validadores de datos
-│   └── formatters.py            # Formateadores de respuestas
+├── 📁 utils/                    # Utilities
+│   ├── validators.py            # Data validators
+│   └── formatters.py            # Response formatters
 │
-├── 📁 analysis/                 # Scripts de análisis
-│   ├── predictive_early_warning.py
-│   └── model_comparison/        # Comparación de modelos
+├── 📁 analysis/                 # Analysis scripts
+│   ├── train_comprehensive_model.py  # Model training
+│   ├── predictive_early_warning.py   # Prediction service
+│   └── comprehensive_model_output/   # Model outputs
 │
-├── 📁 scripts/                  # Scripts de mantenimiento
-│   ├── import_fase2_csv.py      # Importación de datos
-│   └── clean_tables.py          # Limpieza de datos
+├── 📁 scripts/                  # Maintenance scripts
+│   ├── import_fase2_csv.py      # Data import
+│   └── clean_tables.py          # Data cleaning
 │
-└── 📁 frontend/                 # Aplicación React
+└── 📁 frontend/                 # React application
     ├── 📁 src/
-    │   ├── 📁 components/       # Componentes React
-    │   │   ├── charts/          # Gráficos (Recharts)
-    │   │   ├── layout/          # Layout components
-    │   │   └── ui/              # UI components
-    │   ├── 📁 pages/            # Páginas principales
-    │   │   ├── SAT_Dashboard.tsx
-    │   │   ├── InstitutionalView.tsx
-    │   │   └── StudentProfile.tsx
+    │   ├── 📁 components/       # React components
+    │   ├── 📁 pages/            # Main pages
     │   ├── 📁 hooks/            # Custom React hooks
     │   ├── 📁 services/         # API services
     │   └── 📁 context/          # React Context providers
@@ -226,125 +220,162 @@ Academic-Early-Warning-System/
 
 ## 🔌 API Endpoints
 
-### Estudiantes
+### Students
 
-| Método | Endpoint | Descripción |
+| Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/api/students` | Lista de todos los estudiantes |
-| `GET` | `/api/students/{id}` | Detalle de un estudiante |
-| `GET` | `/api/sat-list` | Lista priorizada SAT |
+| `GET` | `/api/students` | List all students |
+| `GET` | `/api/students/{id}` | Get student details |
+| `GET` | `/api/sat-list` | Prioritized SAT list |
 
-### Estadísticas Institucionales
+### Institutional Statistics
 
-| Método | Endpoint | Descripción |
+| Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/api/institutional-stats` | Estadísticas generales |
-| `GET` | `/api/score-distributions` | Distribuciones estadísticas |
-| `GET` | `/api/academic-insights` | Insights académicos |
+| `GET` | `/api/institutional-stats` | General statistics |
+| `GET` | `/api/score-distributions` | Statistical distributions |
+| `GET` | `/api/academic-insights` | Academic insights |
+| `GET` | `/api/model-comparison` | ML model comparison |
+| `GET` | `/api/feature-importance` | Feature importance |
+| `GET` | `/api/education-level-analysis` | Risk by education level |
 
-### Predicciones
+### Predictions
 
-| Método | Endpoint | Descripción |
+| Method | Endpoint | Description |
 |--------|----------|-------------|
-| `POST` | `/api/predict` | Predicción de riesgo |
-| `GET` | `/api/feature-importance` | Importancia de variables |
+| `POST` | `/api/predict` | Risk prediction |
+| `POST` | `/api/batch-predict` | Batch predictions |
 
 ---
 
-## 📊 Modelo de Machine Learning
+## 📊 Machine Learning Model
 
-### Variables Predictoras
+### Comprehensive Model (47 Features)
 
-El modelo analiza las siguientes categorías de variables:
+The model analyzes **ONLY socioeconomic variables** (excluding age and grade to prevent data leakage):
 
-| Categoría | Variables | Peso Aproximado |
-|-----------|-----------|-----------------|
-| **Socioeconómico** | Quintil, ingresos, cobertura salud | ~35% |
-| **Tecnológico** | Laptop, internet, acceso tecnológico | ~25% |
-| **Familiar** | Educación padres, apoyo familiar | ~20% |
-| **Académico** | Historial de notas, materias reprobadas | ~15% |
-| **Demográfico** | Edad, género, zona geográfica | ~5% |
+| Category | Features | Top Coefficient |
+|----------|----------|-----------------|
+| **Education** | Education level, age-grade status | **+1.31** (nivel_educativo) |
+| **Subject Enrollment** | Which subjects student takes | **-1.51** (takes_lengua) |
+| **Family** | Parent age, relationship, education, marital status | ±0.31 |
+| **Housing** | Wall/floor material, housing type, bathrooms | ±0.33 |
+| **Assets** | Refrigerator, washing machine, vehicles, TVs | ±0.41 |
+| **Technology** | Laptop, internet, computer | **-0.42** (internet) |
+| **Digital Habits** | Internet use, email, social media | ±0.30 |
+| **Health** | Public/private insurance coverage | **-0.58** (private insurance) |
+| **Economic** | Quintile, shopping habits | ±0.68 |
 
-### Métricas del Modelo
+### Key Findings
+
+| Finding | Coefficient | Interpretation |
+|---------|-------------|----------------|
+| **Lengua y Literatura enrollment** | **-1.51** | Most protective factor - core literacy skills transfer |
+| **Education level** | **+1.31** | Higher levels = harder curriculum = more risk |
+| **Private insurance** | **-0.58** | Higher SES indicator, protective |
+| **Internet access** | **-0.42** | Enables homework, research, learning |
+| **Laptop ownership** | **+0.12** | Confounded with education level (see documentation) |
+
+### Model Performance (Production)
 
 ```
-┌────────────────────────────────────────┐
-│         Métricas de Evaluación         │
-├────────────────────────────────────────┤
-│  Accuracy:     0.87                    │
-│  Precision:    0.83                    │
-│  Recall:       0.79                    │
-│  F1-Score:     0.81                    │
-│  AUC-ROC:      0.91                    │
-└────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────┐
+│       Final Model: Logistic Regression (Comprehensive)     │
+├────────────────────────────────────────────────────────────┤
+│  ROC-AUC:              0.610                               │
+│  CV Score:             0.681 ± 0.033 (best generalization) │
+│  Recall (threshold 0.50): 56.9%                            │
+│  Recall (threshold 0.25): 92.2% ← Recommended for SAT      │
+│  Precision:            40.2% (threshold 0.25)              │
+│  Missed students:      Only 4 of 51 (threshold 0.25)       │
+├────────────────────────────────────────────────────────────┤
+│  Features:             47 socioeconomic variables          │
+│  EXCLUDED variables:   edad, grado, subject GRADES         │
+│  Dataset:              687 students                        │
+│  At-risk rate:         254 (37.0%)                         │
+└────────────────────────────────────────────────────────────┘
 ```
 
----
+> **Note:** The model uses ONLY socioeconomic variables (excluding age, grade, and subject grades) to make truly early predictions, before seeing any academic performance.
 
-## 🖼 Capturas de Pantalla
+### Risk by Education Level
 
-### Dashboard SAT
-Vista principal con lista priorizada de estudiantes en riesgo.
-
-### Vista Institucional
-Análisis agregado con gráficos de distribución, correlaciones y tendencias.
-
-### Perfil de Estudiante
-Detalle individual con score de riesgo, factores y recomendaciones.
+| Level | Grades | Students | At-Risk Rate |
+|-------|--------|----------|--------------|
+| Basica Elemental | 1-4 | 98 | **8.2%** (lowest) |
+| Basica Media | 5-7 | 149 | 35.6% |
+| Basica Superior | 8-10 | 235 | **45.1%** (highest) |
+| Bachillerato | 11-12 | 205 | 42.4% |
 
 ---
 
-## 📖 Documentación Adicional
+## 🖼 Screenshots
 
-- [📋 Guía de Configuración](SETUP_GUIDE.md)
+### SAT Dashboard
+Main view with prioritized list of at-risk students.
+
+### Institutional View
+Aggregated analysis with distribution charts, correlations, and trends.
+
+### Student Profile
+Individual detail with risk score, factors, and recommendations.
 
 ---
 
-## 🛠 Tecnologías Utilizadas
+## 📖 Additional Documentation
+
+- [📋 Setup Guide](SETUP_GUIDE.md)
+- [📊 Complete Technical Documentation](TECHNICAL_DOCUMENTATION.md)
+- [📈 Data Exploration Report](DATA_EXPLORATION_REPORT.md)
+- [🔬 Thesis vs Implementation Analysis](THESIS_VS_IMPLEMENTATION_ANALYSIS.md)
+
+---
+
+## 🛠 Technologies Used
 
 ### Backend
-- **Flask** - Framework web de Python
-- **Supabase** - Base de datos PostgreSQL como servicio
-- **CatBoost** - Gradient boosting para ML
-- **NumPy/Pandas** - Procesamiento de datos
-- **Scikit-learn** - Utilidades de ML
+- **Flask** - Python web framework
+- **Supabase** - PostgreSQL database as a service
+- **Scikit-learn** - Machine Learning (Logistic Regression)
+- **NumPy/Pandas** - Data processing
+- **Joblib** - Model serialization
 
 ### Frontend
-- **React 18** - Biblioteca UI
-- **TypeScript** - Tipado estático
-- **Tailwind CSS** - Framework CSS utility-first
-- **Recharts** - Librería de gráficos
-- **React Router** - Navegación SPA
+- **React 18** - UI library
+- **TypeScript** - Static typing
+- **Tailwind CSS** - Utility-first CSS framework
+- **Recharts** - Charting library
+- **React Router** - SPA navigation
 
 ---
 
-## 👨‍💻 Autor
+## 👨‍💻 Authors
 
 <div align="center">
 
-**Samuel S. Campozano López**
+### Development Team
 
-Proyecto de Tesis - Universidad Laica Eloy Alfaro de Manabí (ULEAM)
+**Samuel S. Campozano López** & **Jonathan Marcos Vera Parrales**
 
-**Tutor de Tesis:** Jonathan Marcos Vera Parrales
+Thesis Project - Universidad Laica Eloy Alfaro de Manabí (ULEAM)
 
-[![Portfolio](https://img.shields.io/badge/Portfolio-Visitar-4285F4?style=for-the-badge&logo=google-chrome&logoColor=white)](https://portfolio-seven-jade-tg9cqnc8rj.vercel.app/)
+[![Portfolio](https://img.shields.io/badge/Portfolio-Samuel-4285F4?style=for-the-badge&logo=google-chrome&logoColor=white)](https://portfolio-seven-jade-tg9cqnc8rj.vercel.app/)
 [![GitHub](https://img.shields.io/badge/GitHub-samuelcampozano-181717?style=for-the-badge&logo=github)](https://github.com/samuelcampozano)
 
 </div>
 
 ---
 
-## 📄 Licencia
+## 📄 License
 
-Este proyecto fue desarrollado como parte de un trabajo de tesis académica. Todos los derechos reservados.
+This project was developed as part of an academic thesis project. All rights reserved.
 
-© 2025 Samuel S. Campozano López - ULEAM
+© 2025 Samuel S. Campozano López & Jonathan Marcos Vera Parrales - ULEAM
 
 ---
 
 <div align="center">
 
-**⭐ Si este proyecto te fue útil, considera darle una estrella en GitHub ⭐**
+**⭐ If you found this project useful, consider giving it a star on GitHub ⭐**
 
 </div>
