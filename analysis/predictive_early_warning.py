@@ -38,6 +38,27 @@ OUTPUT_DIR.mkdir(exist_ok=True)
 
 plt.style.use('seaborn-v0_8-whitegrid')
 
+# Subject name normalization - combine variations
+SUBJECT_NAME_MAP = {
+    "Matemática": "Matemáticas",
+    "matemática": "Matemáticas",
+    "MATEMÁTICA": "Matemáticas",
+    "MATEMÁTICAS": "Matemáticas",
+    "Animación lectura": "Lengua y Literatura",
+    "Animación Lectura": "Lengua y Literatura",
+    "Estudios sociales": "Estudios Sociales",
+    "estudios sociales": "Estudios Sociales",
+    "Ciencias naturales": "Ciencias Naturales",
+    "ciencias naturales": "Ciencias Naturales",
+}
+
+# Non-academic subjects to filter out
+NON_ACADEMIC_SUBJECTS = {"Acompañamiento", "PPE", "acompañamiento", "ppe"}
+
+def normalize_subject_name(subject: str) -> str:
+    """Normalize subject names to consistent values"""
+    return SUBJECT_NAME_MAP.get(subject, subject)
+
 
 def fetch_historical_data():
     """
@@ -86,6 +107,11 @@ def fetch_historical_data():
         edad_rep = socio_data.get('edad_representante') or 0
         nivel_instruccion = socio_data.get('nivel_instruccion_rep', 'Desconocido')
         
+        # Geographic accessibility / Distance to school (new feature)
+        distancia = socio_data.get('indice_accesibilidad_geografica', 'Desconocido')
+        if distancia is None:
+            distancia = 'Desconocido'
+        
         # Attendance data - ELIMINADO porque causaba overfitting (>147% importance)
         # Las inasistencias del primer mes están correlacionadas con notas finales
         # pero NO son predictivas al inicio del año
@@ -111,13 +137,24 @@ def fetch_historical_data():
         notas_por_materia = {}
         for record in academic_records:
             mat_nombre = record.get('materia', 'Unknown')
+            # Normalize subject name
+            mat_nombre = normalize_subject_name(mat_nombre)
+            # Skip non-academic subjects
+            if mat_nombre in NON_ACADEMIC_SUBJECTS:
+                continue
             mat_nota = record.get('nota', 0)
             if mat_nota and mat_nota > 0:
+                # If same subject appears multiple times, keep the latest
                 notas_por_materia[mat_nombre] = mat_nota
         
         # Para cada materia, crear una fila en el dataset
         for record in academic_records:
             materia = record.get('materia', 'Unknown')
+            # Normalize subject name
+            materia = normalize_subject_name(materia)
+            # Skip non-academic subjects
+            if materia in NON_ACADEMIC_SUBJECTS:
+                continue
             nota_final = record.get('nota', 0)
             
             if not nota_final or nota_final == 0:
@@ -145,6 +182,7 @@ def fetch_historical_data():
                 'numero_hermanos': numero_hermanos,
                 'edad_representante': edad_rep,
                 'nivel_instruccion_rep': nivel_instruccion,
+                'distancia_escuela': distancia,  # NEW: Geographic accessibility
                 
                 # FEATURES - Asistencia (primer mes)
                 'total_inasistencias': total_inasistencias,
@@ -213,6 +251,17 @@ def prepare_features(df):
     }
     df_encoded['nivel_instruccion_encoded'] = df_encoded['nivel_instruccion_rep'].map(nivel_map).fillna(-1)
     
+    # Distance encoding (ordinal) - NEW FEATURE
+    distancia_map = {
+        'Muy cerca': 0,
+        'Cerca': 1,
+        'Moderado': 2,
+        'Lejos': 3,
+        'Muy lejos': 4,
+        'Desconocido': -1  # Will be ignored by CatBoost if all are -1
+    }
+    df_encoded['distancia_encoded'] = df_encoded['distancia_escuela'].map(distancia_map).fillna(-1)
+    
     # Subject encoding (one-hot)
     subject_dummies = pd.get_dummies(df_encoded['subject'], prefix='subject')
     df_encoded = pd.concat([df_encoded, subject_dummies], axis=1)
@@ -232,6 +281,7 @@ def prepare_features(df):
         'genero_encoded',
         'edad_representante',
         'nivel_instruccion_encoded',
+        'distancia_encoded',  # NEW: Geographic accessibility
         
         # Risk components baseline
         'quintil_component_score',
