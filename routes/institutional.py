@@ -5,16 +5,25 @@ Endpoints:
 - GET /api/institutional-stats: Estadísticas globales para la vista institucional
 - GET /api/score-distributions: Distribuciones de notas para gráficos avanzados
 - GET /api/barriers-analysis: Análisis detallado de barreras
+- GET /api/model-comparison: Comparación de modelos ML (nuevo)
+- GET /api/feature-importance: Importancia de características del modelo
+- GET /api/education-level-analysis: Análisis por nivel educativo
 """
 from flask import Blueprint, jsonify
 from services.supabase_client import supabase_client
 from services.risk_calculator import risk_calculator
 import logging
 import numpy as np
+import json
+import os
 
 logger = logging.getLogger(__name__)
 
 institutional_bp = Blueprint("institutional", __name__)
+
+# Path to model outputs
+MODEL_OUTPUT_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
+                                'analysis', 'comprehensive_model_output')
 
 # Subject name normalization mapping
 SUBJECT_NAME_MAP = {
@@ -22,14 +31,382 @@ SUBJECT_NAME_MAP = {
     "Animación Lectura": "Lengua y Literatura",
     "ANIMACIÓN LECTURA": "Lengua y Literatura",
     "animación lectura": "Lengua y Literatura",
+    # Normalize Math variations
+    "Matemática": "Matemáticas",
+    "matemática": "Matemáticas",
+    "MATEMÁTICA": "Matemáticas",
+    "MATEMÁTICAS": "Matemáticas",
+    # Normalize other subjects
+    "Ciencias Naturales": "Ciencias Naturales",
+    "ciencias naturales": "Ciencias Naturales",
+    "Estudios sociales": "Estudios Sociales",
+    "estudios sociales": "Estudios Sociales",
 }
 
-# Non-academic subjects to filter out
-NON_ACADEMIC_SUBJECTS = {"Acompañamiento", "PPE", "acompañamiento", "ppe"}
+# Non-academic subjects to filter out (these are support classes, not core academics)
+NON_ACADEMIC_SUBJECTS = {
+    "Acompañamiento", "PPE", "acompañamiento", "ppe",
+    "Animación lectura", "Animación Lectura"  # Already mapped to Lengua
+}
 
 def normalize_subject_name(subject: str) -> str:
     """Normalize subject names to consistent values"""
     return SUBJECT_NAME_MAP.get(subject, subject)
+
+
+@institutional_bp.route("/model-comparison", methods=["GET"])
+def get_model_comparison():
+    """
+    Obtiene datos de comparación de modelos ML para gráficos
+    
+    Returns:
+        JSON con comparación de modelos entrenados
+    """
+    try:
+        # Load model comparison results
+        report_path = os.path.join(MODEL_OUTPUT_DIR, 'comprehensive_model_report.json')
+        
+        if not os.path.exists(report_path):
+            return jsonify({"error": "Model report not found"}), 404
+        
+        with open(report_path, 'r') as f:
+            report = json.load(f)
+        
+        models = report.get('all_models', [])
+        
+        # Prepare Chart.js data for model comparison
+        model_names = [m['model'] for m in models]
+        
+        response = {
+            # ROC-AUC comparison (bar chart)
+            "rocAucComparison": {
+                "labels": model_names,
+                "datasets": [{
+                    "label": "ROC-AUC",
+                    "data": [round(m['roc_auc'], 3) for m in models],
+                    "backgroundColor": [
+                        "rgba(75, 192, 192, 0.6)" if m['model'] == report['best_model']['name'] 
+                        else "rgba(54, 162, 235, 0.6)" 
+                        for m in models
+                    ],
+                    "borderColor": [
+                        "rgba(75, 192, 192, 1)" if m['model'] == report['best_model']['name'] 
+                        else "rgba(54, 162, 235, 1)" 
+                        for m in models
+                    ],
+                    "borderWidth": 1
+                }]
+            },
+            
+            # CV Score comparison (bar chart with error bars)
+            "cvScoreComparison": {
+                "labels": model_names,
+                "datasets": [{
+                    "label": "CV Score (Mean)",
+                    "data": [round(m['cv_mean'], 3) for m in models],
+                    "error": [round(m['cv_std'], 3) for m in models],
+                    "backgroundColor": "rgba(153, 102, 255, 0.6)",
+                    "borderColor": "rgba(153, 102, 255, 1)",
+                    "borderWidth": 1
+                }]
+            },
+            
+            # Recall vs Precision (scatter plot)
+            "recallVsPrecision": {
+                "datasets": [{
+                    "label": "Models",
+                    "data": [
+                        {"x": round(m['recall'] * 100, 1), "y": round(m['precision'] * 100, 1), "label": m['model']}
+                        for m in models
+                    ],
+                    "backgroundColor": [
+                        "rgba(255, 99, 132, 0.8)" if m['model'] == report['best_model']['name'] 
+                        else "rgba(54, 162, 235, 0.6)" 
+                        for m in models
+                    ],
+                    "pointRadius": 10
+                }]
+            },
+            
+            # Missed students comparison (bar chart - lower is better)
+            "missedStudentsComparison": {
+                "labels": model_names,
+                "datasets": [{
+                    "label": "Estudiantes En Riesgo No Detectados",
+                    "data": [m['missed_at_risk'] for m in models],
+                    "backgroundColor": "rgba(255, 99, 132, 0.6)",
+                    "borderColor": "rgba(255, 99, 132, 1)",
+                    "borderWidth": 1
+                }]
+            },
+            
+            # Best model summary
+            "bestModel": {
+                "name": report['best_model']['name'],
+                "metrics": {
+                    "rocAuc": round(report['best_model']['roc_auc'], 3),
+                    "recall": round(report['best_model']['recall'] * 100, 1),
+                    "precision": round(report['best_model']['precision'] * 100, 1),
+                    "cvMean": round(report['best_model']['cv_mean'], 3),
+                    "cvStd": round(report['best_model']['cv_std'], 3),
+                    "missedAtRisk": report['best_model']['missed_at_risk'],
+                    "falseAlarms": report['best_model']['false_alarms']
+                }
+            },
+            
+            # Threshold optimization data
+            "thresholdOptimization": {
+                "labels": [f"{t['threshold']:.2f}" for t in report.get('threshold_optimization', [])],
+                "datasets": [
+                    {
+                        "label": "Recall (%)",
+                        "data": [round(t['recall'] * 100, 1) for t in report.get('threshold_optimization', [])],
+                        "borderColor": "rgba(75, 192, 192, 1)",
+                        "backgroundColor": "rgba(75, 192, 192, 0.2)",
+                        "fill": False,
+                        "yAxisID": "y"
+                    },
+                    {
+                        "label": "Estudiantes Perdidos",
+                        "data": [t['missed'] for t in report.get('threshold_optimization', [])],
+                        "borderColor": "rgba(255, 99, 132, 1)",
+                        "backgroundColor": "rgba(255, 99, 132, 0.2)",
+                        "fill": False,
+                        "yAxisID": "y1"
+                    }
+                ]
+            },
+            
+            # Dataset info
+            "datasetInfo": {
+                "totalStudents": report['dataset']['total_students'],
+                "atRiskCount": report['dataset']['at_risk_count'],
+                "atRiskPercentage": round(report['dataset']['at_risk_percentage'], 1),
+                "totalFeatures": report['features']['total'],
+                "categoricalFeatures": report['features']['categorical'],
+                "numericFeatures": report['features']['numeric']
+            }
+        }
+        
+        logger.info("Model comparison data retrieved successfully")
+        return jsonify(response), 200
+        
+    except Exception as e:
+        logger.error(f"Error in get_model_comparison: {str(e)}")
+        return jsonify({"error": f"Error al obtener comparación de modelos: {str(e)}"}), 500
+
+
+@institutional_bp.route("/feature-importance", methods=["GET"])
+def get_feature_importance():
+    """
+    Obtiene la importancia de características del modelo
+    
+    Returns:
+        JSON con coeficientes y ranking de características
+    """
+    try:
+        import joblib
+        
+        # Load model
+        model_path = os.path.join(MODEL_OUTPUT_DIR, 'best_model.joblib')
+        report_path = os.path.join(MODEL_OUTPUT_DIR, 'comprehensive_model_report.json')
+        
+        if not os.path.exists(model_path) or not os.path.exists(report_path):
+            return jsonify({"error": "Model files not found"}), 404
+        
+        model = joblib.load(model_path)
+        with open(report_path, 'r') as f:
+            report = json.load(f)
+        
+        features = report['features']['all_features']
+        coefficients = model.coef_[0]
+        
+        # Sort by absolute importance
+        feature_data = sorted(
+            zip(features, coefficients),
+            key=lambda x: abs(x[1]),
+            reverse=True
+        )
+        
+        # Top 20 features for chart
+        top_20 = feature_data[:20]
+        
+        response = {
+            # Bar chart of top 20 features
+            "topFeatures": {
+                "labels": [f[0] for f in top_20],
+                "datasets": [{
+                    "label": "Coeficiente (+ aumenta riesgo, - reduce riesgo)",
+                    "data": [round(f[1], 3) for f in top_20],
+                    "backgroundColor": [
+                        "rgba(255, 99, 132, 0.6)" if f[1] > 0 else "rgba(75, 192, 192, 0.6)"
+                        for f in top_20
+                    ],
+                    "borderColor": [
+                        "rgba(255, 99, 132, 1)" if f[1] > 0 else "rgba(75, 192, 192, 1)"
+                        for f in top_20
+                    ],
+                    "borderWidth": 1
+                }]
+            },
+            
+            # All features with details
+            "allFeatures": [
+                {
+                    "rank": i + 1,
+                    "feature": f[0],
+                    "coefficient": round(f[1], 4),
+                    "impact": "Aumenta riesgo" if f[1] > 0 else "Reduce riesgo",
+                    "absImportance": round(abs(f[1]), 4)
+                }
+                for i, f in enumerate(feature_data)
+            ],
+            
+            # Feature categories
+            "featuresByCategory": {
+                "education": {
+                    "features": ["nivel_educativo", "age_grade_status"],
+                    "avgImportance": round(np.mean([abs(c) for f, c in feature_data if f in ["nivel_educativo", "age_grade_status"]]), 3)
+                },
+                "technology": {
+                    "features": ["tiene_laptop", "tiene_computadora", "tiene_internet", "tech_score"],
+                    "avgImportance": round(np.mean([abs(c) for f, c in feature_data if "laptop" in f or "comput" in f or "internet" in f or "tech" in f]), 3)
+                },
+                "family": {
+                    "features": ["relacion", "estado_civil", "edad_representante", "nivel_instruccion_num"],
+                    "avgImportance": round(np.mean([abs(c) for f, c in feature_data if f in ["relacion", "estado_civil", "edad_representante", "nivel_instruccion_num"]]), 3)
+                },
+                "economic": {
+                    "features": ["quintil", "asset_score", "num_vehiculos"],
+                    "avgImportance": round(np.mean([abs(c) for f, c in feature_data if f in ["quintil", "asset_score", "num_vehiculos"]]), 3)
+                }
+            },
+            
+            # Laptop specific analysis
+            "laptopAnalysis": {
+                "coefficient": round(dict(feature_data).get("tiene_laptop", 0), 4),
+                "rank": next((i+1 for i, f in enumerate(feature_data) if f[0] == "tiene_laptop"), None),
+                "interpretation": "Coeficiente positivo indica que tener laptop se asocia con MAYOR riesgo académico. Esto es probablemente porque estudiantes en niveles educativos superiores (que tienen curricula más difícil) tienden a tener más laptops."
+            }
+        }
+        
+        logger.info("Feature importance retrieved successfully")
+        return jsonify(response), 200
+        
+    except Exception as e:
+        logger.error(f"Error in get_feature_importance: {str(e)}")
+        return jsonify({"error": f"Error al obtener importancia de características: {str(e)}"}), 500
+
+
+@institutional_bp.route("/education-level-analysis", methods=["GET"])
+def get_education_level_analysis():
+    """
+    Obtiene análisis por nivel educativo (nueva característica clave)
+    
+    Returns:
+        JSON con análisis de riesgo por nivel educativo
+    """
+    try:
+        # Data from comprehensive model training
+        # Based on: Basica_Elemental: 8.2%, Basica_Media: 35.6%, Basica_Superior: 45.1%, Bachillerato: 42.4%
+        
+        education_levels = {
+            "Basica_Elemental": {"students": 98, "at_risk": 8, "grades": "1-4", "avg_age": "6-9"},
+            "Basica_Media": {"students": 149, "at_risk": 53, "grades": "5-7", "avg_age": "10-12"},
+            "Basica_Superior": {"students": 235, "at_risk": 106, "grades": "8-10", "avg_age": "13-15"},
+            "Bachillerato": {"students": 205, "at_risk": 87, "grades": "11-12", "avg_age": "16-18"}
+        }
+        
+        response = {
+            # Risk rate by education level (bar chart)
+            "riskByLevel": {
+                "labels": list(education_levels.keys()),
+                "datasets": [{
+                    "label": "% Estudiantes en Riesgo",
+                    "data": [
+                        round(ed["at_risk"] / ed["students"] * 100, 1)
+                        for ed in education_levels.values()
+                    ],
+                    "backgroundColor": [
+                        "rgba(75, 192, 192, 0.6)",   # Low risk - green
+                        "rgba(255, 205, 86, 0.6)",  # Medium - yellow
+                        "rgba(255, 99, 132, 0.6)",  # High - red
+                        "rgba(255, 99, 132, 0.6)",  # High - red
+                    ],
+                    "borderColor": [
+                        "rgba(75, 192, 192, 1)",
+                        "rgba(255, 205, 86, 1)",
+                        "rgba(255, 99, 132, 1)",
+                        "rgba(255, 99, 132, 1)",
+                    ],
+                    "borderWidth": 1
+                }]
+            },
+            
+            # Student distribution (pie chart)
+            "studentDistribution": {
+                "labels": list(education_levels.keys()),
+                "datasets": [{
+                    "label": "Estudiantes",
+                    "data": [ed["students"] for ed in education_levels.values()],
+                    "backgroundColor": [
+                        "rgba(54, 162, 235, 0.6)",
+                        "rgba(255, 205, 86, 0.6)",
+                        "rgba(75, 192, 192, 0.6)",
+                        "rgba(153, 102, 255, 0.6)",
+                    ],
+                    "borderWidth": 1
+                }]
+            },
+            
+            # At-risk vs Not at-risk by level (stacked bar)
+            "riskComposition": {
+                "labels": list(education_levels.keys()),
+                "datasets": [
+                    {
+                        "label": "En Riesgo",
+                        "data": [ed["at_risk"] for ed in education_levels.values()],
+                        "backgroundColor": "rgba(255, 99, 132, 0.6)",
+                        "borderColor": "rgba(255, 99, 132, 1)",
+                        "borderWidth": 1
+                    },
+                    {
+                        "label": "Sin Riesgo",
+                        "data": [ed["students"] - ed["at_risk"] for ed in education_levels.values()],
+                        "backgroundColor": "rgba(75, 192, 192, 0.6)",
+                        "borderColor": "rgba(75, 192, 192, 1)",
+                        "borderWidth": 1
+                    }
+                ]
+            },
+            
+            # Detailed statistics
+            "details": [
+                {
+                    "level": level,
+                    "students": data["students"],
+                    "atRisk": data["at_risk"],
+                    "riskPercentage": round(data["at_risk"] / data["students"] * 100, 1),
+                    "grades": data["grades"],
+                    "avgAge": data["avg_age"]
+                }
+                for level, data in education_levels.items()
+            ],
+            
+            # Key insight
+            "insight": {
+                "title": "Nivel Educativo es el 2do predictor más importante",
+                "description": "El riesgo académico aumenta significativamente con el nivel educativo. Basica_Elemental tiene solo 8.2% en riesgo, mientras que Basica_Superior alcanza 45.1%. Esto refleja la dificultad creciente del currículo.",
+                "recommendation": "Enfocar intervenciones en estudiantes de Basica_Superior y Bachillerato, donde el riesgo es 5x mayor que en Basica_Elemental."
+            }
+        }
+        
+        logger.info("Education level analysis retrieved successfully")
+        return jsonify(response), 200
+        
+    except Exception as e:
+        logger.error(f"Error in get_education_level_analysis: {str(e)}")
+        return jsonify({"error": f"Error al obtener análisis por nivel educativo: {str(e)}"}), 500
 
 
 @institutional_bp.route("/institutional-stats", methods=["GET"])
@@ -50,50 +427,64 @@ def get_institutional_stats():
         # Preparar datos en formato Chart.js para el frontend
 
         # 1. Top 10 Barreras Predictivas (Importancia del Modelo %)
-        # Basado en INFORME_FINAL_MODELO_ML.md - Top 20 Barreras
+        # Based on Comprehensive Model (Logistic Regression) - December 2025
+        # Positive coefficients = increases risk, Negative = decreases risk
         top_barriers = {
             "labels": [
-                "Edad Representante",
-                "Cobertura Salud",
-                "Laptop",
-                "Edad Estudiante",
-                "TV en Hogar",
-                "Lectura Libros",
-                "Acceso Tecnológico",
-                "Nivel Instrucción Rep.",
-                "Lectura (Ausencia)",
-                "Número Hermanos",
+                "Toma Lengua y Lit. (-)",  # -1.51 (protective)
+                "Nivel Educativo (+)",      # +1.31 (higher = more risk)
+                "Escuela Procedencia (+)",  # +0.74
+                "Compra en Centros (-)",    # -0.68 (protective)
+                "Núm. Materias (+)",        # +0.60
+                "Toma Física (+)",          # +0.59
+                "Seguro Privado (-)",       # -0.58 (protective)
+                "Tiene Teléfono (-)",       # -0.52 (protective)
+                "Equipo de Sonido (+)",     # +0.51
+                "Género (+)",               # +0.49
             ],
             "datasets": [
                 {
-                    "label": "Importancia (%)",
-                    "data": [5.84, 4.58, 4.26, 3.53, 3.36, 3.23, 3.12, 3.02, 2.94, 2.68],
-                    "backgroundColor": "rgba(255, 99, 132, 0.6)",
-                    "borderColor": "rgba(255, 99, 132, 1)",
+                    "label": "Coeficiente (Impacto en Riesgo)",
+                    "data": [-1.51, 1.31, 0.74, -0.68, 0.60, 0.59, -0.58, -0.52, 0.51, 0.49],
+                    "backgroundColor": [
+                        "rgba(75, 192, 192, 0.6)",   # Negative = protective (green)
+                        "rgba(255, 99, 132, 0.6)",  # Positive = risk (red)
+                        "rgba(255, 99, 132, 0.6)",
+                        "rgba(75, 192, 192, 0.6)",
+                        "rgba(255, 99, 132, 0.6)",
+                        "rgba(255, 99, 132, 0.6)",
+                        "rgba(75, 192, 192, 0.6)",
+                        "rgba(75, 192, 192, 0.6)",
+                        "rgba(255, 99, 132, 0.6)",
+                        "rgba(255, 99, 132, 0.6)",
+                    ],
+                    "borderColor": "rgba(0, 0, 0, 0.8)",
                     "borderWidth": 1,
                 }
             ],
         }
 
-        # 2. Impacto de Laptop en Promedio (Sección 5.2.2 - Fase 2)
-        # Con laptop: 8.97, Sin laptop: 8.85 (diferencia +0.12, p=0.043)
+        # 2. Impacto de Laptop en Riesgo Académico
+        # Comprehensive Model: tiene_laptop coefficient = +0.124 (slight risk increase!)
+        # This is counterintuitive - may indicate correlation with higher education levels
         laptop_impact = {
             "labels": ["Con Laptop", "Sin Laptop"],
             "datasets": [
                 {
-                    "label": "Promedio General",
-                    "data": [8.97, 8.85],
+                    "label": "Coef. de Riesgo (Modelo)",
+                    "data": [0.124, 0],  # Reference point is "without laptop"
                     "backgroundColor": [
-                        "rgba(75, 192, 192, 0.6)",
-                        "rgba(255, 159, 64, 0.6)",
+                        "rgba(255, 159, 64, 0.6)",  # Orange - slight risk
+                        "rgba(75, 192, 192, 0.6)",  # Green - reference
                     ],
                     "borderColor": [
-                        "rgba(75, 192, 192, 1)",
                         "rgba(255, 159, 64, 1)",
+                        "rgba(75, 192, 192, 1)",
                     ],
                     "borderWidth": 1,
                 }
             ],
+            "note": "Coeficiente positivo indica que tener laptop se asocia con MAYOR riesgo - posiblemente porque estudiantes de grados superiores (más difíciles) tienen más laptops"
         }
 
         # 3. Impacto de Nivel Educativo del Representante (Sección 5.2.2 - Fase 2)
