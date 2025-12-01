@@ -14,6 +14,7 @@ const SAT_Dashboard = () => {
   const [selectedRisk, setSelectedRisk] = useState<string>('all');
   const [selectedQuintile, setSelectedQuintile] = useState<string>('all');
   const [selectedCourse, setSelectedCourse] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<string>('risk'); // New: sort state
   
   const navigate = useNavigate();
 
@@ -47,20 +48,41 @@ const SAT_Dashboard = () => {
   }, [students]);
 
   const formatCourseLabel = (course: string) => {
-    // Try to make it prettier
-    // e.g. "10mo A" -> "10° EGB 'A'"
-    // "1ro BGU A" -> "1° BGU 'A'"
+    // Handle raw database values (e.g., '8', '9', '10', '1BGU', '2BGU', '3BGU')
+    // and also formatted values (e.g., '10mo A', '1ro BGU A')
     
-    const match = course.match(/(\d+)(?:mo|vo|no|ro|do)?\s*(?:EGB|BGU)?\s*([A-Z])?/i);
-    if (!match) return course;
+    if (!course) return 'Sin curso';
     
-    const num = parseInt(match[1]);
-    const letter = match[2] || course.split(' ').pop(); // Fallback to last part if not captured
+    // Check if it's a raw grade value from database
+    const rawGradeMatch = course.match(/^(\d+)(BGU)?$/i);
+    if (rawGradeMatch) {
+      const num = parseInt(rawGradeMatch[1]);
+      const isBGU = rawGradeMatch[2]?.toUpperCase() === 'BGU';
+      
+      if (isBGU || (num >= 1 && num <= 3 && !rawGradeMatch[2])) {
+        // Check context - if number is 1-3 and matches BGU pattern
+        if (isBGU) {
+          return `${num}° Bachillerato (BGU)`;
+        }
+      }
+      
+      // EGB grades (1-10)
+      if (num >= 1 && num <= 10) {
+        return `${num}° EGB (Educación General Básica)`;
+      }
+    }
     
-    if (num >= 8 && num <= 10) {
-      return `${num}° EGB "${letter}"`;
-    } else if (num >= 1 && num <= 3) {
-      return `${num}° Bachillerato "${letter}"`;
+    // Try to parse formatted course strings like "10mo A"
+    const formattedMatch = course.match(/(\d+)(?:mo|vo|no|ro|do)?\s*(?:EGB|BGU)?\s*([A-Z])?/i);
+    if (formattedMatch) {
+      const num = parseInt(formattedMatch[1]);
+      const letter = formattedMatch[2] || '';
+      
+      if (num >= 8 && num <= 10) {
+        return `${num}° EGB${letter ? ` "${letter}"` : ''}`;
+      } else if (num >= 1 && num <= 3) {
+        return `${num}° Bachillerato${letter ? ` "${letter}"` : ''}`;
+      }
     }
     
     return course;
@@ -80,6 +102,33 @@ const SAT_Dashboard = () => {
     
     return matchesSearch && matchesRisk && matchesQuintile && matchesCourse;
   });
+
+  // Sort students based on selected criteria
+  const sortedStudents = useMemo(() => {
+    const sorted = [...filteredStudents];
+    switch (sortBy) {
+      case 'name-asc':
+        return sorted.sort((a, b) => a.name.localeCompare(b.name, 'es'));
+      case 'name-desc':
+        return sorted.sort((a, b) => b.name.localeCompare(a.name, 'es'));
+      case 'risk':
+        return sorted.sort((a, b) => b.riskScore - a.riskScore);
+      case 'risk-asc':
+        return sorted.sort((a, b) => a.riskScore - b.riskScore);
+      case 'course':
+        return sorted.sort((a, b) => {
+          // Custom sort: EGB 1-10, then BGU 1-3
+          const getOrder = (c: string) => {
+            const num = parseInt(c.match(/\d+/)?.[0] || '0');
+            const isBGU = c.toLowerCase().includes('bgu');
+            return isBGU ? num + 10 : num;
+          };
+          return getOrder(a.course) - getOrder(b.course);
+        });
+      default:
+        return sorted.sort((a, b) => b.riskScore - a.riskScore);
+    }
+  }, [filteredStudents, sortBy]);
 
   if (studentsLoading || statsLoading) {
     return (
@@ -224,6 +273,18 @@ const SAT_Dashboard = () => {
                 ...courses.map(c => ({ value: c, label: formatCourseLabel(c) }))
               ]} 
             />
+
+            <FilterSelect 
+              value={sortBy} 
+              onChange={setSortBy} 
+              options={[
+                { value: 'risk', label: '↓ Mayor Riesgo' },
+                { value: 'risk-asc', label: '↑ Menor Riesgo' },
+                { value: 'name-asc', label: 'A-Z (Nombre)' },
+                { value: 'name-desc', label: 'Z-A (Nombre)' },
+                { value: 'course', label: 'Por Curso' },
+              ]} 
+            />
           </div>
         </div>
       </div>
@@ -243,7 +304,7 @@ const SAT_Dashboard = () => {
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
-              {filteredStudents.map((student) => (
+              {sortedStudents.map((student) => (
                 <tr 
                   key={student.id} 
                   onClick={() => handleStudentClick(student)}
@@ -253,7 +314,7 @@ const SAT_Dashboard = () => {
                     <div className="font-medium text-slate-900 dark:text-slate-100">{student.name}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-slate-600 dark:text-slate-400">
-                    {student.course}
+                    {formatCourseLabel(student.course)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-slate-600 dark:text-slate-400">
                     {student.quintile}
@@ -285,7 +346,7 @@ const SAT_Dashboard = () => {
             </tbody>
           </table>
         </div>
-        {filteredStudents.length === 0 && (
+        {sortedStudents.length === 0 && (
           <div className="p-8 text-center text-slate-500 dark:text-slate-400">
             No se encontraron estudiantes con los filtros seleccionados.
           </div>
