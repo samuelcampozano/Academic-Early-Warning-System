@@ -970,15 +970,14 @@ const InstitutionalView = () => {
                 {topBarriersData.map((entry: any, index: number) => (
                   <Cell
                     key={`cell-${index}`}
-                    fill={`#3B82F6`}
-                    opacity={Math.max(0.3, 1 - index * 0.08)}
+                    fill={entry.value < 0 ? '#10B981' : '#EF4444'}
                   />
                 ))}
                 <LabelList
                   dataKey="value"
                   position="right"
-                  formatter={(value: any) => `${value}%`}
-                  style={{ fontSize: 14, fontWeight: 'bold', fill: textColor }}
+                  formatter={(value: any) => value.toFixed(2)}
+                  style={{ fontSize: 12, fontWeight: 'bold', fill: textColor }}
                 />
               </Bar>
             </BarChart>

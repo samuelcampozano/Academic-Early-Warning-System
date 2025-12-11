@@ -7,6 +7,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   Cell,
+  LabelList,
 } from 'recharts';
 import {
   Card,
@@ -17,15 +18,20 @@ import {
 } from '../ui/Card';
 import { useTheme } from '../../context/ThemeContext';
 
+// Actual coefficients from Logistic Regression model (December 2025)
+// Positive = increases risk (red), Negative = protective (green)
 const data = [
-  { name: 'Cobertura Salud', value: 6.2 },
-  { name: 'Edad Est.', value: 4.5 },
-  { name: 'Lectura Libros (Sí)', value: 3.8 },
-  { name: 'Nivel Inst. Rep.', value: 3.2 },
-  { name: 'Num. Hermanos', value: 2.8 },
+  { name: 'Toma Lengua y Lit. (-)', value: -1.511 },
+  { name: 'Nivel Educativo (+)', value: 1.305 },
+  { name: 'Escuela Procedencia (+)', value: 0.740 },
+  { name: 'Compra en Centros (-)', value: -0.682 },
+  { name: 'Núm. Materias (+)', value: 0.601 },
+  { name: 'Toma Física (+)', value: 0.589 },
+  { name: 'Toma Sociales (-)', value: -0.587 },
+  { name: 'Toma Ciencias (-)', value: -0.587 },
+  { name: 'Seguro Privado (-)', value: -0.585 },
+  { name: 'Tiene Teléfono (-)', value: -0.517 },
 ];
-
-const colors = ['#1E40AF', '#2563EB', '#3B82F6', '#60A5FA', '#93C5FD'];
 
 const BarrierChart = () => {
   const { theme } = useTheme();
@@ -37,19 +43,20 @@ const BarrierChart = () => {
       <CardHeader>
         <CardTitle>Top 10 Barreras Predictivas</CardTitle>
         <CardDescription>
-          Importancia de cada factor en el modelo predictivo.
+          Coeficientes del modelo. Verde = protector, Rojo = aumenta riesgo.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data} layout="vertical" margin={{ left: 20 }}>
+          <BarChart data={data} layout="vertical" margin={{ left: 20, right: 50 }}>
             <XAxis type="number" hide />
             <YAxis
               type="category"
               dataKey="name"
               tickLine={false}
               axisLine={false}
-              tick={{ fontSize: 13, fill: textColor }}
+              tick={{ fontSize: 11, fill: textColor }}
+              width={140}
             />
             <Tooltip
               contentStyle={{
@@ -58,14 +65,21 @@ const BarrierChart = () => {
                 borderRadius: '8px',
                 color: textColor,
               }}
+              formatter={(value: number) => [value.toFixed(3), 'Coeficiente']}
             />
-            <Bar dataKey="value" barSize={32} radius={[0, 8, 8, 0]}>
+            <Bar dataKey="value" barSize={20} radius={[0, 8, 8, 0]}>
               {data.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
-                  fill={colors[index % colors.length]}
+                  fill={entry.value < 0 ? '#10B981' : '#EF4444'}
                 />
               ))}
+              <LabelList
+                dataKey="value"
+                position="right"
+                formatter={(value: number) => value.toFixed(2)}
+                style={{ fontSize: 11, fontWeight: 'bold', fill: textColor }}
+              />
             </Bar>
           </BarChart>
         </ResponsiveContainer>

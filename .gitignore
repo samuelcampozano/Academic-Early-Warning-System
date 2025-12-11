@@ -59,6 +59,7 @@ THESIS_GRAPHS_PROMPT.md
 FRONTEND_INTEGRATION_PROMPT.md
 INTEGRATION_PACKAGE.md
 BACKEND_VERIFICATION.md
+THESIS_VS_IMPLEMENTATION_ANALYSIS.md
 
 # Large model files
 models/trained/*.pkl
@@ -72,7 +73,11 @@ check_*.py
 # Config with secrets
 config/secrets.py
 instance/
+
+# Keep these files in repo (force added):
+# - Thesis text in latexx (main thesis document)
+# - References text of the thesis in latex (bibliography)
+# - DATA_EXPLORATION_REPORT.md (project documentation)
+# - TECHNICAL_DOCUMENTATION.md (technical reference)
 DATA_EXPLORATION_REPORT.md
-TECHNICAL_DOCUMENTATION.md
-THESIS_VS_IMPLEMENTATION_ANALYSIS.md
-Thesis text in latexx
+References text of the thesis in latex
