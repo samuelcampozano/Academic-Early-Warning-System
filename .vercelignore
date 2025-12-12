@@ -1,23 +1,21 @@
-# Ignore Python backend files
-*.py
-requirements.txt
-requirements-minimal.txt
-runtime.txt
-Procfile
-render.yaml
-.env
-.env.*
+# Ignore Python backend files (root level only)
+/app.py
+/config.py
+/requirements.txt
+/requirements-minimal.txt
+/runtime.txt
+/Procfile
+/render.yaml
+/.env
+/.env.*
 __pycache__/
 *.pyc
-.venv/
-venv/
-models/
-routes/
-services/
-utils/
-scripts/
-analysis/
-Thesis text in latexx/
-
-# Keep frontend
-!frontend/
+/.venv/
+/venv/
+/models/
+/routes/
+/services/
+/utils/
+/scripts/
+/analysis/
+/Thesis text in latexx/
